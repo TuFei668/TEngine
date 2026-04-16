@@ -1,0 +1,10 @@
+##var,item_id,item_name,item_name_zh,slot_position,icon,price_type,price_amount,effect_type,description,version
+##type,string,string,string,int,string,string,int,string,string,string
+##group,c,c,c,c,c,c,c,c,c,c
+##,道具ID,道具英文名,道具中文名,道具栏位置(1-6),图标资源名,价格类型,价格数量,效果类型,功能描述,引入版本
+bonus_words,Bonus Words,额外词查看,1,icon_bonus_words,free,0,show_bonus_list,查看当前关卡已找到的Bonus Words列表和进度条,mvp
+free_hint,Free Hint,免费提示,2,icon_free_hint,free_ad,0,free_hint,观看激励视频免费获得一次Normal Hint提示,mvp
+get_coins,Get Coins,获取金币,3,icon_get_coins,free_ad,0,get_coins,观看激励视频获取金币,mvp
+wind_hint,Wind Hint,风提示,4,icon_wind_hint,coin,200,remove_noise,移除网格中所有不属于目标单词的干扰字母,1.1
+normal_hint,Normal Hint,普通提示,5,icon_normal_hint,coin,20,reveal_start,揭示一个目标单词的起始字母位置,mvp
+rotate,Rotate,旋转,6,icon_rotate,coin,15,rotate_grid,整个网格旋转180度换视角找词,mvp

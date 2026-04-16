@@ -1,0 +1,28 @@
+{
+    "files.exclude": {
+        "Library/": true,
+        "Temp/": true,
+        "Logs/": true,
+        "Bundles/": true,
+        "HybridCLRData/": true,
+        "UserSettings/": true,
+        "ProjectSettings/": true,
+        ".kilocode/": true,
+        "**/*.meta": true,
+        "**/*.spriteatlasv2": true,
+        "**/*.prefab": true,
+        "**/*.png": true,
+        "**/*.ogg": true,
+        "**/*.wav": true,
+        "**/*.mp3": true,
+        "**/*.mp4": true,
+        "**/*.mov": true,
+        "**/*.avi": true,
+        "**/*.mkv": true,
+        "**/*.flv": true,
+        "**/*.wmv": true,
+        "**/*.webm": true,
+        "**/*.asset": true
+    },
+    "dotnet.defaultSolution": "UnityProject.sln"
+}

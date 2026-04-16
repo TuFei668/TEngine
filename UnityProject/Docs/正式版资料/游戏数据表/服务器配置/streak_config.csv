@@ -1,0 +1,10 @@
+##var,streak_days,reward_type,reward_coins,reward_item_id,reward_item_count
+##type,int,string,int?,string?,int?
+##group,s,s,s,s,s
+##,连续天数节点,奖励类型(coins/item/combo),奖励金币,奖励道具ID,奖励道具数量
+3,coins,5,,
+7,combo,10,normal_hint,1
+14,coins,20,,
+30,combo,50,wind_hint,1
+60,coins,80,,
+90,combo,100,wind_hint,2

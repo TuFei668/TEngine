@@ -1,0 +1,14 @@
+##var,node_index,node_type,reward_coins,reward_item_id,reward_item_count,buff_type,buff_duration_min,required_words,is_final
+##type,int,string,int?,string?,int?,string?,int?,int,bool
+##group,s,s,s,s,s,s,s,s,s
+##,节点序号,节点类型(coins/item/buff/combo),奖励金币,奖励道具ID,奖励道具数量,Buff类型,Buff持续分钟,累计需找到的单词数,是否终极大奖
+1,buff,,,,,x2_hint,5,4,false
+2,buff,,,,,x2_hint,5,8,false
+3,item,,,rotate,1,,,12,false
+4,buff,,,,,half_price_wind,5,16,false
+5,item,,,rotate,1,,,20,false
+6,coins,10,,,,,,24,false
+7,coins,15,,,,,,28,false
+8,buff,,,,,x2_hint,15,32,false
+9,buff,,,,,x2_hint,15,36,false
+10,combo,25,,,,,half_price_wind,30,40,true

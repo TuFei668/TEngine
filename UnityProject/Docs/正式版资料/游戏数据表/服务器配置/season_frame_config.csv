@@ -1,0 +1,12 @@
+##var,season_id,node_index,required_points,frame_asset,frame_name
+##type,string,int,int,string,string
+##group,s,s,s,s,s
+##,赛季ID,节点序号(1/2),所需Frame Points,头像框资源名,头像框名称
+spring_2026,1,10,frame_spring_2026_1,Spring Frame I
+spring_2026,2,40,frame_spring_2026_2,Spring Frame II
+summer_2026,1,10,frame_summer_2026_1,Summer Frame I
+summer_2026,2,40,frame_summer_2026_2,Summer Frame II
+fall_2026,1,10,frame_fall_2026_1,Fall Frame I
+fall_2026,2,40,frame_fall_2026_2,Fall Frame II
+winter_2026,1,10,frame_winter_2026_1,Winter Frame I
+winter_2026,2,40,frame_winter_2026_2,Winter Frame II

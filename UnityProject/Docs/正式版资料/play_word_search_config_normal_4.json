@@ -1,0 +1,113 @@
+﻿{
+    "puzzleId": "28b80c93-a292-4219-b85b-af07c8ec7179",
+    "createTime": "2026-03-10 16:58:53",
+    "dimension": 5,
+    "rows": 5,
+    "cols": 5,
+    "useHardDirections": false,
+    "sizeFactor": 4,
+    "intersectBias": -1,
+    "gridString": "RNFTT|HLEHN|JXINS|TSDZA|ILINE",
+    "words": [
+        "THIS",
+        "TEXT",
+        "LINE"
+    ],
+    "wordPositions": [
+        {
+            "word": "THIS",
+            "startX": 4,
+            "startY": 0,
+            "directionX": -1,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 4,
+                    "y": 0
+                },
+                {
+                    "x": 3,
+                    "y": 1
+                },
+                {
+                    "x": 2,
+                    "y": 2
+                },
+                {
+                    "x": 1,
+                    "y": 3
+                }
+            ],
+            "wordColor": {
+                "r": 1.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "TEXT",
+            "startX": 3,
+            "startY": 0,
+            "directionX": -1,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 3,
+                    "y": 0
+                },
+                {
+                    "x": 2,
+                    "y": 1
+                },
+                {
+                    "x": 1,
+                    "y": 2
+                },
+                {
+                    "x": 0,
+                    "y": 3
+                }
+            ],
+            "wordColor": {
+                "r": 0.0,
+                "g": 0.5,
+                "b": 1.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "LINE",
+            "startX": 1,
+            "startY": 4,
+            "directionX": 1,
+            "directionY": 0,
+            "cellPositions": [
+                {
+                    "x": 1,
+                    "y": 4
+                },
+                {
+                    "x": 2,
+                    "y": 4
+                },
+                {
+                    "x": 3,
+                    "y": 4
+                },
+                {
+                    "x": 4,
+                    "y": 4
+                }
+            ],
+            "wordColor": {
+                "r": 0.0,
+                "g": 0.800000011920929,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        }
+    ],
+    "puzzleText": "R N F T T\nH L E H N\nJ X I N S\nT S D Z A\nI L I N E",
+    "answerKeyText": "r n f T T\nh l e h n\nj x i n s\nt s d z a\ni L i n e"
+}

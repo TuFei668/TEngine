@@ -1,0 +1,8 @@
+##var,scene,sharer_reward_type,sharer_reward_amount,receiver_reward_type,receiver_reward_amount
+##type,string,string,int,string,int
+##group,s,s,s,s,s
+##,分享场景,分享者奖励类型,分享者奖励数量,被分享者奖励类型,被分享者奖励数量
+item_shortage,coins,5,coins,5
+level_complete,coins,5,coins,5
+milestone_achieve,item_normal_hint,1,coins,5
+streak_achieve,coins,10,coins,5

@@ -1,0 +1,23 @@
+##var,pack_id,stage_id,theme_en,theme_zh,total_levels,word_count,sort_order,unlock_type,required_pack_id,next_pack_id
+##type,string,string,string,string,int,int,int,string,string?,string?
+##group,c,c,c,c,c,c,c,c,c,c
+##,关卡包ID,所属学段ID,主题英文名,主题中文名,总关卡数,包含单词数,学段内排序,解锁方式,前置关卡包ID,下一个关卡包ID
+primary_self_intro,primary,Self Introduction,自我介绍,20,30,1,stage_select,,primary_family
+primary_family,primary,Family,家庭,20,30,2,complete_previous,primary_self_intro,primary_animals
+primary_animals,primary,Animals,动物,20,30,3,complete_previous,primary_family,primary_colors
+primary_colors,primary,Colors,颜色,20,30,4,complete_previous,primary_animals,primary_food
+primary_food,primary,Food,食物,20,30,5,complete_previous,primary_colors,primary_school
+primary_school,primary,School,学校,20,30,6,complete_previous,primary_food,primary_body
+primary_body,primary,Body,身体,20,30,7,complete_previous,primary_school,primary_numbers
+primary_numbers,primary,Numbers,数字,20,30,8,complete_previous,primary_body,junior_daily_life
+junior_daily_life,junior_high,Daily Life,日常生活,20,40,1,stage_select,,junior_travel
+junior_travel,junior_high,Travel,旅行,20,40,2,complete_previous,junior_daily_life,junior_technology
+junior_technology,junior_high,Technology,科技,20,40,3,complete_previous,junior_travel,junior_environment
+junior_environment,junior_high,Environment,环境,20,40,4,complete_previous,junior_technology,senior_society
+senior_society,senior_high,Society,社会,20,50,1,stage_select,,senior_science
+senior_science,senior_high,Science,科学,20,50,2,complete_previous,senior_society,senior_economy
+senior_economy,senior_high,Economy,经济,20,50,3,complete_previous,senior_science,cet4
+cet4,adult,CET-4 Core,四级核心词,20,60,1,stage_select,,cet6
+cet6,adult,CET-6 Core,六级核心词,20,60,2,complete_previous,cet4,postgrad
+postgrad,adult,Postgrad,考研词汇,20,60,3,complete_previous,cet6,ielts
+ielts,adult,IELTS,雅思词汇,20,60,4,complete_previous,postgrad,
