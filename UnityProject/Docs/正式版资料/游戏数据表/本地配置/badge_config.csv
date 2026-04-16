@@ -2,13 +2,13 @@
 ##type,int,string,string,string,int,int,string?,int?,string?
 ##group,c,c,c,c,c,c,c,c,c
 ##,等级(1-10),中文称号,英文称号,图标资源名,所需学习积分,奖励金币,奖励道具ID,奖励道具数量,特殊奖励资源名
-1,英语新手,English Rookie,badge_lv1,50,10,,,
-2,单词学徒,Word Apprentice,badge_lv2,150,20,,,
-3,词汇猎人,Vocab Hunter,badge_lv3,300,30,normal_hint,1,
-4,拼写达人,Spelling Pro,badge_lv4,500,50,,,
-5,英语探索者,English Explorer,badge_lv5,800,50,,,frame_badge_lv5
-6,词汇大师,Vocab Master,badge_lv6,1200,80,,,
-7,语言学者,Language Scholar,badge_lv7,1800,100,wind_hint,1,
-8,英语精英,English Elite,badge_lv8,2500,120,,,
-9,词汇王者,Vocab King,badge_lv9,3500,150,,,crown_badge_lv9
-10,语言传奇,Language Legend,badge_lv10,5000,200,,,avatar_badge_lv10
+badge_1,1,英语新手,English Rookie,badge_lv1,50,10,,,
+badge_2,2,单词学徒,Word Apprentice,badge_lv2,150,20,,,
+badge_3,3,词汇猎人,Vocab Hunter,badge_lv3,300,30,normal_hint,1,
+badge_4,4,拼写达人,Spelling Pro,badge_lv4,500,50,,,
+badge_5,5,英语探索者,English Explorer,badge_lv5,800,50,,,frame_badge_lv5
+badge_6,6,词汇大师,Vocab Master,badge_lv6,1200,80,,,
+badge_7,7,语言学者,Language Scholar,badge_lv7,1800,100,wind_hint,1,
+badge_8,8,英语精英,English Elite,badge_lv8,2500,120,,,
+badge_9,9,词汇王者,Vocab King,badge_lv9,3500,150,,,crown_badge_lv9
+badge_10,10,语言传奇,Language Legend,badge_lv10,5000,200,,,avatar_badge_lv10

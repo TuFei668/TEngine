@@ -1,10 +1,10 @@
 ##var,ad_slot_id,ad_type,trigger_scene,min_level_unlock,reward_type,reward_amount,daily_limit
 ##type,string,string,string,int,string?,int?,int
-##group,s,s,s,s,s,s,s
+##group,c,c,c,c,c,c,c
 ##,广告位ID,广告类型,触发场景,最低解锁关卡(延迟爆发),奖励类型,奖励数量,每日观看上限(0=无限)
-ad_free_hint,rewarded_video,item_bar_free_hint,1,normal_hint,1,10
-ad_get_coins,rewarded_video,item_bar_get_coins,1,coins,10,10
-ad_bonus_double,rewarded_video,bonus_meter_full,1,coins,25,5
-ad_banner_game,banner,game_screen_bottom,21,,,0
-ad_interstitial_settle,interstitial,level_settle,21,,,20
-ad_shop_exit,rewarded_video,shop_exit,1,coins,25,3
+ad_ad_free_hint,ad_free_hint,rewarded_video,item_bar_free_hint,1,normal_hint,1,10
+ad_ad_get_coins,ad_get_coins,rewarded_video,item_bar_get_coins,1,coins,10,10
+ad_ad_bonus_double,ad_bonus_double,rewarded_video,bonus_meter_full,1,coins,25,5
+ad_ad_banner_game,ad_banner_game,banner,game_screen_bottom,21,,,0
+ad_ad_interstitial_settle,ad_interstitial_settle,interstitial,level_settle,21,,,20
+ad_ad_shop_exit,ad_shop_exit,rewarded_video,shop_exit,1,coins,25,3

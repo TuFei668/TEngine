@@ -2,7 +2,6 @@
 ##type,string,string,string,string,string,string,bool,string,string,string
 ##group,c,c,c,c,c,c,c,c,c,c,c
 ##,变量名,完整表名,值类型,索引字段,读取模式,分组,备注,是否从文件读取schema,输入文件,输出文件,tags
-TbItem,item.TbItem,Item,,,c,示例道具表,true,item.xlsx,,
 TbStageConfig,cfg.TbStageConfig,StageConfig,stage_id,map,c,学段配置表,true,local/stage_config.csv,,
 TbPackConfig,cfg.TbPackConfig,PackConfig,pack_id,map,c,关卡包配置表,true,local/pack_config.csv,,
 TbWordPool,cfg.TbWordPool,WordPool,word,map,c,单词总池表,true,local/word_pool.csv,,

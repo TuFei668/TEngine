@@ -2,20 +2,20 @@
 ##type,string,string,string,int,string,string
 ##group,c,c,c,c,c,c
 ##,规则ID,类型(earn/spend),触发行为,金币数量,触发条件,引入版本
-earn_level_complete,earn,level_complete,10,完成常规关卡,mvp
-earn_reward_level,earn,reward_level_complete,20,完成奖励关卡,mvp
-earn_daily_dash,earn,daily_dash_complete,50,完成每日冲刺通5关默认值每日轮换,1.2
-earn_bonus_word,earn,bonus_meter_full,25,Bonus Meter进度条填满,mvp
-earn_bonus_word_double,earn,bonus_meter_full_ad,50,Bonus Meter填满后看广告双倍,mvp
-earn_hidden_word,earn,hidden_word_found,3,找到一个Hidden Word,mvp
-earn_share,earn,share_friend,5,分享给微信好友双方各得,1.2
-earn_ad_video,earn,watch_rewarded_video,10,观看激励视频,mvp
-earn_daily_login,earn,daily_login,5,每日登录礼盒,1.2
-earn_streak_3,earn,streak_3_days,5,连续打卡3天,1.2
-earn_streak_7,earn,streak_7_days,10,连续打卡7天,1.2
-earn_streak_30,earn,streak_30_days,20,连续打卡30天,1.2
-earn_daily_challenge,earn,daily_challenge_complete,10,完成每日挑战,1.2
-earn_unit_complete,earn,pack_complete,30,完成关卡包全部关卡,1.1
-spend_normal_hint,spend,use_normal_hint,-20,使用普通提示道具,mvp
-spend_rotate,spend,use_rotate,-15,使用旋转道具,mvp
-spend_wind_hint,spend,use_wind_hint,-200,使用风提示道具,1.1
+coin_rule_earn_level_complete,earn_level_complete,earn,level_complete,10,完成常规关卡,mvp
+coin_rule_earn_reward_level,earn_reward_level,earn,reward_level_complete,20,完成奖励关卡,mvp
+coin_rule_earn_daily_dash,earn_daily_dash,earn,daily_dash_complete,50,完成每日冲刺通5关默认值每日轮换,1.2
+coin_rule_earn_bonus_word,earn_bonus_word,earn,bonus_meter_full,25,Bonus Meter进度条填满,mvp
+coin_rule_earn_bonus_word_double,earn_bonus_word_double,earn,bonus_meter_full_ad,50,Bonus Meter填满后看广告双倍,mvp
+coin_rule_earn_hidden_word,earn_hidden_word,earn,hidden_word_found,3,找到一个Hidden Word,mvp
+coin_rule_earn_share,earn_share,earn,share_friend,5,分享给微信好友双方各得,1.2
+coin_rule_earn_ad_video,earn_ad_video,earn,watch_rewarded_video,10,观看激励视频,mvp
+coin_rule_earn_daily_login,earn_daily_login,earn,daily_login,5,每日登录礼盒,1.2
+coin_rule_earn_streak_3,earn_streak_3,earn,streak_3_days,5,连续打卡3天,1.2
+coin_rule_earn_streak_7,earn_streak_7,earn,streak_7_days,10,连续打卡7天,1.2
+coin_rule_earn_streak_30,earn_streak_30,earn,streak_30_days,20,连续打卡30天,1.2
+coin_rule_earn_daily_challenge,earn_daily_challenge,earn,daily_challenge_complete,10,完成每日挑战,1.2
+coin_rule_earn_unit_complete,earn_unit_complete,earn,pack_complete,30,完成关卡包全部关卡,1.1
+coin_rule_spend_normal_hint,spend_normal_hint,spend,use_normal_hint,-20,使用普通提示道具,mvp
+coin_rule_spend_rotate,spend_rotate,spend,use_rotate,-15,使用旋转道具,mvp
+coin_rule_spend_wind_hint,spend_wind_hint,spend,use_wind_hint,-200,使用风提示道具,1.1

@@ -2,6 +2,6 @@
 ##type,string,string,int,int,string,bool
 ##group,c,c,c,c,c,c
 ##,规则ID,用户类型,每日最大游戏时长(分钟0=无限制),护眼提醒间隔(分钟),提醒文案,是否强制退出
-minor_normal,minor,60,20,已经学习20分钟了休息一下眼睛吧,true
-minor_holiday,minor_holiday,90,20,已经学习20分钟了休息一下眼睛吧,true
-adult_normal,adult,0,40,已经学习40分钟了休息一下眼睛吧,false
+anti_addiction_minor_normal,minor_normal,minor,60,20,已经学习20分钟了休息一下眼睛吧,true
+anti_addiction_minor_holiday,minor_holiday,minor_holiday,90,20,已经学习20分钟了休息一下眼睛吧,true
+anti_addiction_adult_normal,adult_normal,adult,0,40,已经学习40分钟了休息一下眼睛吧,false

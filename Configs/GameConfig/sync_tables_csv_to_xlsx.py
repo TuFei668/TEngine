@@ -27,6 +27,7 @@ HEADER_ROW_1 = [
     "mode",
     "group",
     "comment",
+    "output",
     "tags",
 ]
 
@@ -40,6 +41,7 @@ HEADER_ROW_2 = [
     "模式",
     "分组",
     "注释",
+    "输出文件",
     "",
 ]
 
@@ -52,6 +54,7 @@ HEADER_ROW_3 = [
     '为空的话自动取value_type中第一个字段,多主键联合索引为key1+key2,多主键独立索引为"key1,key2"',
     "取值one|map|list，为空自动为map",
     "取值c|s|e，可以有多个，以逗号','分隔。空则表示属于所有分组",
+    "",
     "",
     "",
 ]
@@ -89,6 +92,7 @@ def csv_row_to_xlsx_row(row):
         row[4],                 # mode
         row[5],                 # group
         row[6],                 # comment
+        row[9],                 # output
         row[10],                # tags
     ]
 

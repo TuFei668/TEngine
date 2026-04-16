@@ -34,6 +34,13 @@
 2. 执行同步脚本，把 csv 覆盖到 xlsx
 3. 执行生成脚本
 
+如果想直接一步完成，也可以执行一键脚本：
+
+```bash
+cd Configs/GameConfig
+sh ./sync_and_gen.sh
+```
+
 同步命令：
 
 ```bash
@@ -72,6 +79,22 @@ sh ./gen_code_bin_to_project_lazyload.sh
 - `__tables__.csv` 是维护源
 - `__tables__.xlsx` 是 Luban 实际读取文件
 - 如果只改了 xlsx，没有回写 csv，下次同步时会被 csv 覆盖
+
+## `sync_and_gen.sh` 说明
+
+脚本位置：
+
+- `Configs/GameConfig/sync_and_gen.sh`
+
+功能：
+
+1. 自动同步 `Datas/__tables__.csv` 到 `Datas/__tables__.xlsx`
+2. 自动执行 `gen_code_bin_to_project_lazyload.sh`
+
+适用场景：
+
+- 日常改完 `__tables__.csv` 后直接一键生成
+- 避免忘记先同步再转表
 
 ## 生成方式
 
