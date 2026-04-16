@@ -1,0 +1,11 @@
+##var,day_index,required_levels,reward_type,reward_coins,reward_item_id,reward_item_count
+##type,int,int,string,int?,string?,int?
+##group,s,s,s,s,s,s
+##,轮换日序号(1-7循环),需通关数,奖励类型(coins/item/combo),奖励金币数,奖励道具ID,奖励道具数量
+1,5,coins,50,,
+2,5,item,,normal_hint,2
+3,5,coins,50,,
+4,5,combo,10,wind_hint,1
+5,5,coins,50,,
+6,5,item,,normal_hint,3
+7,5,combo,30,normal_hint,1

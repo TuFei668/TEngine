@@ -1,0 +1,12 @@
+##var,full_name,value_type,index,mode,group,comment,read_schema_from_file,input,output,tags
+##type,string,string,string,string,string,string,bool,string,string,string
+##group,c,c,c,c,c,c,c,c,c,c,c
+##,变量名,完整表名,值类型,索引字段,读取模式,分组,备注,是否从文件读取schema,输入文件,输出文件,tags
+TbStageConfig,cfg.TbStageConfig,StageConfig,stage_id,map,c,学段配置表,true,local/stage_config.csv,,
+TbPackConfig,cfg.TbPackConfig,PackConfig,pack_id,map,c,关卡包配置表,true,local/pack_config.csv,,
+TbWordPool,cfg.TbWordPool,WordPool,word,map,c,单词总池表,true,local/word_pool.csv,,
+TbItemConfig,cfg.TbItemConfig,ItemConfig,item_id,map,c,道具配置表,true,local/item_config.csv,,
+TbBadgeConfig,cfg.TbBadgeConfig,BadgeConfig,badge_level,map,c,称号徽章配置表,true,local/badge_config.csv,,
+TbLandmarkCardConfig,cfg.TbLandmarkCardConfig,LandmarkCardConfig,card_id,map,c,景区卡片配置表,true,local/landmark_card_config.csv,,
+TbCoinRule,cfg.TbCoinRule,CoinRule,rule_id,map,c,金币规则表,true,local/coin_rule.csv,,
+TbAntiAddictionConfig,cfg.TbAntiAddictionConfig,AntiAddictionConfig,rule_id,map,c,防沉迷配置表,true,local/anti_addiction_config.csv,,

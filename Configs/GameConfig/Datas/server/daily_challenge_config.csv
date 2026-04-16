@@ -1,0 +1,9 @@
+##var,challenge_id,challenge_date,challenge_type,content_en,content_zh,source,reward_coins
+##type,string,string,string,string,string,string,int
+##group,s,s,s,s,s,s,s
+##,挑战ID,日期(YYYY-MM-DD),类型(sentence_fill/quote),英文内容,中文翻译,来源,完成奖励金币
+dc_20260401,2026-04-01,quote,The only way to do great work is to love what you do.,做出伟大工作的唯一方法就是热爱你所做的事,Steve Jobs,10
+dc_20260402,2026-04-02,quote,In the middle of difficulty lies opportunity.,困难之中蕴藏着机遇,Albert Einstein,10
+dc_20260403,2026-04-03,quote,Education is the most powerful weapon which you can use to change the world.,教育是你可以用来改变世界的最强大的武器,Nelson Mandela,10
+dc_20260404,2026-04-04,sentence_fill,Good morning! My ___ is Li Ming. Nice to ___ you.,早上好我的名字是李明很高兴认识你,PEP Grade 3,10
+dc_20260405,2026-04-05,quote,The more that you read the more things you will know.,你读得越多你知道的就越多,Dr. Seuss,10
