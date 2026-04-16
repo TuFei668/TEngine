@@ -2,6 +2,7 @@
 ##type,string,string,string,string,string,string,bool,string,string,string
 ##group,c,c,c,c,c,c,c,c,c,c,c
 ##,变量名,完整表名,值类型,索引字段,读取模式,分组,备注,是否从文件读取schema,输入文件,输出文件,tags
+TbItem,item.TbItem,Item,,,c,示例道具表,true,item.xlsx,,
 TbStageConfig,cfg.TbStageConfig,StageConfig,stage_id,map,c,学段配置表,true,local/stage_config.csv,,
 TbPackConfig,cfg.TbPackConfig,PackConfig,pack_id,map,c,关卡包配置表,true,local/pack_config.csv,,
 TbWordPool,cfg.TbWordPool,WordPool,word,map,c,单词总池表,true,local/word_pool.csv,,
@@ -10,3 +11,18 @@ TbBadgeConfig,cfg.TbBadgeConfig,BadgeConfig,badge_level,map,c,称号徽章配置
 TbLandmarkCardConfig,cfg.TbLandmarkCardConfig,LandmarkCardConfig,card_id,map,c,景区卡片配置表,true,local/landmark_card_config.csv,,
 TbCoinRule,cfg.TbCoinRule,CoinRule,rule_id,map,c,金币规则表,true,local/coin_rule.csv,,
 TbAntiAddictionConfig,cfg.TbAntiAddictionConfig,AntiAddictionConfig,rule_id,map,c,防沉迷配置表,true,local/anti_addiction_config.csv,,
+TbAdConfig,cfg.TbAdConfig,AdConfig,ad_slot_id,map,c,广告配置表,true,server/ad_config.csv,,
+TbAvatarEventConfig,cfg.TbAvatarEventConfig,AvatarEventConfig,avatar_event_id,map,c,头像活动配置表,true,server/avatar_event_config.csv,,
+TbAvatarEventItems,cfg.TbAvatarEventItems,AvatarEventItem,avatar_id,map,c,头像活动物品表,true,server/avatar_event_items.csv,,
+TbDailyChallengeConfig,cfg.TbDailyChallengeConfig,DailyChallengeConfig,challenge_id,map,c,每日挑战配置表,true,server/daily_challenge_config.csv,,
+TbDailyDashConfig,cfg.TbDailyDashConfig,DailyDashConfig,day_index,map,c,每日冲刺配置表,true,server/daily_dash_config.csv,,
+TbDailyRewardConfig,cfg.TbDailyRewardConfig,DailyRewardConfig,day,map,c,每日奖励配置表,true,server/daily_reward_config.csv,,
+TbEventConfig,cfg.TbEventConfig,EventConfig,event_id,map,c,活动配置表,true,server/event_config.csv,,
+TbProvinceMilestoneConfig,cfg.TbProvinceMilestoneConfig,ProvinceMilestoneConfig,milestone_id,map,c,省份里程碑配置表,true,server/province_milestone_config.csv,,
+TbSeasonConfig,cfg.TbSeasonConfig,SeasonConfig,season_id,map,c,赛季配置表,true,server/season_config.csv,,
+TbSeasonCrownConfig,cfg.TbSeasonCrownConfig,SeasonCrownConfig,season_id+node_index,list,c,赛季皇冠节点表,true,server/season_crown_config.csv,,
+TbSeasonFrameConfig,cfg.TbSeasonFrameConfig,SeasonFrameConfig,season_id+node_index,list,c,赛季头像框节点表,true,server/season_frame_config.csv,,
+TbShareRewardConfig,cfg.TbShareRewardConfig,ShareRewardConfig,scene,map,c,分享奖励配置表,true,server/share_reward_config.csv,,
+TbStreakConfig,cfg.TbStreakConfig,StreakConfig,streak_days,map,c,连胜奖励配置表,true,server/streak_config.csv,,
+TbTournamentRewardConfig,cfg.TbTournamentRewardConfig,TournamentRewardConfig,tournament_type+rank_min+rank_max,list,c,赛事奖励配置表,true,server/tournament_reward_config.csv,,
+TbWordMasterConfig,cfg.TbWordMasterConfig,WordMasterConfig,node_index,map,c,词王赛配置表,true,server/word_master_config.csv,,

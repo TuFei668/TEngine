@@ -23,3 +23,4 @@ Tools/GameEventSourceGenerator/SourceGenerator/obj
 
 #openspec
 openspec/
+/Configs/GameConfig/.venv_xlsx

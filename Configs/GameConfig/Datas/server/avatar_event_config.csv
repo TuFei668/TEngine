@@ -1,7 +1,7 @@
 ##var,avatar_event_id,theme_name,start_time,end_time,tokens_per_box,fragments_per_avatar,total_normal_avatars,has_premium,premium_avatar_asset,premium_avatar_name
 ##type,string,string,string,string,int,int,int,bool,string?,string?
-##group,s,s,s,s,s,s,s,s,s,s
+##group,c,c,c,c,c,c,c,c,c,c
 ##,活动ID,主题名称,开始时间,结束时间,开箱消耗代币数,合成需碎片数,普通头像数量,有无Premium头像,Premium头像资源名,Premium头像名称
-avatar_jurassic_w15,Jurassic Titans,2026-04-13T00:00:00Z,2026-04-16T00:00:00Z,10,3,8,true,avatar_premium_jurassic,Jurassic Premium
-avatar_ocean_w16,Ocean Explorers,2026-04-16T00:00:00Z,2026-04-19T00:00:00Z,10,3,8,true,avatar_premium_ocean,Ocean Premium
-avatar_space_w16,Space Voyagers,2026-04-19T00:00:00Z,2026-04-22T00:00:00Z,10,3,8,true,avatar_premium_space,Space Premium
+avatar_event_avatar_jurassic_w15,avatar_jurassic_w15,Jurassic Titans,2026-04-13T00:00:00Z,2026-04-16T00:00:00Z,10,3,8,true,avatar_premium_jurassic,Jurassic Premium
+avatar_event_avatar_ocean_w16,avatar_ocean_w16,Ocean Explorers,2026-04-16T00:00:00Z,2026-04-19T00:00:00Z,10,3,8,true,avatar_premium_ocean,Ocean Premium
+avatar_event_avatar_space_w16,avatar_space_w16,Space Voyagers,2026-04-19T00:00:00Z,2026-04-22T00:00:00Z,10,3,8,true,avatar_premium_space,Space Premium

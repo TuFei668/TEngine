@@ -2,7 +2,7 @@
 ##type,string,string,string,string,string,string,string,string,int,int
 ##group,c,c,c,c,c,c,c,c,c,c
 ##,卡片ID,所属关卡包ID,中文名,英文名,图片资源名,中文描述,英文描述,趣味知识,包内第几关解锁,展示排序
-great_wall,primary_self_intro,长城,The Great Wall,landmark_great_wall,长城是中国古代的军事防御工程总长度超过2万公里,The Great Wall is an ancient military defense project stretching over 20000 km,长城的英文名直译就是伟大的墙是世界新七大奇迹之一,10,1
-great_wall_badaling,primary_self_intro,长城·八达岭,Badaling Great Wall,landmark_badaling,八达岭长城是长城最著名的段落每年接待游客超过1000万人次,Badaling is the most famous section of the Great Wall receiving over 10 million visitors annually,不到长城非好汉 He who has never been to the Great Wall is not a true man,20,2
-forbidden_city,primary_family,故宫,The Forbidden City,landmark_forbidden_city,故宫是中国明清两代的皇家宫殿拥有9999间半房间,The Forbidden City served as the imperial palace for the Ming and Qing dynasties,故宫的英文名是紫禁城 Forbidden City因为普通人禁止进入,10,1
-forbidden_city_taihe,primary_family,故宫·太和殿,Hall of Supreme Harmony,landmark_taihe,太和殿是故宫最大的宫殿是皇帝举行重大典礼的地方,The Hall of Supreme Harmony is the largest hall in the Forbidden City,Supreme Harmony意思是至高的和谐体现了中国和的哲学,20,2
+landmark_great_wall,great_wall,primary_self_intro,长城,The Great Wall,landmark_great_wall,长城是中国古代的军事防御工程总长度超过2万公里,The Great Wall is an ancient military defense project stretching over 20000 km,长城的英文名直译就是伟大的墙是世界新七大奇迹之一,10,1
+landmark_great_wall_badaling,great_wall_badaling,primary_self_intro,长城·八达岭,Badaling Great Wall,landmark_badaling,八达岭长城是长城最著名的段落每年接待游客超过1000万人次,Badaling is the most famous section of the Great Wall receiving over 10 million visitors annually,不到长城非好汉 He who has never been to the Great Wall is not a true man,20,2
+landmark_forbidden_city,forbidden_city,primary_family,故宫,The Forbidden City,landmark_forbidden_city,故宫是中国明清两代的皇家宫殿拥有9999间半房间,The Forbidden City served as the imperial palace for the Ming and Qing dynasties,故宫的英文名是紫禁城 Forbidden City因为普通人禁止进入,10,1
+landmark_forbidden_city_taihe,forbidden_city_taihe,primary_family,故宫·太和殿,Hall of Supreme Harmony,landmark_taihe,太和殿是故宫最大的宫殿是皇帝举行重大典礼的地方,The Hall of Supreme Harmony is the largest hall in the Forbidden City,Supreme Harmony意思是至高的和谐体现了中国和的哲学,20,2
