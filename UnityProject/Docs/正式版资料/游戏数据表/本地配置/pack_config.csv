@@ -1,23 +1,23 @@
-##var,pack_id,stage_id,theme_en,theme_zh,total_levels,word_count,sort_order,unlock_type,required_pack_id,next_pack_id
-##type,string,string,string,string,int,int,int,string,string?,string?
-##group,c,c,c,c,c,c,c,c,c,c
-##,关卡包ID,所属学段ID,主题英文名,主题中文名,总关卡数,包含单词数,学段内排序,解锁方式,前置关卡包ID,下一个关卡包ID
-pack_primary_self_intro,primary_self_intro,primary,Self Introduction,自我介绍,20,30,1,stage_select,,primary_family
-pack_primary_family,primary_family,primary,Family,家庭,20,30,2,complete_previous,primary_self_intro,primary_animals
-pack_primary_animals,primary_animals,primary,Animals,动物,20,30,3,complete_previous,primary_family,primary_colors
-pack_primary_colors,primary_colors,primary,Colors,颜色,20,30,4,complete_previous,primary_animals,primary_food
-pack_primary_food,primary_food,primary,Food,食物,20,30,5,complete_previous,primary_colors,primary_school
-pack_primary_school,primary_school,primary,School,学校,20,30,6,complete_previous,primary_food,primary_body
-pack_primary_body,primary_body,primary,Body,身体,20,30,7,complete_previous,primary_school,primary_numbers
-pack_primary_numbers,primary_numbers,primary,Numbers,数字,20,30,8,complete_previous,primary_body,junior_daily_life
-pack_junior_daily_life,junior_daily_life,junior_high,Daily Life,日常生活,20,40,1,stage_select,,junior_travel
-pack_junior_travel,junior_travel,junior_high,Travel,旅行,20,40,2,complete_previous,junior_daily_life,junior_technology
-pack_junior_technology,junior_technology,junior_high,Technology,科技,20,40,3,complete_previous,junior_travel,junior_environment
-pack_junior_environment,junior_environment,junior_high,Environment,环境,20,40,4,complete_previous,junior_technology,senior_society
-pack_senior_society,senior_society,senior_high,Society,社会,20,50,1,stage_select,,senior_science
-pack_senior_science,senior_science,senior_high,Science,科学,20,50,2,complete_previous,senior_society,senior_economy
-pack_senior_economy,senior_economy,senior_high,Economy,经济,20,50,3,complete_previous,senior_science,cet4
-pack_cet4,cet4,adult,CET-4 Core,四级核心词,20,60,1,stage_select,,cet6
-pack_cet6,cet6,adult,CET-6 Core,六级核心词,20,60,2,complete_previous,cet4,postgrad
-pack_postgrad,postgrad,adult,Postgrad,考研词汇,20,60,3,complete_previous,cet6,ielts
-pack_ielts,ielts,adult,IELTS,雅思词汇,20,60,4,complete_previous,postgrad,
+##var,pack_id,stage_id,theme_en,theme_zh,total_levels,word_count,sort_order,unlock_type,required_pack_id,next_pack_id,background_asset
+##type,string,string,string,string,int,int,int,string,string?,string?,string
+##group,c,c,c,c,c,c,c,c,c,c,c
+##,关卡包ID,所属学段ID,主题英文名,主题中文名,总关卡数,包含单词数,学段内排序,解锁方式,前置关卡包ID,下一个关卡包ID,背景图资源名
+pack_primary_self_intro,primary_self_intro,primary,Self Introduction,自我介绍,20,30,1,stage_select,,primary_family,bg_primary_self_intro
+pack_primary_family,primary_family,primary,Family,家庭,20,30,2,complete_previous,primary_self_intro,primary_animals,bg_primary_family
+pack_primary_animals,primary_animals,primary,Animals,动物,20,30,3,complete_previous,primary_family,primary_colors,bg_primary_animals
+pack_primary_colors,primary_colors,primary,Colors,颜色,20,30,4,complete_previous,primary_animals,primary_food,bg_primary_colors
+pack_primary_food,primary_food,primary,Food,食物,20,30,5,complete_previous,primary_colors,primary_school,bg_primary_food
+pack_primary_school,primary_school,primary,School,学校,20,30,6,complete_previous,primary_food,primary_body,bg_primary_school
+pack_primary_body,primary_body,primary,Body,身体,20,30,7,complete_previous,primary_school,primary_numbers,bg_primary_body
+pack_primary_numbers,primary_numbers,primary,Numbers,数字,20,30,8,complete_previous,primary_body,junior_daily_life,bg_primary_numbers
+pack_junior_daily_life,junior_daily_life,junior_high,Daily Life,日常生活,20,40,1,stage_select,,junior_travel,bg_junior_daily_life
+pack_junior_travel,junior_travel,junior_high,Travel,旅行,20,40,2,complete_previous,junior_daily_life,junior_technology,bg_junior_travel
+pack_junior_technology,junior_technology,junior_high,Technology,科技,20,40,3,complete_previous,junior_travel,junior_environment,bg_junior_technology
+pack_junior_environment,junior_environment,junior_high,Environment,环境,20,40,4,complete_previous,junior_technology,senior_society,bg_junior_environment
+pack_senior_society,senior_society,senior_high,Society,社会,20,50,1,stage_select,,senior_science,bg_senior_society
+pack_senior_science,senior_science,senior_high,Science,科学,20,50,2,complete_previous,senior_society,senior_economy,bg_senior_science
+pack_senior_economy,senior_economy,senior_high,Economy,经济,20,50,3,complete_previous,senior_science,cet4,bg_senior_economy
+pack_cet4,cet4,adult,CET-4 Core,四级核心词,20,60,1,stage_select,,cet6,bg_cet4
+pack_cet6,cet6,adult,CET-6 Core,六级核心词,20,60,2,complete_previous,cet4,postgrad,bg_cet6
+pack_postgrad,postgrad,adult,Postgrad,考研词汇,20,60,3,complete_previous,cet6,ielts,bg_postgrad
+pack_ielts,ielts,adult,IELTS,雅思词汇,20,60,4,complete_previous,postgrad,,bg_ielts

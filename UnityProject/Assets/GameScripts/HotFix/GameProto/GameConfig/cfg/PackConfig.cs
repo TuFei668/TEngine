@@ -26,6 +26,7 @@ public sealed partial class PackConfig : Luban.BeanBase
         UnlockType = _buf.ReadString();
         if(_buf.ReadBool()){ RequiredPackId = _buf.ReadString(); } else { RequiredPackId = null; }
         if(_buf.ReadBool()){ NextPackId = _buf.ReadString(); } else { NextPackId = null; }
+        BackgroundAsset = _buf.ReadString();
     }
 
     public static PackConfig DeserializePackConfig(ByteBuf _buf)
@@ -73,6 +74,10 @@ public sealed partial class PackConfig : Luban.BeanBase
     /// 下一个关卡包ID
     /// </summary>
     public readonly string NextPackId;
+    /// <summary>
+    /// 背景图资源名
+    /// </summary>
+    public readonly string BackgroundAsset;
    
     public const int __ID__ = -2141180251;
     public override int GetTypeId() => __ID__;
@@ -94,6 +99,7 @@ public sealed partial class PackConfig : Luban.BeanBase
         + "unlockType:" + UnlockType + ","
         + "requiredPackId:" + RequiredPackId + ","
         + "nextPackId:" + NextPackId + ","
+        + "backgroundAsset:" + BackgroundAsset + ","
         + "}";
     }
 }

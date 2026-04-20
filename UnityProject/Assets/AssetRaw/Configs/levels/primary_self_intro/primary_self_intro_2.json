@@ -1,0 +1,46 @@
+{
+  "puzzleId": "level-primary-self-intro-002",
+  "level_id": 2,
+  "pack_id": "primary_self_intro",
+  "stage": "primary",
+  "theme": "自我介绍",
+  "theme_en": "Self Introduction",
+  "difficulty": 1,
+  "type": "normal",
+  "bonus_coin_multiplier": 1,
+  "dimension": 6,
+  "rows": 6,
+  "cols": 6,
+  "useHardDirections": false,
+  "gridString": "MORNIN|GXRTAM|INICEM|RLPQWB|MEETFZ|SDKJVE",
+  "words": ["MORNING", "NICE", "MEET"],
+  "wordPositions": [
+    {
+      "word": "MORNING",
+      "startX": 0, "startY": 0,
+      "directionX": 1, "directionY": 0,
+      "cellPositions": [{"x":0,"y":0},{"x":1,"y":0},{"x":2,"y":0},{"x":3,"y":0},{"x":4,"y":0},{"x":5,"y":0},{"x":6,"y":0}],
+      "wordColor": {"r":1.0,"g":0.5,"b":0.0,"a":0.6}
+    },
+    {
+      "word": "NICE",
+      "startX": 2, "startY": 2,
+      "directionX": 1, "directionY": 0,
+      "cellPositions": [{"x":2,"y":2},{"x":3,"y":2},{"x":4,"y":2},{"x":5,"y":2}],
+      "wordColor": {"r":0.5,"g":0.0,"b":1.0,"a":0.6}
+    },
+    {
+      "word": "MEET",
+      "startX": 0, "startY": 4,
+      "directionX": 1, "directionY": 0,
+      "cellPositions": [{"x":0,"y":4},{"x":1,"y":4},{"x":2,"y":4},{"x":3,"y":4}],
+      "wordColor": {"r":0.0,"g":0.8,"b":0.8,"a":0.6}
+    }
+  ],
+  "wordDetails": [
+    {"word":"MORNING","translation":"早上","phonetic":"/ˈmɔːrnɪŋ/","example":"Good morning everyone.","audio":"morning","is_new":true,"first_appear_level":2,"repeat_count":0,"gap_since_last":0},
+    {"word":"NICE","translation":"好的；令人愉快的","phonetic":"/naɪs/","example":"Nice to meet you.","audio":"nice","is_new":true,"first_appear_level":2,"repeat_count":0,"gap_since_last":0},
+    {"word":"MEET","translation":"遇见","phonetic":"/miːt/","example":"Nice to meet you too.","audio":"meet","is_new":true,"first_appear_level":2,"repeat_count":0,"gap_since_last":0}
+  ],
+  "hiddenWords": []
+}

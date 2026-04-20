@@ -1,0 +1,66 @@
+{
+  "puzzleId": "level-primary-self-intro-003",
+  "level_id": 3,
+  "pack_id": "primary_self_intro",
+  "stage": "primary",
+  "theme": "自我介绍",
+  "theme_en": "Self Introduction",
+  "difficulty": 2,
+  "type": "normal",
+  "bonus_coin_multiplier": 1,
+  "dimension": 6,
+  "rows": 6,
+  "cols": 6,
+  "useHardDirections": false,
+  "gridString": "BHELLO|GNXRTA|INAMEM|RLPQWB|LBOYFZ|SDKJVE",
+  "words": ["HELLO", "NAME", "BOY", "GIRL"],
+  "wordPositions": [
+    {
+      "word": "HELLO",
+      "startX": 1, "startY": 0,
+      "directionX": 1, "directionY": 0,
+      "cellPositions": [{"x":1,"y":0},{"x":2,"y":0},{"x":3,"y":0},{"x":4,"y":0},{"x":5,"y":0}],
+      "wordColor": {"r":1.0,"g":0.0,"b":0.0,"a":0.6}
+    },
+    {
+      "word": "NAME",
+      "startX": 1, "startY": 2,
+      "directionX": 1, "directionY": 0,
+      "cellPositions": [{"x":1,"y":2},{"x":2,"y":2},{"x":3,"y":2},{"x":4,"y":2}],
+      "wordColor": {"r":0.0,"g":0.5,"b":1.0,"a":0.6}
+    },
+    {
+      "word": "BOY",
+      "startX": 1, "startY": 4,
+      "directionX": 1, "directionY": 0,
+      "cellPositions": [{"x":1,"y":4},{"x":2,"y":4},{"x":3,"y":4}],
+      "wordColor": {"r":0.0,"g":0.8,"b":0.0,"a":0.6}
+    },
+    {
+      "word": "GIRL",
+      "startX": 0, "startY": 1,
+      "directionX": 0, "directionY": 1,
+      "cellPositions": [{"x":0,"y":1},{"x":0,"y":2},{"x":0,"y":3},{"x":0,"y":4}],
+      "wordColor": {"r":0.8,"g":0.0,"b":0.8,"a":0.6}
+    }
+  ],
+  "wordDetails": [
+    {"word":"HELLO","translation":"你好","phonetic":"/həˈloʊ/","example":"Hello, my name is Li Ming.","audio":"hello","is_new":false,"first_appear_level":1,"repeat_count":1,"gap_since_last":2},
+    {"word":"NAME","translation":"名字","phonetic":"/neɪm/","example":"My name is Wang Lei.","audio":"name","is_new":false,"first_appear_level":1,"repeat_count":1,"gap_since_last":2},
+    {"word":"BOY","translation":"男孩","phonetic":"/bɔɪ/","example":"The boy is my friend.","audio":"boy","is_new":true,"first_appear_level":3,"repeat_count":0,"gap_since_last":0},
+    {"word":"GIRL","translation":"女孩","phonetic":"/ɡɜːrl/","example":"The girl is a student.","audio":"girl","is_new":true,"first_appear_level":3,"repeat_count":0,"gap_since_last":0}
+  ],
+  "hiddenWords": [
+    {
+      "word": "GREET",
+      "translation": "问候",
+      "phonetic": "/ɡriːt/",
+      "example": "We greet each other every morning.",
+      "audio": "greet",
+      "startX": 0, "startY": 1,
+      "directionX": 1, "directionY": 1,
+      "cellPositions": [{"x":0,"y":1},{"x":1,"y":2},{"x":2,"y":3},{"x":3,"y":4},{"x":4,"y":5}],
+      "reward_coins": 3
+    }
+  ]
+}

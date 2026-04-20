@@ -52,7 +52,6 @@ public class ConfigSystem
             _resourceModule = ModuleSystem.GetModule<IResourceModule>();
         }
         TextAsset textAsset = _resourceModule.LoadAsset<TextAsset>(file);
-        byte[] bytes = textAsset.bytes;
-        return new ByteBuf(bytes);
+        return new ByteBuf(textAsset.bytes);
     }
 }

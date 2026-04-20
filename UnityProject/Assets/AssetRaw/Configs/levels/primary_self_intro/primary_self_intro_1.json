@@ -1,0 +1,46 @@
+{
+  "puzzleId": "level-primary-self-intro-001",
+  "level_id": 1,
+  "pack_id": "primary_self_intro",
+  "stage": "primary",
+  "theme": "自我介绍",
+  "theme_en": "Self Introduction",
+  "difficulty": 1,
+  "type": "normal",
+  "bonus_coin_multiplier": 1,
+  "dimension": 6,
+  "rows": 6,
+  "cols": 6,
+  "useHardDirections": false,
+  "gridString": "HELLOG|NXRTAM|INAMEM|RLPQWB|LBOYFZ|SDKJVE",
+  "words": ["HELLO", "NAME", "GOOD"],
+  "wordPositions": [
+    {
+      "word": "HELLO",
+      "startX": 0, "startY": 0,
+      "directionX": 1, "directionY": 0,
+      "cellPositions": [{"x":0,"y":0},{"x":1,"y":0},{"x":2,"y":0},{"x":3,"y":0},{"x":4,"y":0}],
+      "wordColor": {"r":1.0,"g":0.0,"b":0.0,"a":0.6}
+    },
+    {
+      "word": "NAME",
+      "startX": 1, "startY": 2,
+      "directionX": 1, "directionY": 0,
+      "cellPositions": [{"x":1,"y":2},{"x":2,"y":2},{"x":3,"y":2},{"x":4,"y":2}],
+      "wordColor": {"r":0.0,"g":0.5,"b":1.0,"a":0.6}
+    },
+    {
+      "word": "GOOD",
+      "startX": 0, "startY": 1,
+      "directionX": 0, "directionY": 1,
+      "cellPositions": [{"x":0,"y":1},{"x":0,"y":2},{"x":0,"y":3},{"x":0,"y":4}],
+      "wordColor": {"r":0.0,"g":0.8,"b":0.0,"a":0.6}
+    }
+  ],
+  "wordDetails": [
+    {"word":"HELLO","translation":"你好","phonetic":"/həˈloʊ/","example":"Hello, my name is Li Ming.","audio":"hello","is_new":true,"first_appear_level":1,"repeat_count":0,"gap_since_last":0},
+    {"word":"NAME","translation":"名字","phonetic":"/neɪm/","example":"My name is Wang Lei.","audio":"name","is_new":true,"first_appear_level":1,"repeat_count":0,"gap_since_last":0},
+    {"word":"GOOD","translation":"好的","phonetic":"/ɡʊd/","example":"Good morning, teacher.","audio":"good","is_new":true,"first_appear_level":1,"repeat_count":0,"gap_since_last":0}
+  ],
+  "hiddenWords": []
+}

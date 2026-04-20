@@ -160,10 +160,15 @@ public class ConfigSystem
         _init = true;
     }
 
+    private IResourceModule _resourceModule;
+
     private ByteBuf LoadByteBuf(string file)
     {
-        // 通过 YooAsset 同步加载（预加载阶段调用）
-        var textAsset = GameModule.Resource.LoadAsset<TextAsset>(file);
+        // ConfigSystem 在 GameProto 程序集，无法访问 GameModule（GameLogic 层）
+        // 通过 ModuleSystem.GetModule<IResourceModule>() 跨程序集获取资源模块
+        if (_resourceModule == null)
+            _resourceModule = ModuleSystem.GetModule<IResourceModule>();
+        var textAsset = _resourceModule.LoadAsset<TextAsset>(file);
         return new ByteBuf(textAsset.bytes);
     }
 }
