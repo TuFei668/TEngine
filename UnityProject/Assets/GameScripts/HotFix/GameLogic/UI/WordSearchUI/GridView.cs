@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Cysharp.Threading.Tasks;
 using TEngine;
 using UnityEngine;
 
@@ -31,13 +32,24 @@ namespace GameLogic
         public int Rows => _rows;
         public int Cols => _cols;
 
-        public void Init(Transform cellContainer, LevelData data)
+        public async UniTask InitAsync(Transform cellContainer, LevelData data)
         {
             _cellContainer = cellContainer;
             _rows = data.rows;
             _cols = data.cols;
 
-            // 获取 cell 预设体（cell_container 下第一个子节点）
+            // 强制设置容器为左上角坐标系（pivot=0,1），确保定位一致
+            var containerRt = _cellContainer as RectTransform;
+            if (containerRt != null)
+            {
+                containerRt.pivot = new Vector2(0f, 1f);
+                containerRt.anchorMin = new Vector2(0f, 0f);
+                containerRt.anchorMax = new Vector2(1f, 1f);
+                containerRt.offsetMin = Vector2.zero;
+                containerRt.offsetMax = Vector2.zero;
+            }
+
+            // 优先从 cell_container 子节点取模板
             if (_cellContainer.childCount > 0)
             {
                 _cellPrefab = _cellContainer.GetChild(0).gameObject;
@@ -45,12 +57,17 @@ namespace GameLogic
             }
             else
             {
-                Log.Error("[GridView] cell_container has no children, cannot find cell prefab template");
-                return;
+                // 动态加载 grid_cell prefab 作为模板
+                _cellPrefab = await GameModule.Resource.LoadAssetAsync<GameObject>("grid_cell");
+                if (_cellPrefab == null)
+                {
+                    Log.Error("[GridView] Failed to load grid_cell prefab");
+                    return;
+                }
             }
 
             CalculateCellSize();
-            Log.Info($"[GridView] CellSize={_cellSize}, step={_step}, container=({(_cellContainer as RectTransform)?.rect.width},{(_cellContainer as RectTransform)?.rect.height})");
+            Log.Info($"[GridView] CellSize={_cellSize}, step={_step}, container=({containerRt?.rect.width},{containerRt?.rect.height})");
             RenderGrid(data);
             Log.Info($"[GridView] Grid rendered: {_rows}x{_cols}, {_rows * _cols} cells created");
         }
@@ -104,9 +121,14 @@ namespace GameLogic
             var cellView = CreateWidgetByPrefab<CellView>(_cellPrefab, _cellContainer);
             cellView.gameObject.SetActive(true);
 
-            // 设置位置（pivot=(0,1) 坐标系，x 向右，y 向下为负）
+            // 设置 anchor/pivot 为左上角，确保定位一致
             var rt = cellView.rectTransform;
+            rt.anchorMin = new Vector2(0f, 1f);
+            rt.anchorMax = new Vector2(0f, 1f);
+            rt.pivot = new Vector2(0.5f, 0.5f);
             rt.sizeDelta = new Vector2(_cellSize, _cellSize);
+
+            // pivot=(0,1) 容器坐标系，cell pivot=(0.5,0.5) 所以用中心点定位
             float px = Padding + x * _step + _cellSize / 2f;
             float py = -(Padding + y * _step + _cellSize / 2f);
             rt.anchoredPosition = new Vector2(px, py);
@@ -144,8 +166,19 @@ namespace GameLogic
             var rt = _cellContainer as RectTransform;
             if (rt == null) return (-1, -1);
 
+            // 获取所在 Canvas 的 worldCamera（WorldSpace Canvas 必须传 camera）
+            var canvas = rt.GetComponentInParent<Canvas>();
+            var cam = canvas != null ? canvas.worldCamera : null;
+            // 若 worldCamera 未设置，查找 UICamera，再回退到主摄像机
+            if (cam == null)
+            {
+                var uiCamGo = GameObject.Find("UICamera");
+                cam = uiCamGo != null ? uiCamGo.GetComponent<Camera>() : null;
+            }
+            if (cam == null) cam = Camera.main;
+
             RectTransformUtility.ScreenPointToLocalPointInRectangle(
-                rt, screenPos, null, out var localPos);
+                rt, screenPos, cam, out var localPos);
 
             // pivot=(0,1) 坐标系：localPos.x 从左向右，localPos.y 从上向下（负值）
             int cx = Mathf.FloorToInt((localPos.x - Padding) / _step);

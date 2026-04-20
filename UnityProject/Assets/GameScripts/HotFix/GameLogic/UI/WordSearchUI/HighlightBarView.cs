@@ -23,13 +23,13 @@ namespace GameLogic
         private readonly Dictionary<string, RectTransform> _confirmedBars = new();
         private GameObject _barPrefab;
 
-        public void Init(int rows, float cellSize)
+        public async UniTask InitAsync(int rows, float cellSize)
         {
             _rows = rows;
             _cellSize = cellSize;
             _barHeight = BarWidthTable.TryGetValue(rows, out float w) ? w : 90f;
 
-            // highlight_root 下第一个子节点作为 bar 预设体模板
+            // 优先从 highlight_root 子节点取模板
             if (rectTransform.childCount > 0)
             {
                 _barPrefab = rectTransform.GetChild(0).gameObject;
@@ -37,7 +37,13 @@ namespace GameLogic
             }
             else
             {
-                Log.Error("[HighlightBarView] highlight_root has no children, cannot find bar prefab template");
+                // 动态加载 word_line_segment prefab 作为模板
+                _barPrefab = await GameModule.Resource.LoadAssetAsync<GameObject>("word_line_segment");
+                if (_barPrefab == null)
+                {
+                    Log.Error("[HighlightBarView] Failed to load word_line_segment prefab");
+                    return;
+                }
             }
             Log.Info($"[HighlightBarView] Init rows={rows}, cellSize={cellSize}, barHeight={_barHeight}");
         }

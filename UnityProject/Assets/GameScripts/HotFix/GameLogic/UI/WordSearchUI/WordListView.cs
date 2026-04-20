@@ -24,7 +24,7 @@ namespace GameLogic
             public List<RectTransform> LetterRTs = new();
         }
 
-        public void Init(List<string> words, List<ActivityMark> activityMarks)
+        public void Init(List<string> words, List<ActivityMark> activityMarks, int gridRows = 6, int gridCols = 6)
         {
             if (rectTransform == null || rectTransform.childCount == 0)
             {
@@ -44,9 +44,9 @@ namespace GameLogic
                 _letterTemplate.SetActive(false);
             }
 
-            bool smallFont = words.Count <= 5;
-            int fontSize = smallFont ? 65 : 55;
-            float itemHeight = smallFont ? 90f : 70f;
+            // 字体大小和行高基于网格大小动态计算
+            int fontSize = CalcFontSize(gridRows, gridCols, words.Count);
+            float itemHeight = CalcItemHeight(gridRows, words.Count);
 
             var markMap = new Dictionary<string, ActivityMark>();
             if (activityMarks != null)
@@ -90,6 +90,23 @@ namespace GameLogic
 
                 _wordItems[word] = data;
             }
+        }
+
+        // 字体大小：网格越大字越小，单词越多字越小
+        private static int CalcFontSize(int rows, int cols, int wordCount)
+        {
+            int gridMax = Mathf.Max(rows, cols);
+            int baseSize = gridMax <= 5 ? 65 : gridMax <= 7 ? 55 : 45;
+            if (wordCount > 8) baseSize -= 5;
+            return Mathf.Max(baseSize, 30);
+        }
+
+        // 行高：单词越多行越矮
+        private static float CalcItemHeight(int rows, int wordCount)
+        {
+            if (wordCount <= 5) return 90f;
+            if (wordCount <= 8) return 75f;
+            return 60f;
         }
 
         public void MarkWordFound(string word)

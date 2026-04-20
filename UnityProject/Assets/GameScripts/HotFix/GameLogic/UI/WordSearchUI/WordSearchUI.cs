@@ -29,7 +29,6 @@ namespace GameLogic
         private GridView _gridView;
         private WordListView _wordListView;
         private HighlightBarView _highlightBarView;
-        private StartPanelWidget _startPanel;
         private EndPanelWidget _endPanel;
 
         // ── 控制器 ────────────────────────────────────────────
@@ -131,35 +130,35 @@ namespace GameLogic
                 return;
             }
             _gridView = CreateWidget<GridView>(_cellContainer.parent.gameObject);
-            _gridView.Init(_cellContainer, levelData);
+            await _gridView.InitAsync(_cellContainer, levelData);
             Log.Info($"[WordSearchUI] GridView initialized, cellSize={_gridView.CellSize}");
 
             _wordListView = CreateWidget<WordListView>(_wordListRoot.gameObject);
-            _wordListView.Init(levelData.words, _runtimeData.ActivityMarks);
+            _wordListView.Init(levelData.words, _runtimeData.ActivityMarks, levelData.rows, levelData.cols);
             Log.Info($"[WordSearchUI] WordListView initialized, {levelData.words.Count} words");
 
             _highlightBarView = CreateWidget<HighlightBarView>(_highlightRoot.gameObject);
-            _highlightBarView.Init(levelData.rows, _gridView.CellSize);
+            await _highlightBarView.InitAsync(levelData.rows, _gridView.CellSize);
 
-            // 初始化拖拽控制器
+            // 初始化拖拽控制器，挂 GridInputHandler 到 cell_container
             _dragController = new DragController(this);
+            var inputHandler = _cellContainer.gameObject.AddComponent(typeof(GridInputHandler)) as GridInputHandler;
+            inputHandler.Setup(_dragController);
+            // 确保 cell_container 有 Image 组件（透明）让 UGUI 射线能命中
+            var hitArea = _cellContainer.gameObject.GetComponent<UnityEngine.UI.Image>();
+            if (hitArea == null)
+            {
+                hitArea = _cellContainer.gameObject.AddComponent<UnityEngine.UI.Image>();
+                hitArea.color = new UnityEngine.Color(0, 0, 0, 0);
+                hitArea.raycastTarget = true;
+            }
 
             // 初始化游戏控制器
             _gameController = new WordSearchGameController(this);
 
-            // 显示开始面板
-            if (_viewRoot != null)
-            {
-                _startPanel = await CreateWidgetByPathAsync<StartPanelWidget>(
-                    _viewRoot, "ui_start_panel");
-                if (_startPanel == null)
-                {
-                    Log.Error("[WordSearchUI] Failed to load ui_start_panel prefab");
-                    return;
-                }
-                _startPanel.OnDifficultySelected = OnDifficultySelected;
-                Log.Info("[WordSearchUI] StartPanel ready, waiting for difficulty selection");
-            }
+            // 直接以 normal 难度开始游戏
+            _gameController.StartGame("normal");
+            Log.Info("[WordSearchUI] Game started directly with normal difficulty");
         }
 
         protected override void OnUpdate()
@@ -169,12 +168,6 @@ namespace GameLogic
         }
 
         // ── 回调 ──────────────────────────────────────────────
-
-        private void OnDifficultySelected(string difficulty)
-        {
-            Log.Info($"[WordSearchUI] Difficulty selected: {difficulty}");
-            _gameController?.StartGame(difficulty);
-        }
 
         private void OnWordFound(string word, List<CellPosition> cellPositions, bool isReverse)
         {
