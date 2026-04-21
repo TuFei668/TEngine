@@ -122,8 +122,21 @@ namespace WordSearchGenerator
     {
         // ========== 基本信息 ==========
         
-        public string puzzleId;                      // 谜题唯一ID
+        public string puzzleId;                      // 谜题唯一ID，如 level-primary-fruit-001
+        public int level_id;                         // 关卡id（同主题内第几关）
+        public string pack_id;                       // 包ID，等同于 stage
+        public string stage;                         // 大类型：primary / junior
+        public string theme;                         // 主题中文名，如 "水果"
+        public string theme_en;                      // 主题英文名，如 fruit
+
+        public int difficulty = 1;                   // 难度（默认 1）
+        public string type = "normal";               // 类型（默认 normal）
+        public int bonus_coin_multiplier = 1;        // 奖励金币倍率（默认 1）
+
         public string createTime;                    // 创建时间
+        public string generateTime;                  // 生成时间（每次生成都会刷新）
+        public string version = "1.0";               // 数据版本号
+
         public int dimension;                        // 谜题维度（正方形时 rows==cols==dimension）
         public int rows;                             // 网格行数
         public int cols;                             // 网格列数
@@ -141,11 +154,13 @@ namespace WordSearchGenerator
         public char[,] grid;                         // 拼图网格（运行时使用）
         
         public string gridString;                    // 网格字符串表示（用于JSON）
-        public List<string> words;                   // 单词列表
+        public List<string> words;                   // 单词列表（Excel Words 行）
         
         // ========== 答案信息 ==========
         
-        public List<WordPosition> wordPositions;     // 每个单词的位置信息
+        public List<WordPosition> wordPositions;     // 正常单词的位置信息（彩色）
+        public List<WordPosition> bonusWords;        // Bonus 词（灰色）
+        public List<WordPosition> hiddenWords;       // 隐藏词（深灰色）
         
         // ========== 显示信息 ==========
         
@@ -158,8 +173,12 @@ namespace WordSearchGenerator
         {
             puzzleId = Guid.NewGuid().ToString();
             createTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+            generateTime = createTime;
+            version = "1.0";
             words = new List<string>();
             wordPositions = new List<WordPosition>();
+            bonusWords = new List<WordPosition>();
+            hiddenWords = new List<WordPosition>();
         }
         
         // ========== 序列化方法 ==========
