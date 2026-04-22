@@ -8,16 +8,16 @@
     "difficulty": 1,
     "type": "normal",
     "bonus_coin_multiplier": 1,
-    "createTime": "2026-04-22 15:05:36",
-    "generateTime": "2026-04-22 15:05:36",
+    "createTime": "2026-04-22 17:44:32",
+    "generateTime": "2026-04-22 17:44:32",
     "version": "1.0",
     "dimension": 8,
-    "rows": 7,
-    "cols": 8,
-    "useHardDirections": true,
+    "rows": 8,
+    "cols": 7,
+    "useHardDirections": false,
     "sizeFactor": 4,
     "intersectBias": 0,
-    "gridString": "MANGOHNN|WOHSQEQL|PZBLVWDI|EBYEHNWG|EQRDIKRH|KFLKPZDT|OPEACHXC",
+    "gridString": "LIGHTSP|HQHDTHE|OEKQSOA|MYIEQWC|AVNZEHH|NLDZVPU|GMBMJZI|OLNEVER",
     "words": [
         "MANGO",
         "PEACH",
@@ -28,6 +28,138 @@
     "wordPositions": [
         {
             "word": "MANGO",
+            "startX": 0,
+            "startY": 3,
+            "directionX": 0,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 0,
+                    "y": 3
+                },
+                {
+                    "x": 0,
+                    "y": 4
+                },
+                {
+                    "x": 0,
+                    "y": 5
+                },
+                {
+                    "x": 0,
+                    "y": 6
+                },
+                {
+                    "x": 0,
+                    "y": 7
+                }
+            ],
+            "wordColor": {
+                "r": 1.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "PEACH",
+            "startX": 6,
+            "startY": 0,
+            "directionX": 0,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 6,
+                    "y": 0
+                },
+                {
+                    "x": 6,
+                    "y": 1
+                },
+                {
+                    "x": 6,
+                    "y": 2
+                },
+                {
+                    "x": 6,
+                    "y": 3
+                },
+                {
+                    "x": 6,
+                    "y": 4
+                }
+            ],
+            "wordColor": {
+                "r": 0.0,
+                "g": 0.5,
+                "b": 1.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "KEEP",
+            "startX": 2,
+            "startY": 2,
+            "directionX": 1,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 2,
+                    "y": 2
+                },
+                {
+                    "x": 3,
+                    "y": 3
+                },
+                {
+                    "x": 4,
+                    "y": 4
+                },
+                {
+                    "x": 5,
+                    "y": 5
+                }
+            ],
+            "wordColor": {
+                "r": 0.0,
+                "g": 0.800000011920929,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "KIND",
+            "startX": 2,
+            "startY": 2,
+            "directionX": 0,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 2,
+                    "y": 2
+                },
+                {
+                    "x": 2,
+                    "y": 3
+                },
+                {
+                    "x": 2,
+                    "y": 4
+                },
+                {
+                    "x": 2,
+                    "y": 5
+                }
+            ],
+            "wordColor": {
+                "r": 1.0,
+                "g": 0.6000000238418579,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "LIGHT",
             "startX": 0,
             "startY": 0,
             "directionX": 1,
@@ -52,138 +184,6 @@
                 {
                     "x": 4,
                     "y": 0
-                }
-            ],
-            "wordColor": {
-                "r": 1.0,
-                "g": 0.0,
-                "b": 0.0,
-                "a": 0.6000000238418579
-            }
-        },
-        {
-            "word": "PEACH",
-            "startX": 1,
-            "startY": 6,
-            "directionX": 1,
-            "directionY": 0,
-            "cellPositions": [
-                {
-                    "x": 1,
-                    "y": 6
-                },
-                {
-                    "x": 2,
-                    "y": 6
-                },
-                {
-                    "x": 3,
-                    "y": 6
-                },
-                {
-                    "x": 4,
-                    "y": 6
-                },
-                {
-                    "x": 5,
-                    "y": 6
-                }
-            ],
-            "wordColor": {
-                "r": 0.0,
-                "g": 0.5,
-                "b": 1.0,
-                "a": 0.6000000238418579
-            }
-        },
-        {
-            "word": "KEEP",
-            "startX": 0,
-            "startY": 5,
-            "directionX": 0,
-            "directionY": -1,
-            "cellPositions": [
-                {
-                    "x": 0,
-                    "y": 5
-                },
-                {
-                    "x": 0,
-                    "y": 4
-                },
-                {
-                    "x": 0,
-                    "y": 3
-                },
-                {
-                    "x": 0,
-                    "y": 2
-                }
-            ],
-            "wordColor": {
-                "r": 0.0,
-                "g": 0.800000011920929,
-                "b": 0.0,
-                "a": 0.6000000238418579
-            }
-        },
-        {
-            "word": "KIND",
-            "startX": 3,
-            "startY": 5,
-            "directionX": 1,
-            "directionY": -1,
-            "cellPositions": [
-                {
-                    "x": 3,
-                    "y": 5
-                },
-                {
-                    "x": 4,
-                    "y": 4
-                },
-                {
-                    "x": 5,
-                    "y": 3
-                },
-                {
-                    "x": 6,
-                    "y": 2
-                }
-            ],
-            "wordColor": {
-                "r": 1.0,
-                "g": 0.6000000238418579,
-                "b": 0.0,
-                "a": 0.6000000238418579
-            }
-        },
-        {
-            "word": "LIGHT",
-            "startX": 7,
-            "startY": 1,
-            "directionX": 0,
-            "directionY": 1,
-            "cellPositions": [
-                {
-                    "x": 7,
-                    "y": 1
-                },
-                {
-                    "x": 7,
-                    "y": 2
-                },
-                {
-                    "x": 7,
-                    "y": 3
-                },
-                {
-                    "x": 7,
-                    "y": 4
-                },
-                {
-                    "x": 7,
-                    "y": 5
                 }
             ],
             "wordColor": {
@@ -197,26 +197,26 @@
     "bonusWords": [
         {
             "word": "SHOW",
-            "startX": 3,
-            "startY": 1,
-            "directionX": -1,
-            "directionY": 0,
+            "startX": 5,
+            "startY": 0,
+            "directionX": 0,
+            "directionY": 1,
             "cellPositions": [
                 {
-                    "x": 3,
+                    "x": 5,
+                    "y": 0
+                },
+                {
+                    "x": 5,
                     "y": 1
                 },
                 {
-                    "x": 2,
-                    "y": 1
+                    "x": 5,
+                    "y": 2
                 },
                 {
-                    "x": 1,
-                    "y": 1
-                },
-                {
-                    "x": 0,
-                    "y": 1
+                    "x": 5,
+                    "y": 3
                 }
             ],
             "wordColor": {
@@ -230,30 +230,30 @@
     "hiddenWords": [
         {
             "word": "NEVER",
-            "startX": 6,
-            "startY": 0,
-            "directionX": -1,
-            "directionY": 1,
+            "startX": 2,
+            "startY": 7,
+            "directionX": 1,
+            "directionY": 0,
             "cellPositions": [
                 {
-                    "x": 6,
-                    "y": 0
-                },
-                {
-                    "x": 5,
-                    "y": 1
-                },
-                {
-                    "x": 4,
-                    "y": 2
+                    "x": 2,
+                    "y": 7
                 },
                 {
                     "x": 3,
-                    "y": 3
+                    "y": 7
                 },
                 {
-                    "x": 2,
-                    "y": 4
+                    "x": 4,
+                    "y": 7
+                },
+                {
+                    "x": 5,
+                    "y": 7
+                },
+                {
+                    "x": 6,
+                    "y": 7
                 }
             ],
             "wordColor": {
@@ -264,16 +264,25 @@
             }
         }
     ],
-    "puzzleText": "M A N G O H N N\nW O H S Q E Q L\nP Z B L V W D I\nE B Y E H N W G\nE Q R D I K R H\nK F L K P Z D T\nO P E A C H X C",
-    "answerKeyText": "M a n g o h N n\nw o h S q e q L\np z b l v w d i\ne b y e h n w g\ne q r d i k r h\nK f l K p z d t\no P e a c h x c",
-    "seed": -640885644,
-    "bestOfN": 5,
-    "layoutScore": 1.8678572177886963,
-    "difficultyAuto": 35.71428680419922,
-    "intersectionRatio": 0.0,
-    "directionDiversity": 0.75,
-    "reverseRatio": 0.4285714328289032,
-    "diagonalRatio": 0.2857142984867096,
-    "wordDensity": 0.5714285969734192,
-    "adjacentPairs": 25
+    "puzzleText": "L I G H T S P\nH Q H D T H E\nO E K Q S O A\nM Y I E Q W C\nA V N Z E H H\nN L D Z V P U\nG M B M J Z I\nO L N E V E R",
+    "answerKeyText": "L i g h t S P\nh q h d t h e\no e K q s o a\nM y i e q w c\na v n z e h h\nn l d z v p u\ng m b m j z i\no l N e v e r",
+    "seed": -511413486,
+    "bestOfN": 1,
+    "layoutScore": 1.571428656578064,
+    "difficultyAuto": 18.83928680419922,
+    "intersectionRatio": 0.1428571492433548,
+    "directionDiversity": 0.375,
+    "reverseRatio": 0.0,
+    "diagonalRatio": 0.1428571492433548,
+    "wordDensity": 0.5535714030265808,
+    "adjacentPairs": 28,
+    "placementSequence": [
+        "MANGO",
+        "PEACH",
+        "LIGHT",
+        "NEVER",
+        "KEEP",
+        "KIND",
+        "SHOW"
+    ]
 }

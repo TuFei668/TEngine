@@ -8,16 +8,16 @@
     "difficulty": 1,
     "type": "normal",
     "bonus_coin_multiplier": 1,
-    "createTime": "2026-04-22 17:15:31",
-    "generateTime": "2026-04-22 17:15:31",
+    "createTime": "2026-04-22 17:39:03",
+    "generateTime": "2026-04-22 17:39:03",
     "version": "1.0",
     "dimension": 9,
     "rows": 9,
-    "cols": 6,
+    "cols": 7,
     "useHardDirections": false,
     "sizeFactor": 4,
-    "intersectBias": -1,
-    "gridString": "TOMATO|ONIONL|SLACVE|PPRAVT|IEDBOT|NPRBFU|APWAJC|CENGIE|HRQEMM",
+    "intersectBias": 0,
+    "gridString": "LEUCBPQ|EOOASES|TYNBVPP|TPIBDPI|UGOACEN|CTNGKRA|ECXEOIC|MCINLJH|TOMATOC",
     "words": [
         "LETTUCE",
         "SPINACH",
@@ -27,38 +27,38 @@
     "wordPositions": [
         {
             "word": "LETTUCE",
-            "startX": 5,
-            "startY": 1,
+            "startX": 0,
+            "startY": 0,
             "directionX": 0,
             "directionY": 1,
             "cellPositions": [
                 {
-                    "x": 5,
+                    "x": 0,
+                    "y": 0
+                },
+                {
+                    "x": 0,
                     "y": 1
                 },
                 {
-                    "x": 5,
+                    "x": 0,
                     "y": 2
                 },
                 {
-                    "x": 5,
+                    "x": 0,
                     "y": 3
                 },
                 {
-                    "x": 5,
+                    "x": 0,
                     "y": 4
                 },
                 {
-                    "x": 5,
+                    "x": 0,
                     "y": 5
                 },
                 {
-                    "x": 5,
+                    "x": 0,
                     "y": 6
-                },
-                {
-                    "x": 5,
-                    "y": 7
                 }
             ],
             "wordColor": {
@@ -70,38 +70,38 @@
         },
         {
             "word": "SPINACH",
-            "startX": 0,
-            "startY": 2,
+            "startX": 6,
+            "startY": 1,
             "directionX": 0,
             "directionY": 1,
             "cellPositions": [
                 {
-                    "x": 0,
+                    "x": 6,
+                    "y": 1
+                },
+                {
+                    "x": 6,
                     "y": 2
                 },
                 {
-                    "x": 0,
+                    "x": 6,
                     "y": 3
                 },
                 {
-                    "x": 0,
+                    "x": 6,
                     "y": 4
                 },
                 {
-                    "x": 0,
+                    "x": 6,
                     "y": 5
                 },
                 {
-                    "x": 0,
+                    "x": 6,
                     "y": 6
                 },
                 {
-                    "x": 0,
+                    "x": 6,
                     "y": 7
-                },
-                {
-                    "x": 0,
-                    "y": 8
                 }
             ],
             "wordColor": {
@@ -114,33 +114,33 @@
         {
             "word": "TOMATO",
             "startX": 0,
-            "startY": 0,
+            "startY": 8,
             "directionX": 1,
             "directionY": 0,
             "cellPositions": [
                 {
                     "x": 0,
-                    "y": 0
+                    "y": 8
                 },
                 {
                     "x": 1,
-                    "y": 0
+                    "y": 8
                 },
                 {
                     "x": 2,
-                    "y": 0
+                    "y": 8
                 },
                 {
                     "x": 3,
-                    "y": 0
+                    "y": 8
                 },
                 {
                     "x": 4,
-                    "y": 0
+                    "y": 8
                 },
                 {
                     "x": 5,
-                    "y": 0
+                    "y": 8
                 }
             ],
             "wordColor": {
@@ -153,10 +153,18 @@
         {
             "word": "CABBAGE",
             "startX": 3,
-            "startY": 2,
+            "startY": 0,
             "directionX": 0,
             "directionY": 1,
             "cellPositions": [
+                {
+                    "x": 3,
+                    "y": 0
+                },
+                {
+                    "x": 3,
+                    "y": 1
+                },
                 {
                     "x": 3,
                     "y": 2
@@ -176,14 +184,6 @@
                 {
                     "x": 3,
                     "y": 6
-                },
-                {
-                    "x": 3,
-                    "y": 7
-                },
-                {
-                    "x": 3,
-                    "y": 8
                 }
             ],
             "wordColor": {
@@ -197,34 +197,34 @@
     "bonusWords": [
         {
             "word": "PEPPER",
-            "startX": 1,
-            "startY": 3,
+            "startX": 5,
+            "startY": 0,
             "directionX": 0,
             "directionY": 1,
             "cellPositions": [
                 {
-                    "x": 1,
+                    "x": 5,
+                    "y": 0
+                },
+                {
+                    "x": 5,
+                    "y": 1
+                },
+                {
+                    "x": 5,
+                    "y": 2
+                },
+                {
+                    "x": 5,
                     "y": 3
                 },
                 {
-                    "x": 1,
+                    "x": 5,
                     "y": 4
                 },
                 {
-                    "x": 1,
+                    "x": 5,
                     "y": 5
-                },
-                {
-                    "x": 1,
-                    "y": 6
-                },
-                {
-                    "x": 1,
-                    "y": 7
-                },
-                {
-                    "x": 1,
-                    "y": 8
                 }
             ],
             "wordColor": {
@@ -238,30 +238,30 @@
     "hiddenWords": [
         {
             "word": "ONION",
-            "startX": 0,
+            "startX": 2,
             "startY": 1,
-            "directionX": 1,
-            "directionY": 0,
+            "directionX": 0,
+            "directionY": 1,
             "cellPositions": [
-                {
-                    "x": 0,
-                    "y": 1
-                },
-                {
-                    "x": 1,
-                    "y": 1
-                },
                 {
                     "x": 2,
                     "y": 1
                 },
                 {
-                    "x": 3,
-                    "y": 1
+                    "x": 2,
+                    "y": 2
                 },
                 {
-                    "x": 4,
-                    "y": 1
+                    "x": 2,
+                    "y": 3
+                },
+                {
+                    "x": 2,
+                    "y": 4
+                },
+                {
+                    "x": 2,
+                    "y": 5
                 }
             ],
             "wordColor": {
@@ -272,18 +272,18 @@
             }
         }
     ],
-    "puzzleText": "T O M A T O\nO N I O N L\nS L A C V E\nP P R A V T\nI E D B O T\nN P R B F U\nA P W A J C\nC E N G I E\nH R Q E M M",
-    "answerKeyText": "T o m a t o\nO n i o n L\nS l a C v e\np P r a v t\ni e d b o t\nn p r b f u\na p w a j c\nc e n g i e\nh r q e m m",
-    "seed": 997850617,
+    "puzzleText": "L E U C B P Q\nE O O A S E S\nT Y N B V P P\nT P I B D P I\nU G O A C E N\nC T N G K R A\nE C X E O I C\nM C I N L J H\nT O M A T O C",
+    "answerKeyText": "L e u C b P q\ne o O a s e S\nt y n b v p p\nt p i b d p i\nu g o a c e n\nc t n g k r a\ne c x e o i c\nm c i n l j h\nT o m a t o c",
+    "seed": 614624012,
     "bestOfN": 5,
-    "layoutScore": 1.2462964057922364,
-    "difficultyAuto": 9.44444465637207,
+    "layoutScore": 1.1468254327774048,
+    "difficultyAuto": 10.952380180358887,
     "intersectionRatio": 0.0,
     "directionDiversity": 0.25,
     "reverseRatio": 0.0,
     "diagonalRatio": 0.0,
-    "wordDensity": 0.7037037014961243,
-    "adjacentPairs": 47,
+    "wordDensity": 0.60317462682724,
+    "adjacentPairs": 42,
     "placementSequence": [
         "LETTUCE",
         "SPINACH",

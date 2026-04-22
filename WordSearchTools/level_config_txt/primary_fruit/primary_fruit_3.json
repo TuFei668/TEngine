@@ -288,5 +288,16 @@
         }
     ],
     "puzzleText": "K B A N A N A U P\nS M S Y N H U R T\nS T U D Y W F K Y\nH O L D G P S N P\nP I N E A P P L E\nK S G P A P A Y A\nQ U Q G O W P U G\nW C B F I C M J N\nH H E U G N T C Y",
-    "answerKeyText": "k B a n a n a u p\ns m s y n H u r t\nS t u d y w f k y\nH o l d g p s n p\nP i n e a p p l e\nk S g P a p a y a\nq u q g o w p u g\nw c b f i c m j n\nh h e u g n t c y"
+    "answerKeyText": "k B a n a n a u p\ns m s y n H u r t\nS t u d y w f k y\nH o l d g p s n p\nP i n e a p p l e\nk S g P a p a y a\nq u q g o w p u g\nw c b f i c m j n\nh h e u g n t c y",
+    "seed": 0,
+    "bestOfN": 0,
+    "layoutScore": 0.0,
+    "difficultyAuto": 0.0,
+    "intersectionRatio": 0.0,
+    "directionDiversity": 0.0,
+    "reverseRatio": 0.0,
+    "diagonalRatio": 0.0,
+    "wordDensity": 0.0,
+    "adjacentPairs": 0,
+    "placementSequence": []
 }

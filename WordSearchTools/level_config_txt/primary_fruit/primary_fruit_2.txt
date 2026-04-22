@@ -1,8 +1,8 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 15:05:36
+Created: 2026-04-22 17:44:32
 Puzzle ID: level-primary-fruit-002
-Size: 8x7
-Hard Mode: True
+Size: 7x8
+Hard Mode: False
 Size Factor: 4
 Intersect Bias: Random
 
@@ -14,26 +14,28 @@ KIND
 LIGHT
 
 --- Puzzle ---
-M A N G O H N N
-W O H S Q E Q L
-P Z B L V W D I
-E B Y E H N W G
-E Q R D I K R H
-K F L K P Z D T
-O P E A C H X C
+L I G H T S P
+H Q H D T H E
+O E K Q S O A
+M Y I E Q W C
+A V N Z E H H
+N L D Z V P U
+G M B M J Z I
+O L N E V E R
 
 --- Answer Key ---
-M a n g o h N n
-w o h S q e q L
-p z b l v w d i
-e b y e h n w g
-e q r d i k r h
-K f l K p z d t
-o P e a c h x c
+L i g h t S P
+h q h d t h e
+o e K q s o a
+M y i e q w c
+a v n z e h h
+n l d z v p u
+g m b m j z i
+o l N e v e r
 
 --- Word Positions ---
-MANGO: Start(0,0) → Right
-PEACH: Start(1,6) → Right
-KEEP: Start(0,5) ↑ Up
-KIND: Start(3,5) ↗ Up-Right
-LIGHT: Start(7,1) ↓ Down
+MANGO: Start(0,3) ↓ Down
+PEACH: Start(6,0) ↓ Down
+KEEP: Start(2,2) ↘ Down-Right
+KIND: Start(2,2) ↓ Down
+LIGHT: Start(0,0) → Right

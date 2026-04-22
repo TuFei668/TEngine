@@ -1,10 +1,10 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 17:15:31
+Created: 2026-04-22 17:39:03
 Puzzle ID: level-junior_high-vegetable-002
-Size: 6x9
+Size: 7x9
 Hard Mode: False
 Size Factor: 4
-Intersect Bias: Avoid
+Intersect Bias: Random
 
 --- Words to Find ---
 LETTUCE
@@ -13,29 +13,29 @@ TOMATO
 CABBAGE
 
 --- Puzzle ---
-T O M A T O
-O N I O N L
-S L A C V E
-P P R A V T
-I E D B O T
-N P R B F U
-A P W A J C
-C E N G I E
-H R Q E M M
+L E U C B P Q
+E O O A S E S
+T Y N B V P P
+T P I B D P I
+U G O A C E N
+C T N G K R A
+E C X E O I C
+M C I N L J H
+T O M A T O C
 
 --- Answer Key ---
-T o m a t o
-O n i o n L
-S l a C v e
-p P r a v t
-i e d b o t
-n p r b f u
-a p w a j c
-c e n g i e
-h r q e m m
+L e u C b P q
+e o O a s e S
+t y n b v p p
+t p i b d p i
+u g o a c e n
+c t n g k r a
+e c x e o i c
+m c i n l j h
+T o m a t o c
 
 --- Word Positions ---
-LETTUCE: Start(5,1) ↓ Down
-SPINACH: Start(0,2) ↓ Down
-TOMATO: Start(0,0) → Right
-CABBAGE: Start(3,2) ↓ Down
+LETTUCE: Start(0,0) ↓ Down
+SPINACH: Start(6,1) ↓ Down
+TOMATO: Start(0,8) → Right
+CABBAGE: Start(3,0) ↓ Down

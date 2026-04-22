@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets/WordSearchGenerator/Scripts/Utils/Json/Editor/JSONChecker.cs" />
+    <Compile Include="Assets/Editor/LevelConfigBinarySync.cs" />
     <Compile Include="Assets/WordSearchGenerator/Editor/EncryptTools/common_json_encrypt_editor.cs" />
     <Compile Include="Assets/WordSearchGenerator/Editor/UIBuilder.cs" />
   </ItemGroup>
@@ -463,6 +464,14 @@
     </Reference>
     <Reference Include="Unity.VisualScripting.TextureAssets">
       <HintPath>Library/PackageCache/com.unity.visualscripting@1.9.4/Editor/VisualScripting.Core/EditorAssetResources/Unity.VisualScripting.TextureAssets.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Excel">
+      <HintPath>Assets/Plugins/excel_dll/Excel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>Assets/Plugins/excel_dll/ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="nunit.framework">
