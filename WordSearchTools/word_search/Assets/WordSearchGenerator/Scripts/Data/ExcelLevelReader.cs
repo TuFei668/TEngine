@@ -4,10 +4,12 @@
  * 使用 Excel.dll (ExcelDataReader) 读取 Assets/Excel/*.xlsx 中的关卡配置。
  *
  * 约定格式（每关 4 行为一个分块）：
- *   A列=#XxxSchool  | B=themeEn | C=themeZh | D=levelId
+ *   A列=#大类型名   | B=themeEn | C=themeZh | D=levelId
  *   A列=Words       | B..N = 本关正确答案词
  *   A列=HiddenWords | B..N = 隐藏词
  *   A列=BonusWords  | B..N = Bonus 词
+ *
+ * #后紧跟大类型原始字段名（如 #Primary、#Junior），packId = 大类型名.ToLower()，不再做映射。
  *
  * 该工具仅在 Editor / Standalone 使用。
  */
@@ -25,25 +27,6 @@ namespace WordSearchGenerator
     {
         // 单词允许的字符：只保留字母；其余全部过滤（去空格、去标点）
         private static readonly Regex s_nonLetter = new Regex("[^A-Za-z]+", RegexOptions.Compiled);
-
-        // 大类型简称映射
-        private static readonly Dictionary<string, string> s_stageToPackId =
-            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
-            {
-                {"PrimarySchool", "primary"},
-                {"JuniorSchool",  "junior"},
-                {"HighSchool",    "high"},  // 预留
-            };
-
-        /// <summary>
-        /// 根据 stage 原名返回 pack_id（小写简称）。未识别时返回 stage.ToLower()。
-        /// </summary>
-        public static string StageToPackId(string stage)
-        {
-            if (string.IsNullOrEmpty(stage)) return "";
-            if (s_stageToPackId.TryGetValue(stage, out string packId)) return packId;
-            return stage.ToLowerInvariant();
-        }
 
         /// <summary>
         /// 扫描目录下所有 xlsx，返回按 stage 分组的 PackConfig 列表。
@@ -81,7 +64,7 @@ namespace WordSearchGenerator
         }
 
         /// <summary>
-        /// 读取单个 Excel 文件（xlsx），可能包含多个 #XxxSchool 分块 → 多个 PackConfig。
+        /// 读取单个 Excel 文件（xlsx），可能包含多个 #大类型 分块 → 多个 PackConfig。
         /// </summary>
         public static List<PackConfig> ReadExcelFile(string filePath)
         {
@@ -96,8 +79,10 @@ namespace WordSearchGenerator
                     if (dataSet == null || dataSet.Tables.Count == 0)
                         return new List<PackConfig>();
 
-                    // 只解析第一个 sheet
-                    var table = dataSet.Tables[0];
+                    // 遍历所有 sheet，每个 sheet 都可以包含独立的关卡数据
+                    for (int t = 0; t < dataSet.Tables.Count; t++)
+                    {
+                    var table = dataSet.Tables[t];
                     int rowCount = table.Rows.Count;
 
                     LevelConfig current = null; // 当前正在填充的关卡
@@ -109,7 +94,7 @@ namespace WordSearchGenerator
 
                         if (colA.StartsWith("#"))
                         {
-                            // 新关卡起始行：#PrimarySchool | fruit | 水果 | 1
+                            // 新关卡起始行：#Primary | fruit | 水果 | 1
                             string stageRaw = colA.Substring(1).Trim();
                             string themeEn  = GetCell(table, r, 1).Trim();
                             string themeZh  = GetCell(table, r, 2).Trim();
@@ -117,19 +102,20 @@ namespace WordSearchGenerator
 
                             if (string.IsNullOrEmpty(stageRaw) || string.IsNullOrEmpty(themeEn))
                             {
-                                Debug.LogWarning($"[ExcelLevelReader] 行{r + 1} #标签行字段不全：stage={stageRaw} themeEn={themeEn}");
+                                Debug.LogWarning($"[ExcelLevelReader] Sheet{t} 行{r + 1} #标签行字段不全：stage={stageRaw} themeEn={themeEn}");
                                 current = null;
                                 continue;
                             }
 
                             if (!int.TryParse(levelStr, out int levelId) || levelId <= 0)
                             {
-                                Debug.LogWarning($"[ExcelLevelReader] 行{r + 1} levelId 解析失败: '{levelStr}'");
+                                Debug.LogWarning($"[ExcelLevelReader] Sheet{t} 行{r + 1} levelId 解析失败: '{levelStr}'");
                                 current = null;
                                 continue;
                             }
 
-                            string packId = StageToPackId(stageRaw);
+                            // packId = 大类型名小写，直接来自 Excel 标签，不再做映射
+                            string packId = stageRaw.ToLowerInvariant();
 
                             if (!packs.TryGetValue(stageRaw, out PackConfig pack))
                             {
@@ -179,6 +165,7 @@ namespace WordSearchGenerator
                             }
                         }
                     }
+                    } // end foreach sheet
                 }
                 finally
                 {

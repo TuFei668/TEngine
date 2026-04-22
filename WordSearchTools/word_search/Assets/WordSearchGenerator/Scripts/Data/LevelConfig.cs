@@ -13,8 +13,8 @@ namespace WordSearchGenerator
     /// </summary>
     public class LevelConfig
     {
-        public string stage;             // 大类型：PrimarySchool / JuniorSchool（原样）
-        public string packId;            // 小写简称：primary / junior
+        public string stage;             // 大类型：Excel 中 # 后的原始字段名（如 Primary / Junior）
+        public string packId;            // 大类型小写：stage.ToLower()（如 primary / junior）
         public string themeEn;           // 英文主题：fruit
         public string themeZh;           // 中文主题：水果
         public int levelId;              // 关卡id：1 / 2 / 3
@@ -41,8 +41,8 @@ namespace WordSearchGenerator
     /// </summary>
     public class PackConfig
     {
-        public string stage;       // PrimarySchool
-        public string packId;      // primary
+        public string stage;       // Excel # 后的原始大类型名（如 Primary）
+        public string packId;      // stage.ToLower()（如 primary）
         public string sourceFile;  // Excel 文件绝对路径
 
         // themeEn -> (levelId -> LevelConfig)

@@ -1,0 +1,49 @@
+﻿=== Word Search Puzzle ===
+Created: 2026-04-22 11:59:13
+Puzzle ID: level-junior_high-fruit-003
+Size: 12x12
+Hard Mode: False
+Size Factor: 4
+Intersect Bias: Avoid
+
+--- Words to Find ---
+HOLD
+HURT
+PINEAPPLE
+BANANA
+PAPAYA
+
+--- Puzzle ---
+V B X N G I O N F G S G
+P B A N A N A O G B P G
+W F Q Q P K P N N C I R
+S Y C A U A F C R S N P
+O M J M P F N X U Q E L
+B D L A E B N C M I A U
+O M Y B V W H S V V P I
+C A M D T W H T R F P H
+D R C R H I C U N D L L
+P R U O G E Y D C P E Q
+A H L O D H P Y A J I Q
+D D Z S Z Y O Q A E S U
+
+--- Answer Key ---
+v b x n g i o n f g s g
+p B a n a n a o g b P g
+w f q q p k P n n c i r
+s y c a u a f c r S n p
+o m j m p f n x u q e l
+b d l a e b n c m i a u
+o m y b v w h S v v p i
+c a m d t w h t r f p h
+d r c r H i c u n d l l
+p r u o g e y d c p e q
+a H l o d h p y a j i q
+d d z s z y o q a e s u
+
+--- Word Positions ---
+HOLD: Start(4,8) ↙ Down-Left
+HURT: Start(1,10) ↗ Up-Right
+PINEAPPLE: Start(10,1) ↓ Down
+BANANA: Start(1,1) → Right
+PAPAYA: Start(6,2) ↙ Down-Left

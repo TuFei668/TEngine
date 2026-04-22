@@ -140,7 +140,13 @@ namespace WordSearchGenerator.UI
                 gridSizeDropdown.ClearOptions();
                 gridSizeDropdown.AddOptions(new System.Collections.Generic.List<string>
                 {
-                    "自动", "5×5", "6×6", "8×8", "9×9", "7×7", "10×10"
+                    "自动",
+                    "5×5", "5×6", "5×7",
+                    "6×6", "6×7", "6×8", "6×9",
+                    "7×7", "7×8", "7×9", "7×10",
+                    "8×8", "8×9", "8×10", "8×11", "8×12",
+                    "9×9", "9×10", "9×11", "9×12",
+                    "10×10"
                 });
                 gridSizeDropdown.value = 0;
             }
@@ -535,12 +541,27 @@ namespace WordSearchGenerator.UI
             // 选项格式为 宽×高，即 cols×rows
             switch (gridSizeDropdown.value)
             {
-                case 1: return (5, 5);   // 5×5
-                case 2: return (6, 6);   // 6×6 → rows=6, cols=6
-                case 3: return (8, 8);   // 8×8 → rows=8, cols=8
-                case 4: return (9, 9);   // 9×9 → rows=9, cols=9
-                case 5: return (7, 7);  // 7×7 → rows=7, cols=7
-                case 6: return (10, 10);  // 10×10 → rows=10, cols=10
+                case 1:  return (5, 5);
+                case 2:  return (5, 6);
+                case 3:  return (5, 7);
+                case 4:  return (6, 6);
+                case 5:  return (6, 7);
+                case 6:  return (6, 8);
+                case 7:  return (6, 9);
+                case 8:  return (7, 7);
+                case 9:  return (7, 8);
+                case 10: return (7, 9);
+                case 11: return (7, 10);
+                case 12: return (8, 8);
+                case 13: return (8, 9);
+                case 14: return (8, 10);
+                case 15: return (8, 11);
+                case 16: return (8, 12);
+                case 17: return (9, 9);
+                case 18: return (9, 10);
+                case 19: return (9, 11);
+                case 20: return (9, 12);
+                case 21: return (10, 10);
                 default: return (null, null); // 自动
             }
         }

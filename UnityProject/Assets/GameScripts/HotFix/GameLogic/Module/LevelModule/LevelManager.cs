@@ -1,4 +1,3 @@
-using System.Linq;
 using Cysharp.Threading.Tasks;
 using TEngine;
 using UnityEngine;
@@ -6,7 +5,7 @@ using UnityEngine;
 namespace GameLogic
 {
     /// <summary>
-    /// 关卡管理器，负责进度管理、display_level 计算、关卡 JSON 加载。
+    /// 关卡管理器，负责进度管理、display_level 计算、关卡数据加载（加密 .bytes）。
     /// </summary>
     public class LevelManager : Singleton<LevelManager>
     {
@@ -21,26 +20,17 @@ namespace GameLogic
 
         // ── 进度管理 ──────────────────────────────────────────
 
-        /// <summary>
-        /// 读取玩家进度，首次进入返回 null。
-        /// </summary>
         public PlayerProgress LoadProgress()
         {
             _progress = PlayerProgress.Load();
             return _progress;
         }
 
-        /// <summary>
-        /// 保存当前进度。
-        /// </summary>
         public void SaveProgress()
         {
             _progress?.Save();
         }
 
-        /// <summary>
-        /// 初始化新玩家进度（选完学段后调用）。
-        /// </summary>
         public void InitProgress(string stageId)
         {
             var stage = StageConfigMgr.Instance.GetStageConfig(stageId);
@@ -61,9 +51,6 @@ namespace GameLogic
 
         // ── display_level 计算 ────────────────────────────────
 
-        /// <summary>
-        /// 计算用于 UI 显示的关卡号（不持久化）。
-        /// </summary>
         public int CalcDisplayLevel()
         {
             if (_progress == null) return 1;
@@ -83,9 +70,6 @@ namespace GameLogic
 
         // ── 通关推进 ──────────────────────────────────────────
 
-        /// <summary>
-        /// 通关后推进进度，处理包内推进和跨包跳转。
-        /// </summary>
         public void AdvanceLevel()
         {
             if (_progress == null) return;
@@ -118,10 +102,12 @@ namespace GameLogic
             GameEvent.Get<IOnLevelAdvanced>().OnLevelAdvanced();
         }
 
-        // ── 关卡 JSON 加载 ────────────────────────────────────
+        // ── 关卡数据加载（加密 .bytes）────────────────────────
 
         /// <summary>
-        /// 异步加载关卡 JSON，路径：levels/{packId}/{packId}_{levelInPack}
+        /// 异步加载关卡数据。
+        /// 自动识别加密 .bytes（WSGB）和明文 .json 两种格式。
+        /// 资源路径：levels/{packId}/{packId}_{levelInPack}
         /// </summary>
         public async UniTask<LevelData> LoadLevelDataAsync(string packId, int levelInPack)
         {
@@ -129,12 +115,37 @@ namespace GameLogic
             var textAsset = await GameModule.Resource.LoadAssetAsync<TextAsset>(assetName);
             if (textAsset == null)
             {
-                Log.Error($"[LevelManager] Level JSON not found: {assetName}");
+                Log.Error($"[LevelManager] Level asset not found: {assetName}");
                 return null;
             }
 
-            var levelData = JsonUtility.FromJson<LevelData>(textAsset.text);
-            GameModule.Resource.UnloadAsset(textAsset);
+            LevelData levelData = null;
+            try
+            {
+                string plainJson;
+                if (LevelEncryptTool.IsEncryptedFormat(textAsset.bytes))
+                {
+                    plainJson = LevelEncryptTool.DecryptBytes(textAsset.bytes);
+                    if (string.IsNullOrEmpty(plainJson))
+                    {
+                        Log.Error($"[LevelManager] 解密失败: {assetName}");
+                        return null;
+                    }
+                }
+                else
+                {
+                    // 明文 JSON（兼容旧 .json 格式）
+                    plainJson = textAsset.text;
+                }
+
+                levelData = JsonUtility.FromJson<LevelData>(plainJson);
+                levelData?.PostDeserialize();
+            }
+            finally
+            {
+                GameModule.Resource.UnloadAsset(textAsset);
+            }
+
             return levelData;
         }
 

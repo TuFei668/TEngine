@@ -189,8 +189,8 @@ namespace GameLogic
                     cell.SetState(CellState.Matched);
                 }
 
-                GameEvent.Get<IWordSearchEvent>().OnHiddenWordFound(
-                    hiddenResult.word, hiddenResult.reward_coins);
+                // reward_coins 后续从单词配置表获取，暂传 0
+                GameEvent.Get<IWordSearchEvent>().OnHiddenWordFound(hiddenResult.word, 0);
 
                 ClearSelection();
                 return;

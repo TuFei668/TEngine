@@ -1,14 +1,17 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace GameLogic
 {
     /// <summary>
-    /// 关卡 JSON 数据结构，对应 levels/{pack_id}/{pack_id}_{level}.json
+    /// 关卡 JSON 数据结构，对应加密 .bytes 解密后的 JSON。
+    /// 字段与生成器导出的 json 一一对应。
     /// </summary>
-    [System.Serializable]
+    [Serializable]
     public class LevelData
     {
+        // ── 基本信息 ──────────────────────────────────────────
         public string puzzleId;
         public int level_id;
         public string pack_id;
@@ -19,20 +22,45 @@ namespace GameLogic
         public string type;
         public int bonus_coin_multiplier;
 
+        public string createTime;
+        public string generateTime;
+        public string version;
+
         public int dimension;
         public int rows;
         public int cols;
+
+        // ── 配置信息 ──────────────────────────────────────────
         public bool useHardDirections;
+        public int sizeFactor;
+        public int intersectBias;
+
+        // ── 谜题内容 ──────────────────────────────────────────
         public string gridString;
-
         public List<string> words;
-        public List<WordPosition> wordPositions;
-        public List<WordDetail> wordDetails;
-        public List<HiddenWord> hiddenWords;
 
-        private string[] _gridLines;
+        // ── 答案信息 ──────────────────────────────────────────
+        public List<WordPosition> wordPositions;
+        public List<WordPosition> bonusWords;
+        public List<WordPosition> hiddenWords;
+
+        // ── 展示文本 ──────────────────────────────────────────
+        public string puzzleText;
+        public string answerKeyText;
+
+        // ── 运行时缓存（不序列化）─────────────────────────────
+        [NonSerialized] private string[] _gridLines;
 
         private string[] GridLines => _gridLines ??= gridString.Split('|');
+
+        /// <summary>
+        /// 反序列化后调用，确保 rows/cols 有值。
+        /// </summary>
+        public void PostDeserialize()
+        {
+            if (rows == 0) rows = dimension;
+            if (cols == 0) cols = dimension;
+        }
 
         /// <summary>
         /// 获取指定位置的字母。越界返回 '\0'。
@@ -61,7 +89,7 @@ namespace GameLogic
         }
     }
 
-    [System.Serializable]
+    [Serializable]
     public class WordPosition
     {
         public string word;
@@ -73,7 +101,7 @@ namespace GameLogic
         public WordColor wordColor;
     }
 
-    [System.Serializable]
+    [Serializable]
     public class CellPosition
     {
         public int x;
@@ -91,7 +119,7 @@ namespace GameLogic
         public override string ToString() => $"({x},{y})";
     }
 
-    [System.Serializable]
+    [Serializable]
     public class WordColor
     {
         public float r;
@@ -100,35 +128,5 @@ namespace GameLogic
         public float a;
 
         public Color ToUnityColor() => new Color(r, g, b, a);
-    }
-
-    [System.Serializable]
-    public class WordDetail
-    {
-        public string word;
-        public string translation;
-        public string phonetic;
-        public string example;
-        public string audio;
-        public bool is_new;
-        public int first_appear_level;
-        public int repeat_count;
-        public int gap_since_last;
-    }
-
-    [System.Serializable]
-    public class HiddenWord
-    {
-        public string word;
-        public string translation;
-        public string phonetic;
-        public string example;
-        public string audio;
-        public int startX;
-        public int startY;
-        public int directionX;
-        public int directionY;
-        public List<CellPosition> cellPositions;
-        public int reward_coins;
     }
 }

@@ -1,0 +1,55 @@
+﻿=== Word Search Puzzle ===
+Created: 2026-04-22 11:58:41
+Puzzle ID: level-junior_high-vegetable-001
+Size: 14x14
+Hard Mode: False
+Size Factor: 4
+Intersect Bias: Avoid
+
+--- Words to Find ---
+CARROT
+POTATO
+TOMATO
+CABBAGE
+SPINACH
+LETTUCE
+
+--- Puzzle ---
+C C S Z N O N I O N H C K J
+B A N S M U A T O M A T O T
+Q C X C H V S L L B E Y O T
+C E Q Q O J E P L F G S O H
+A C E A D T A C I C Y R T F
+B Q V R T V O S G N R N S P
+B O O U H K T M D A A E Z E
+A U C Z T T V B C S Q C G P
+G E K N Z Z X P X G C K H P
+E C H W T Q B O Q W B S B E
+P A P P O Q Y T P R C U L R
+Q S I V E V I A X P M V K H
+J O F R A S I T D C U L M M
+T H L W K M B O E D G D Q V
+
+--- Answer Key ---
+c c s z n O n i o n h c k j
+b a n s m u a T o m a t o t
+q c x c h v S L l b e y o t
+C e q q o j e p l f g s o h
+a c e a d t a c i c y r t f
+b q v r t v o s g n r n s P
+b o o u h k t m d a a e z e
+a u c z t t v b C s q c g p
+g e k n z z x P x g c k h p
+e c h w t q b o q w b s b e
+p a p p o q y t p r c u l r
+q s i v e v i a x p m v k h
+j o f r a s i t d c u l m m
+t h l w k m b o e d g d q v
+
+--- Word Positions ---
+CARROT: Start(8,7) ↗ Up-Right
+POTATO: Start(7,8) ↓ Down
+TOMATO: Start(7,1) → Right
+CABBAGE: Start(0,3) ↓ Down
+SPINACH: Start(6,2) ↘ Down-Right
+LETTUCE: Start(7,2) ↙ Down-Left

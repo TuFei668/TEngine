@@ -28,7 +28,7 @@ public class ConfigSystem
             return _tables;
         }
     }
-
+    
     private IResourceModule _resourceModule;
 
     /// <summary>

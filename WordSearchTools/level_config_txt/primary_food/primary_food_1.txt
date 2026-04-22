@@ -1,7 +1,7 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 10:55:16
+Created: 2026-04-22 11:58:27
 Puzzle ID: level-primary-food-001
-Size: 9x9
+Size: 12x12
 Hard Mode: False
 Size Factor: 4
 Intersect Bias: Avoid
@@ -15,31 +15,37 @@ TURN
 SHOW
 
 --- Puzzle ---
-L W Y E A R S H X
-Z O F X F S A I P
-T R A D D U H H I
-H L S T I L L O Z
-I D W H Y Q D R W
-N S T U D Y F K T
-G M D W S U C H X
-S D H G C L N L F
-T U R N T T X D J
+Y B Z G L L W Q K U E X
+O K O Q E O R N W Z B S
+S Y X W H H D K J H J S
+K T E S I L J R H H U P
+W S Q A R P N B Z C N V
+Q R T O R R P Z H L G V
+S T W U G S K S P E C S
+J T K T D C F S I Z Y W
+C Y I A X Y H T U R N H
+A F E L D S J U M B T B
+S H X T L D N V B R Q N
+D X O T H I N G S I E Z
 
 --- Answer Key ---
-l W Y e a r s h x
-z o f x f S a i p
-T r A d d u h h i
-h l S t i l l o z
-i d w h y q d r w
-n S t u d y f k t
-g m d w S u c h x
-s d h g c l n l f
-T u r n t t x d j
+y b z g l l w q k u e x
+o k o q e o r n w z b s
+s Y x w h h d k j h j S
+k t e S i l j r h h u p
+w S q a r p n b z c n v
+q r t o r r p z h l g v
+S t W u g s k s p e c s
+j t k t d c f s i z y w
+c y i A x y h T u r n h
+a f e l d s j u m b t b
+s h x t l d n v b r q n
+d x o T h i n g s i e z
 
 --- Word Positions ---
-STILL: Start(2,3) → Right
-STUDY: Start(1,5) → Right
-SUCH: Start(4,6) → Right
-THINGS: Start(0,2) ↓ Down
-TURN: Start(0,8) → Right
-SHOW: Start(5,1) ↘ Down-Right
+STILL: Start(0,6) ↘ Down-Right
+STUDY: Start(1,4) ↘ Down-Right
+SUCH: Start(11,2) ↙ Down-Left
+THINGS: Start(3,11) → Right
+TURN: Start(7,8) → Right
+SHOW: Start(3,3) ↗ Up-Right

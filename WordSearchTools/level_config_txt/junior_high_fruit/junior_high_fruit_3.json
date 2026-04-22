@@ -1,0 +1,292 @@
+﻿{
+    "puzzleId": "level-junior_high-fruit-003",
+    "level_id": 3,
+    "pack_id": "junior_high",
+    "stage": "junior_high",
+    "theme": "水果",
+    "theme_en": "fruit",
+    "difficulty": 1,
+    "type": "normal",
+    "bonus_coin_multiplier": 1,
+    "createTime": "2026-04-22 11:59:13",
+    "generateTime": "2026-04-22 11:59:13",
+    "version": "1.0",
+    "dimension": 12,
+    "rows": 12,
+    "cols": 12,
+    "useHardDirections": false,
+    "sizeFactor": 4,
+    "intersectBias": -1,
+    "gridString": "VBXNGIONFGSG|PBANANAOGBPG|WFQQPKPNNCIR|SYCAUAFCRSNP|OMJMPFNXUQEL|BDLAEBNCMIAU|OMYBVWHSVVPI|CAMDTWHTRFPH|DRCRHICUNDLL|PRUOGEYDCPEQ|AHLODHPYAJIQ|DDZSZYOQAESU",
+    "words": [
+        "HOLD",
+        "HURT",
+        "PINEAPPLE",
+        "BANANA",
+        "PAPAYA"
+    ],
+    "wordPositions": [
+        {
+            "word": "HOLD",
+            "startX": 4,
+            "startY": 8,
+            "directionX": -1,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 4,
+                    "y": 8
+                },
+                {
+                    "x": 3,
+                    "y": 9
+                },
+                {
+                    "x": 2,
+                    "y": 10
+                },
+                {
+                    "x": 1,
+                    "y": 11
+                }
+            ],
+            "wordColor": {
+                "r": 1.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "HURT",
+            "startX": 1,
+            "startY": 10,
+            "directionX": 1,
+            "directionY": -1,
+            "cellPositions": [
+                {
+                    "x": 1,
+                    "y": 10
+                },
+                {
+                    "x": 2,
+                    "y": 9
+                },
+                {
+                    "x": 3,
+                    "y": 8
+                },
+                {
+                    "x": 4,
+                    "y": 7
+                }
+            ],
+            "wordColor": {
+                "r": 0.0,
+                "g": 0.5,
+                "b": 1.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "PINEAPPLE",
+            "startX": 10,
+            "startY": 1,
+            "directionX": 0,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 10,
+                    "y": 1
+                },
+                {
+                    "x": 10,
+                    "y": 2
+                },
+                {
+                    "x": 10,
+                    "y": 3
+                },
+                {
+                    "x": 10,
+                    "y": 4
+                },
+                {
+                    "x": 10,
+                    "y": 5
+                },
+                {
+                    "x": 10,
+                    "y": 6
+                },
+                {
+                    "x": 10,
+                    "y": 7
+                },
+                {
+                    "x": 10,
+                    "y": 8
+                },
+                {
+                    "x": 10,
+                    "y": 9
+                }
+            ],
+            "wordColor": {
+                "r": 0.0,
+                "g": 0.800000011920929,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "BANANA",
+            "startX": 1,
+            "startY": 1,
+            "directionX": 1,
+            "directionY": 0,
+            "cellPositions": [
+                {
+                    "x": 1,
+                    "y": 1
+                },
+                {
+                    "x": 2,
+                    "y": 1
+                },
+                {
+                    "x": 3,
+                    "y": 1
+                },
+                {
+                    "x": 4,
+                    "y": 1
+                },
+                {
+                    "x": 5,
+                    "y": 1
+                },
+                {
+                    "x": 6,
+                    "y": 1
+                }
+            ],
+            "wordColor": {
+                "r": 1.0,
+                "g": 0.6000000238418579,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "PAPAYA",
+            "startX": 6,
+            "startY": 2,
+            "directionX": -1,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 6,
+                    "y": 2
+                },
+                {
+                    "x": 5,
+                    "y": 3
+                },
+                {
+                    "x": 4,
+                    "y": 4
+                },
+                {
+                    "x": 3,
+                    "y": 5
+                },
+                {
+                    "x": 2,
+                    "y": 6
+                },
+                {
+                    "x": 1,
+                    "y": 7
+                }
+            ],
+            "wordColor": {
+                "r": 0.6000000238418579,
+                "g": 0.0,
+                "b": 1.0,
+                "a": 0.6000000238418579
+            }
+        }
+    ],
+    "bonusWords": [],
+    "hiddenWords": [
+        {
+            "word": "STUDY",
+            "startX": 7,
+            "startY": 6,
+            "directionX": 0,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 7,
+                    "y": 6
+                },
+                {
+                    "x": 7,
+                    "y": 7
+                },
+                {
+                    "x": 7,
+                    "y": 8
+                },
+                {
+                    "x": 7,
+                    "y": 9
+                },
+                {
+                    "x": 7,
+                    "y": 10
+                }
+            ],
+            "wordColor": {
+                "r": 0.25,
+                "g": 0.25,
+                "b": 0.25,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "SUCH",
+            "startX": 9,
+            "startY": 3,
+            "directionX": -1,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 9,
+                    "y": 3
+                },
+                {
+                    "x": 8,
+                    "y": 4
+                },
+                {
+                    "x": 7,
+                    "y": 5
+                },
+                {
+                    "x": 6,
+                    "y": 6
+                }
+            ],
+            "wordColor": {
+                "r": 0.25,
+                "g": 0.25,
+                "b": 0.25,
+                "a": 0.6000000238418579
+            }
+        }
+    ],
+    "puzzleText": "V B X N G I O N F G S G\nP B A N A N A O G B P G\nW F Q Q P K P N N C I R\nS Y C A U A F C R S N P\nO M J M P F N X U Q E L\nB D L A E B N C M I A U\nO M Y B V W H S V V P I\nC A M D T W H T R F P H\nD R C R H I C U N D L L\nP R U O G E Y D C P E Q\nA H L O D H P Y A J I Q\nD D Z S Z Y O Q A E S U",
+    "answerKeyText": "v b x n g i o n f g s g\np B a n a n a o g b P g\nw f q q p k P n n c i r\ns y c a u a f c r S n p\no m j m p f n x u q e l\nb d l a e b n c m i a u\no m y b v w h S v v p i\nc a m d t w h t r f p h\nd r c r H i c u n d l l\np r u o g e y d c p e q\na H l o d h p y a j i q\nd d z s z y o q a e s u"
+}

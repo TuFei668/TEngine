@@ -1,0 +1,47 @@
+﻿=== Word Search Puzzle ===
+Created: 2026-04-22 11:59:10
+Puzzle ID: level-junior_high-fruit-002
+Size: 11x11
+Hard Mode: False
+Size Factor: 4
+Intersect Bias: Avoid
+
+--- Words to Find ---
+MANGO
+PEACH
+KEEP
+KIND
+LIGHT
+
+--- Puzzle ---
+B I Q F V B L G S I N
+Z C L V W P I R P G G
+I U M P P V G K I N D
+F O C E A D H Q C X N
+U V A X X M T M O H H
+H C R M U Z A F E G X
+H J N X V H K N C I M
+H E E D O E A N G J M
+N S V Z E H L P B O L
+P D E P H Z S M T X T
+L U R T S H O W Z G C
+
+--- Answer Key ---
+b i q f v b L g s i n
+z c l v w p i r p g g
+i u m p P v g K i n d
+f o c e a d h q c x n
+u v a x x M t m o h h
+h c r m u z a f e g x
+h j N x v h K n c i m
+h e e d o e a n g j m
+n s v z e h l p b o l
+p d e p h z s m t x t
+l u r t S h o w z g c
+
+--- Word Positions ---
+MANGO: Start(5,4) ↘ Down-Right
+PEACH: Start(4,2) ↙ Down-Left
+KEEP: Start(6,6) ↙ Down-Left
+KIND: Start(7,2) → Right
+LIGHT: Start(6,0) ↓ Down

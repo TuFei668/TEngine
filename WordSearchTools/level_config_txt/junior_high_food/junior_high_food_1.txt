@@ -1,0 +1,51 @@
+﻿=== Word Search Puzzle ===
+Created: 2026-04-22 11:58:31
+Puzzle ID: level-junior_high-food-001
+Size: 12x12
+Hard Mode: False
+Size Factor: 4
+Intersect Bias: Avoid
+
+--- Words to Find ---
+STILL
+STUDY
+SUCH
+THINGS
+TURN
+SHOW
+
+--- Puzzle ---
+J V H S C J Y T S U H D
+Z X T U Y S S T I L L O
+Z M N H U B F S C J M X
+N W Q C I Q B H E H K J
+O I H U Q N Y O F Y U X
+O K J D S J G W Z J Q W
+J I V F T A Z S E W J O
+W X B I U Y E A R S V R
+L Z Y T D B B B T F Y L
+H H W E Y B K D U D D D
+P O K Y K L D Z R L K Q
+L A V G G A I F N Z T F
+
+--- Answer Key ---
+j v h s c j y t s u h d
+z x T u y S S t i l l o
+z m n h u b f S c j m x
+n w q c i q b h e h k j
+o i h u q n y o f y u x
+o k j d S j g w z j q W
+j i v f t a z s e w j o
+w x b i u Y e a r s v r
+l z y t d b b b T f y l
+h h w e y b k d u d d d
+p o k y k l d z r l k q
+l a v g g A i f n z t f
+
+--- Word Positions ---
+STILL: Start(6,1) → Right
+STUDY: Start(4,5) ↓ Down
+SUCH: Start(5,1) ↙ Down-Left
+THINGS: Start(2,1) ↘ Down-Right
+TURN: Start(8,8) ↓ Down
+SHOW: Start(7,2) ↓ Down

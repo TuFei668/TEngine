@@ -1,0 +1,47 @@
+﻿=== Word Search Puzzle ===
+Created: 2026-04-22 11:57:35
+Puzzle ID: level-junior_high-fruit-001
+Size: 12x12
+Hard Mode: False
+Size Factor: 4
+Intersect Bias: Avoid
+
+--- Words to Find ---
+APPLE
+BANANA
+ORANGE
+MANGO
+
+--- Puzzle ---
+L T W K E R I K R N L T
+C C C L G O R A N G E J
+N T P W G N W E X Y B M
+S P F P Y I H W Q R L P
+A N G B H N I M K D I Z
+N Y J B A N A N A N E I
+I A Q U M J X S E N R J
+S E F A X O C A O Q D O
+Z E N B E B P T F V W Z
+K G M Z F P F X A N J U
+O X B M L E P A P A Y A
+O J Z E W A Y A A U D K
+
+--- Answer Key ---
+l t w k e r i k r n l t
+c c c l g O r a n g e j
+n t p w g n w e x y b m
+s p f p y i h w q r l P
+A n g b h n i m k d i z
+n y j B a n a n a n e i
+i a q u M j x s e n r j
+s e f a x o c a o q d O
+z e n b e b p t f v w z
+k g m z f p f x a n j u
+o x b m l e P a p a y a
+o j z e w a y a a u d k
+
+--- Word Positions ---
+APPLE: Start(0,4) ↗ Up-Right
+BANANA: Start(3,5) → Right
+ORANGE: Start(5,1) → Right
+MANGO: Start(4,6) ↙ Down-Left

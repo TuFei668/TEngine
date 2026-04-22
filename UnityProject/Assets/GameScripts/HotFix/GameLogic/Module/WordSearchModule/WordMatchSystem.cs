@@ -41,9 +41,9 @@ namespace GameLogic
         }
 
         /// <summary>
-        /// 匹配隐藏词，返回匹配的 HiddenWord 或 null。
+        /// 匹配隐藏词，返回匹配的 WordPosition 或 null。
         /// </summary>
-        public static HiddenWord MatchHiddenWord(List<CellPosition> selectedCells, LevelData levelData)
+        public static WordPosition MatchHiddenWord(List<CellPosition> selectedCells, LevelData levelData)
         {
             if (selectedCells == null || levelData?.hiddenWords == null) return null;
 

@@ -1,7 +1,7 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 10:54:53
+Created: 2026-04-22 11:47:32
 Puzzle ID: level-primary-fruit-001
-Size: 9x9
+Size: 12x12
 Hard Mode: False
 Size Factor: 4
 Intersect Bias: Avoid
@@ -13,29 +13,35 @@ ORANGE
 MANGO
 
 --- Puzzle ---
-P M A N G O B X O
-A O D Y G A B W W
-P F H F N J R E N
-A E B A Y G G F P
-Y R N X C N A T G
-A A N X A Y U H F
-S H A R A P P L E
-A G O N W C U M G
-P I N E A P P L E
+V Q P T A P P L E B T W
+K K E I E W M Z F O D A
+W V O D N E F G B J P P
+P B N T O E W R I S P P
+G M A Y V R A T C I S Z
+M U P N A S A P Q W K R
+Q R A F A V U N P X T N
+M X P I A N U W G L V B
+A O A L B D A H W E E N
+N C Y J S D Z N X Z T V
+G U A M H R W G N P J P
+O W P K V O L H A H I R
 
 --- Answer Key ---
-P M a n g o B x O
-a o d y g a b w w
-p f h f n j r e n
-a e b a y g g f p
-y r n x c n a t g
-a a n x a y u h f
-s h a r A p p l e
-a g O n w c u m g
-P i n e a p p l e
+v q P t A p p l e b t w
+k k e i e w m z f o d a
+w v o d n e f g b j p p
+p B n t O e w r i s p p
+g m a y v r a t c i s z
+m u P n a s a p q w k r
+q r a f a v u n p x t n
+M x p i a n u w g l v b
+a o a l b d a h w e e n
+n c y j s d z n x z t v
+g u a m h r w g n p j p
+o w p k v O l h a h i r
 
 --- Word Positions ---
-APPLE: Start(4,6) → Right
-BANANA: Start(6,0) ↙ Down-Left
-ORANGE: Start(2,7) ↗ Up-Right
-MANGO: Start(1,0) → Right
+APPLE: Start(4,0) → Right
+BANANA: Start(1,3) ↘ Down-Right
+ORANGE: Start(4,3) ↘ Down-Right
+MANGO: Start(0,7) ↓ Down
