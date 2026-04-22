@@ -121,6 +121,14 @@ namespace WordSearchGenerator
         /// <summary>Best-of-N 的最大上限（防止无脑设置过大）</summary>
         public const int BEST_OF_N_MAX = 32;
 
+        // ========== P1-2 批量生成 ==========
+
+        /// <summary>批量生成默认数量</summary>
+        public const int BATCH_COUNT_DEFAULT = 5;
+
+        /// <summary>批量生成上限</summary>
+        public const int BATCH_COUNT_MAX = 20;
+
         // ========== P1-3 难度评分权重（综合分） ==========
         //
         // difficulty_auto = W_DIFF_INTERSECT  * intersection_ratio

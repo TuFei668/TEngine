@@ -56,6 +56,17 @@ namespace WordSearchGenerator.UI
         [Header("答案视图（同场景内 Panel）")]
         [SerializeField] private GameObject answerPanel;
 
+        [Header("批量生成 / 候选切换（均可选，未绑定则功能隐藏）")]
+        [SerializeField] private Button batchGenerateButton;           // 点击触发批量生成
+        [SerializeField] private InputField batchCountInputField;      // N 数量（可选，默认 Constants.BATCH_COUNT_DEFAULT）
+        [SerializeField] private Button prevCandidateButton;           // 上一张候选
+        [SerializeField] private Button nextCandidateButton;           // 下一张候选
+        [SerializeField] private Text batchInfoText;                   // "3/5  Score=2.5  Diff=28.3"
+
+        [Header("回放（可选）")]
+        [SerializeField] private Button replayButton;
+        [SerializeField] private float replayStepSeconds = 0.4f;       // 每步停顿时长
+
         [Header("书本与关卡")]
         [SerializeField] private InputField bookIdInputField;
         [SerializeField] private Dropdown levelDifficultyDropdown;
@@ -85,6 +96,13 @@ namespace WordSearchGenerator.UI
         private WordSearchData currentPuzzleData;
         private Thread generatorThread;
         private bool isGenerating = false;
+
+        // 批量候选状态（P1-2）
+        private List<WordSearchData> batchResults = new List<WordSearchData>();
+        private int batchIndex = 0;
+
+        // 回放协程（P1-4）
+        private Coroutine replayCoroutine;
         
         /// <summary>
         /// 在Start之前通过transform.Find自动绑定引用（含同级的 AnswerPanel）
@@ -122,6 +140,19 @@ namespace WordSearchGenerator.UI
             saveJsonButton.onClick.AddListener(OnSaveButtonClick);
             saveTxtButton.onClick.AddListener(OnSaveButtonClick);
             viewAnswersButton.onClick.AddListener(OnViewAnswersButtonClick);
+
+            // 可选 UI 绑定（P1-2 / P1-4）：未在场景中配置则跳过
+            if (batchGenerateButton != null)
+                batchGenerateButton.onClick.AddListener(OnBatchGenerateButtonClick);
+            if (prevCandidateButton != null)
+                prevCandidateButton.onClick.AddListener(() => CycleCandidate(-1));
+            if (nextCandidateButton != null)
+                nextCandidateButton.onClick.AddListener(() => CycleCandidate(+1));
+            if (replayButton != null)
+                replayButton.onClick.AddListener(OnReplayButtonClick);
+            if (batchCountInputField != null && string.IsNullOrEmpty(batchCountInputField.text))
+                batchCountInputField.text = Constants.BATCH_COUNT_DEFAULT.ToString();
+            RefreshBatchUIState();
             
             // 初始化关卡难度下拉框
             if (levelDifficultyDropdown != null)
@@ -442,7 +473,11 @@ namespace WordSearchGenerator.UI
         void OnGenerationComplete(WordSearchData result)
         {
             isGenerating = false;
+            // 单张生成完成后，清理批量候选状态（P1-2）
+            batchResults.Clear();
+            batchIndex = 0;
             UpdateUIForGeneration(false);
+            RefreshBatchUIState();
             
             if (result != null)
             {
@@ -509,6 +544,13 @@ namespace WordSearchGenerator.UI
             biasRandomToggle.interactable = !generating;
             biasPreferToggle.interactable = !generating;
             if (gridSizeDropdown != null) gridSizeDropdown.interactable = !generating;
+
+            // 批量 / 回放（可选）
+            if (batchGenerateButton != null)  batchGenerateButton.interactable  = !generating;
+            if (batchCountInputField != null) batchCountInputField.interactable = !generating;
+            if (replayButton != null)         replayButton.interactable         = !generating && currentPuzzleData != null;
+            if (prevCandidateButton != null)  prevCandidateButton.interactable  = !generating && batchResults.Count > 1;
+            if (nextCandidateButton != null)  nextCandidateButton.interactable  = !generating && batchResults.Count > 1;
             
             if (!generating)
             {
@@ -538,35 +580,38 @@ namespace WordSearchGenerator.UI
         }
 
         /// <summary>
-        /// 根据下拉框选项返回 (fixedRows, fixedCols)，自动模式返回 null
+        /// 根据下拉框选项返回 (fixedRows, fixedCols)，自动模式返回 null。
+        /// 下拉 label 约定为 "宽×高"，即 cols×rows。
+        /// 注意：返回元组第一项是 rows（高），第二项是 cols（宽），不能和 label 顺序直接对齐，
+        ///       因此 label "7×9"（7 宽 × 9 高）对应返回值 (fixedRows=9, fixedCols=7)。
         /// </summary>
         (int? fixedRows, int? fixedCols) GetGridSize()
         {
             if (gridSizeDropdown == null) return (null, null);
-            // 选项格式为 宽×高，即 cols×rows
+            // (fixedRows, fixedCols) 对应 label 的 "高 × 宽"
             switch (gridSizeDropdown.value)
             {
-                case 1:  return (5, 5);
-                case 2:  return (5, 6);
-                case 3:  return (5, 7);
-                case 4:  return (6, 6);
-                case 5:  return (6, 7);
-                case 6:  return (6, 8);
-                case 7:  return (6, 9);
-                case 8:  return (7, 7);
-                case 9:  return (7, 8);
-                case 10: return (7, 9);
-                case 11: return (7, 10);
-                case 12: return (8, 8);
-                case 13: return (8, 9);
-                case 14: return (8, 10);
-                case 15: return (8, 11);
-                case 16: return (8, 12);
-                case 17: return (9, 9);
-                case 18: return (9, 10);
-                case 19: return (9, 11);
-                case 20: return (9, 12);
-                case 21: return (10, 10);
+                case 1:  return (5, 5);   // 5×5
+                case 2:  return (6, 5);   // 5×6
+                case 3:  return (7, 5);   // 5×7
+                case 4:  return (6, 6);   // 6×6
+                case 5:  return (7, 6);   // 6×7
+                case 6:  return (8, 6);   // 6×8
+                case 7:  return (9, 6);   // 6×9
+                case 8:  return (7, 7);   // 7×7
+                case 9:  return (8, 7);   // 7×8
+                case 10: return (9, 7);   // 7×9
+                case 11: return (10, 7);  // 7×10
+                case 12: return (8, 8);   // 8×8
+                case 13: return (9, 8);   // 8×9
+                case 14: return (10, 8);  // 8×10
+                case 15: return (11, 8);  // 8×11
+                case 16: return (12, 8);  // 8×12
+                case 17: return (9, 9);   // 9×9
+                case 18: return (10, 9);  // 9×10
+                case 19: return (11, 9);  // 9×11
+                case 20: return (12, 9);  // 9×12
+                case 21: return (10, 10); // 10×10
                 default: return (null, null); // 自动
             }
         }
@@ -620,6 +665,14 @@ namespace WordSearchGenerator.UI
                 }
                 return comp;
             }
+
+            // 静默查找：找不到不打警告（用于 P1-2 / P1-4 的可选 UI 元素）
+            T SilentFind<T>(string path) where T : Component
+            {
+                var t = transform.Find(path);
+                if (t == null) return null;
+                return t.GetComponent<T>();
+            }
             
             // ===== 输入控件（SettingsPanel 下） =====
             if (useHardToggle == null)
@@ -660,6 +713,24 @@ namespace WordSearchGenerator.UI
                 saveTxtButton = FindComp<Button>("ButtonPanel/SaveTxtButton");
             if (viewAnswersButton == null)
                 viewAnswersButton = FindComp<Button>("ButtonPanel/ViewAnswersButton");
+
+            // ===== 批量 / 回放（可选，全部找不到也不报错） =====
+            // 注意：FindComp 在找不到时会打警告；这里用 transform.Find 静默探测，避免开发期噪音
+            if (batchGenerateButton == null)
+                batchGenerateButton = SilentFind<Button>("ButtonPanel/BatchGenerateButton")
+                                   ?? SilentFind<Button>("SettingsPanel/BatchGenerateButton");
+            if (batchCountInputField == null)
+                batchCountInputField = SilentFind<InputField>("SettingsPanel/BatchCountInputField")
+                                     ?? SilentFind<InputField>("ButtonPanel/BatchCountInputField");
+            if (prevCandidateButton == null)
+                prevCandidateButton = SilentFind<Button>("ButtonPanel/PrevCandidateButton");
+            if (nextCandidateButton == null)
+                nextCandidateButton = SilentFind<Button>("ButtonPanel/NextCandidateButton");
+            if (batchInfoText == null)
+                batchInfoText = SilentFind<Text>("ButtonPanel/BatchInfoText")
+                             ?? SilentFind<Text>("SettingsPanel/BatchInfoText");
+            if (replayButton == null)
+                replayButton = SilentFind<Button>("ButtonPanel/ReplayButton");
             
             // ===== 结果显示（ResultPanel 下，可选） =====
             if (resultText == null)
@@ -1021,6 +1092,9 @@ namespace WordSearchGenerator.UI
         void LoadExistingPuzzle(WordSearchData data)
         {
             currentPuzzleData = data;
+            batchResults.Clear();
+            batchIndex = 0;
+            StopReplayIfRunning();
 
             if (resultGridContainer != null && gridCellPrefab != null)
             {
@@ -1037,6 +1111,7 @@ namespace WordSearchGenerator.UI
             viewAnswersButton.interactable = true;
 
             if (progressText != null) progressText.text = "Loaded";
+            RefreshBatchUIState();
             ShowNotification($"已加载已保存关卡: {data.puzzleId}");
         }
 
@@ -1082,6 +1157,287 @@ namespace WordSearchGenerator.UI
             generatorThread.Start();
         }
 
+        // ==================== P1-2：批量生成 + 候选切换 ====================
+
+        /// <summary>批量按钮点击：按 N 张生成候选并按 layoutScore 排序展示</summary>
+        void OnBatchGenerateButtonClick()
+        {
+            if (isGenerating) return;
+
+            int count = ReadBatchCount();
+
+            // 走 Excel 路径 or 手动输入
+            if (currentLevel != null)
+            {
+                StartBatchGenerationFromLevel(currentLevel, count);
+            }
+            else
+            {
+                var words = GetCurrentWords();
+                if (words.Count == 0)
+                {
+                    ShowNotification("没有输入单词");
+                    return;
+                }
+                StartBatchGeneration(words, count);
+            }
+        }
+
+        int ReadBatchCount()
+        {
+            int n = Constants.BATCH_COUNT_DEFAULT;
+            if (batchCountInputField != null && int.TryParse(batchCountInputField.text, out int parsed))
+            {
+                n = parsed;
+            }
+            return Mathf.Clamp(n, 1, Constants.BATCH_COUNT_MAX);
+        }
+
+        void StartBatchGeneration(List<string> words, int count)
+        {
+            isGenerating = true;
+            UpdateUIForGeneration(true);
+
+            if (resultText != null) resultText.text = "";
+
+            var directions   = useHardToggle.isOn ? Constants.ALL_DIRECTIONS : Constants.EASY_DIRECTIONS;
+            int sizeFactor   = Mathf.RoundToInt(sizeFactorSlider.value);
+            int intersectBias = GetIntersectBias();
+            var (fixedRows, fixedCols) = GetGridSize();
+
+            progressBar.value = 0;
+            progressBar.maxValue = Mathf.Max(1, count * words.Count);
+
+            generatorThread = new Thread(() =>
+            {
+                try
+                {
+                    var list = generator.GenerateBatch(
+                        words, count, directions, sizeFactor, intersectBias,
+                        fixedRows, fixedCols);
+                    UnityMainThreadDispatcher.Instance.Enqueue(() => OnBatchGenerationComplete(list));
+                }
+                catch (System.Exception e)
+                {
+                    UnityMainThreadDispatcher.Instance.Enqueue(() => OnGenerationError(e));
+                }
+            });
+            generatorThread.IsBackground = true;
+            generatorThread.Start();
+        }
+
+        void StartBatchGenerationFromLevel(LevelConfig level, int count)
+        {
+            isGenerating = true;
+            UpdateUIForGeneration(true);
+            if (resultText != null) resultText.text = "";
+
+            var directions   = useHardToggle.isOn ? Constants.ALL_DIRECTIONS : Constants.EASY_DIRECTIONS;
+            int sizeFactor   = Mathf.RoundToInt(sizeFactorSlider.value);
+            int intersectBias = GetIntersectBias();
+            var (fixedRows, fixedCols) = GetGridSize();
+
+            int totalWords = level.words.Count + level.bonusWords.Count + level.hiddenWords.Count;
+            progressBar.value = 0;
+            progressBar.maxValue = Mathf.Max(1, count * totalWords);
+
+            var levelSnapshot = level;
+
+            generatorThread = new Thread(() =>
+            {
+                try
+                {
+                    var list = LevelGenerationHelper.GenerateBatchFromLevelConfig(
+                        levelSnapshot, generator, count, directions, sizeFactor, intersectBias,
+                        fixedRows, fixedCols);
+                    UnityMainThreadDispatcher.Instance.Enqueue(() => OnBatchGenerationComplete(list));
+                }
+                catch (System.Exception e)
+                {
+                    UnityMainThreadDispatcher.Instance.Enqueue(() => OnGenerationError(e));
+                }
+            });
+            generatorThread.IsBackground = true;
+            generatorThread.Start();
+        }
+
+        void OnBatchGenerationComplete(List<WordSearchData> list)
+        {
+            isGenerating = false;
+
+            if (list == null || list.Count == 0)
+            {
+                batchResults.Clear();
+                batchIndex = 0;
+                UpdateUIForGeneration(false);
+                RefreshBatchUIState();
+                ShowNotification("批量生成失败或被取消");
+                return;
+            }
+
+            batchResults = list;
+            batchIndex = 0;
+            ApplyCandidate(batchResults[batchIndex]);
+
+            UpdateUIForGeneration(false);
+            RefreshBatchUIState();
+
+            Debug.Log($"✓ 批量生成完成：{list.Count} 张");
+            for (int i = 0; i < list.Count; i++)
+            {
+                var d = list[i];
+                Debug.Log($"  [{i + 1}] Seed={d.seed} LayoutScore={d.layoutScore:F2} Diff={d.difficultyAuto:F1} adj={d.adjacentPairs}");
+            }
+        }
+
+        void CycleCandidate(int step)
+        {
+            if (batchResults == null || batchResults.Count == 0) return;
+            batchIndex = (batchIndex + step + batchResults.Count) % batchResults.Count;
+            ApplyCandidate(batchResults[batchIndex]);
+        }
+
+        /// <summary>把某张候选渲染到 UI，并同步 currentPuzzleData（保存/查看都指向它）</summary>
+        void ApplyCandidate(WordSearchData data)
+        {
+            if (data == null) return;
+
+            // 中断可能的回放
+            StopReplayIfRunning();
+
+            currentPuzzleData = data;
+
+            if (resultGridContainer != null && gridCellPrefab != null)
+            {
+                GridDisplayHelper.DisplayPuzzleGrid(data, resultGridContainer, resultGridLayout,
+                    gridCellPrefab, resultCellSize, resultCellSpacing);
+            }
+
+            if (resultText != null)
+            {
+                string header = batchResults.Count > 1
+                    ? $"=== Candidate {batchIndex + 1}/{batchResults.Count} ==="
+                    : "=== Generated Puzzle ===";
+                resultText.text = $"{header}\n\n{data.puzzleText}";
+            }
+
+            if (saveJsonButton != null)    saveJsonButton.interactable = true;
+            if (saveTxtButton != null)     saveTxtButton.interactable  = true;
+            if (viewAnswersButton != null) viewAnswersButton.interactable = true;
+
+            RefreshBatchUIState();
+        }
+
+        void RefreshBatchUIState()
+        {
+            bool hasBatch = batchResults != null && batchResults.Count > 1;
+            if (prevCandidateButton != null) prevCandidateButton.interactable = !isGenerating && hasBatch;
+            if (nextCandidateButton != null) nextCandidateButton.interactable = !isGenerating && hasBatch;
+            if (replayButton != null)        replayButton.interactable        = !isGenerating && currentPuzzleData != null;
+
+            if (batchInfoText != null)
+            {
+                if (batchResults == null || batchResults.Count == 0)
+                {
+                    batchInfoText.text = "";
+                }
+                else
+                {
+                    var d = batchResults[batchIndex];
+                    batchInfoText.text =
+                        $"{batchIndex + 1}/{batchResults.Count}  " +
+                        $"Score={d.layoutScore:F2}  " +
+                        $"Diff={d.difficultyAuto:F1}  " +
+                        $"adj={d.adjacentPairs}";
+                }
+            }
+        }
+
+        // ==================== P1-4：按放置顺序回放 ====================
+
+        void OnReplayButtonClick()
+        {
+            if (currentPuzzleData == null) return;
+            if (currentPuzzleData.placementSequence == null || currentPuzzleData.placementSequence.Count == 0)
+            {
+                ShowNotification("此数据无 placementSequence，无法回放");
+                return;
+            }
+            StopReplayIfRunning();
+            replayCoroutine = StartCoroutine(ReplayRoutine(currentPuzzleData));
+        }
+
+        void StopReplayIfRunning()
+        {
+            if (replayCoroutine != null)
+            {
+                StopCoroutine(replayCoroutine);
+                replayCoroutine = null;
+            }
+        }
+
+        System.Collections.IEnumerator ReplayRoutine(WordSearchData data)
+        {
+            int total = data.placementSequence.Count;
+            float wait = Mathf.Max(0.05f, replayStepSeconds);
+
+            // 0..total 共 total+1 步；第 i 步只显示前 i 个单词
+            for (int step = 0; step <= total; step++)
+            {
+                var partial = BuildPartialData(data, step);
+                if (resultGridContainer != null && gridCellPrefab != null)
+                {
+                    GridDisplayHelper.DisplayPuzzleGrid(partial, resultGridContainer, resultGridLayout,
+                        gridCellPrefab, resultCellSize, resultCellSpacing);
+                }
+                if (batchInfoText != null)
+                {
+                    batchInfoText.text = step == 0
+                        ? $"Replay 0/{total} (start)"
+                        : $"Replay {step}/{total}  place \"{data.placementSequence[step - 1]}\"";
+                }
+                yield return new WaitForSeconds(wait);
+            }
+
+            // 回放结束，恢复完整显示
+            ApplyCandidate(data);
+            replayCoroutine = null;
+        }
+
+        /// <summary>
+        /// 克隆一份只显示前 showCount 个单词的轻量 WordSearchData（grid 共享引用，不会分配）。
+        /// </summary>
+        static WordSearchData BuildPartialData(WordSearchData src, int showCount)
+        {
+            var dst = new WordSearchData
+            {
+                dimension     = src.dimension,
+                rows          = src.rows,
+                cols          = src.cols,
+                grid          = src.grid,
+                wordPositions = new List<WordPosition>(),
+                bonusWords    = new List<WordPosition>(),
+                hiddenWords   = new List<WordPosition>(),
+            };
+
+            if (src.placementSequence == null || showCount <= 0) return dst;
+
+            var show = new HashSet<string>();
+            for (int i = 0; i < showCount && i < src.placementSequence.Count; i++)
+            {
+                show.Add(src.placementSequence[i]);
+            }
+
+            if (src.wordPositions != null)
+                foreach (var wp in src.wordPositions) if (wp != null && show.Contains(wp.word)) dst.wordPositions.Add(wp);
+            if (src.bonusWords != null)
+                foreach (var wp in src.bonusWords)    if (wp != null && show.Contains(wp.word)) dst.bonusWords.Add(wp);
+            if (src.hiddenWords != null)
+                foreach (var wp in src.hiddenWords)   if (wp != null && show.Contains(wp.word)) dst.hiddenWords.Add(wp);
+
+            return dst;
+        }
+
         void OnDestroy()
         {
             // 清理线程
@@ -1090,6 +1446,7 @@ namespace WordSearchGenerator.UI
                 generator?.Halt();
                 generatorThread.Join(1000); // 等待最多1秒
             }
+            StopReplayIfRunning();
         }
     }
 }

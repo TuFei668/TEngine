@@ -209,6 +209,12 @@ namespace WordSearchGenerator
         /// </summary>
         public int adjacentPairs;
         
+        /// <summary>
+        /// 回溯成功后的单词放置顺序（P1-4 回放用）。
+        /// 等同于 Generator 内部按长度降序的 placementOrder，一一对应每个单词第一次成功落位的时刻
+        /// </summary>
+        public List<string> placementSequence;
+        
         // ========== 构造函数 ==========
         
         public WordSearchData()
@@ -221,6 +227,7 @@ namespace WordSearchGenerator
             wordPositions = new List<WordPosition>();
             bonusWords = new List<WordPosition>();
             hiddenWords = new List<WordPosition>();
+            placementSequence = new List<string>();
         }
         
         // ========== 序列化方法 ==========

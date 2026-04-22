@@ -50,6 +50,7 @@ namespace WordSearchGenerator
         private List<Position> allPossiblePositions;                       // 所有合法起点×方向组合
         private int currentIndex;                                          // 当前 placementOrder 下标
         private bool isHalted;
+        private volatile bool cancelRequested;                             // 跨 Generate 调用的持久化取消标志（P1-2 批量用）
         private System.Random random;
 
         private Action progressCallback;
@@ -76,8 +77,13 @@ namespace WordSearchGenerator
 
         // ========== 中止 ==========
 
+        /// <summary>
+        /// 请求中止当前生成。跨多次 GenerateWordSearch 调用也会保持生效，
+        /// 直到下一次由用户主动触发的 GenerateWordSearch / GenerateBatch 重置该标志。
+        /// </summary>
         public void Halt()
         {
+            cancelRequested = true;
             isHalted = true;
         }
 
@@ -103,6 +109,75 @@ namespace WordSearchGenerator
             int? fixedCols = null,
             int? seed = null,
             int? bestOfN = null)
+        {
+            // 用户主动发起的新一次生成，重置取消标志
+            cancelRequested = false;
+            return GenerateInternal(words, directions, sizeFactor, intersectBias,
+                fixedRows, fixedCols, seed, bestOfN);
+        }
+
+        /// <summary>
+        /// P1-2：一次性生成多张候选，按 layoutScore 降序返回，便于工具侧"翻阅择优"。
+        /// 每张候选内部仍经过 Best-of-N 择优（默认 1，提高速度；也可由参数指定）。
+        /// </summary>
+        /// <param name="count">要产出的候选张数</param>
+        /// <param name="bestOfNPerCandidate">每张候选内部的 Best-of-N 次数（默认 1）</param>
+        public List<WordSearchData> GenerateBatch(
+            List<string> words,
+            int count,
+            Vector2Int[] directions = null,
+            int? sizeFactor = null,
+            int? intersectBias = null,
+            int? fixedRows = null,
+            int? fixedCols = null,
+            int? baseSeed = null,
+            int? bestOfNPerCandidate = null)
+        {
+            count = Mathf.Clamp(count, 1, Constants.BATCH_COUNT_MAX);
+            int seedBase = baseSeed ?? Guid.NewGuid().GetHashCode();
+            int perCandidate = bestOfNPerCandidate ?? 1;
+
+            cancelRequested = false;
+
+            var results = new List<WordSearchData>();
+            Exception lastError = null;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (cancelRequested) break;
+
+                int s = unchecked(seedBase + i * 9973);
+                try
+                {
+                    var r = GenerateInternal(words, directions, sizeFactor, intersectBias,
+                        fixedRows, fixedCols, s, perCandidate);
+                    if (r != null) results.Add(r);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    lastError = ex;
+                }
+            }
+
+            // 若全部失败，抛出最后一次错误，供 UI 显式提示
+            if (results.Count == 0 && lastError != null) throw lastError;
+
+            results.Sort((a, b) => b.layoutScore.CompareTo(a.layoutScore));
+            return results;
+        }
+
+        /// <summary>
+        /// 内部实现：不会重置 cancelRequested，使批量生成过程中可被 Halt() 中断。
+        /// </summary>
+        private WordSearchData GenerateInternal(
+            List<string> words,
+            Vector2Int[] directions,
+            int? sizeFactor,
+            int? intersectBias,
+            int? fixedRows,
+            int? fixedCols,
+            int? seed,
+            int? bestOfN)
         {
             if (words != null) this.words = words;
             if (this.words == null || this.words.Count == 0)
@@ -155,7 +230,7 @@ namespace WordSearchGenerator
 
             for (int attempt = 0; attempt < attempts; attempt++)
             {
-                if (isHalted) break;
+                if (isHalted || cancelRequested) break;
 
                 int attemptSeed = unchecked(baseSeed + attempt * 9973);
                 try
@@ -187,6 +262,9 @@ namespace WordSearchGenerator
                 if (lastError != null) throw lastError;
                 return null;  // 全部被取消
             }
+            
+            // 未命中使用的 baseSeed 仅用于日志可追踪，这里故意保留变量以避免"未使用警告"
+            _ = bestSeed;
 
             // 仅对最终选中的那张做文本渲染（省时）
             best.puzzleText    = RenderPuzzle(best.grid, best.rows, best.cols, false, null);
@@ -217,7 +295,7 @@ namespace WordSearchGenerator
 
             ResetGenerationData();
 
-            while (currentIndex < placementOrder.Count && !isHalted)
+            while (currentIndex < placementOrder.Count && !isHalted && !cancelRequested)
             {
                 var currentWorkablePos = CurrentWorkablePositions;
 
@@ -265,7 +343,7 @@ namespace WordSearchGenerator
                 ProgressStep();
             }
 
-            if (isHalted) return null;
+            if (isHalted || cancelRequested) return null;
 
             // P1-3：评估本次布局 → 指标 + 综合分
             var metrics = LayoutScorer.EvaluateLayout(
@@ -307,6 +385,9 @@ namespace WordSearchGenerator
                     data.wordPositions.Add(new WordPosition(word, pos, word.Length));
                 }
             }
+
+            // P1-4：回溯成功后 placementOrder 即为实际放置顺序（长度降序）
+            data.placementSequence = new List<string>(placementOrder);
 
             LayoutScorer.WriteDifficultyFields(data, metrics, this.words);
             return data;

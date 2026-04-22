@@ -69,6 +69,48 @@ namespace WordSearchGenerator
         }
 
         /// <summary>
+        /// P1-2：基于关卡配置批量生成多张候选（按 layoutScore 降序）。
+        /// </summary>
+        public static List<WordSearchData> GenerateBatchFromLevelConfig(
+            LevelConfig level,
+            Generator generator,
+            int count,
+            Vector2Int[] directions,
+            int sizeFactor,
+            int intersectBias,
+            int? fixedRows,
+            int? fixedCols,
+            int? baseSeed = null,
+            int? bestOfNPerCandidate = null)
+        {
+            if (level == null) throw new ArgumentNullException(nameof(level));
+            if (generator == null) throw new ArgumentNullException(nameof(generator));
+
+            var allWords = new List<string>();
+            allWords.AddRange(level.words);
+            allWords.AddRange(level.bonusWords);
+            allWords.AddRange(level.hiddenWords);
+            allWords = allWords.Where(w => !string.IsNullOrEmpty(w)).Distinct().ToList();
+
+            if (allWords.Count == 0)
+                throw new InvalidOperationException($"关卡 {level.UniqueKey} 没有任何有效单词");
+
+            var list = generator.GenerateBatch(
+                allWords, count, directions, sizeFactor, intersectBias,
+                fixedRows, fixedCols, baseSeed, bestOfNPerCandidate);
+
+            if (list == null) return null;
+
+            foreach (var data in list)
+            {
+                if (data == null) continue;
+                ApplyLevelMetadata(data, level);
+                SplitAndColorize(data, level);
+            }
+            return list;
+        }
+
+        /// <summary>
         /// 给 WordSearchData 填充关卡元数据字段。
         /// </summary>
         public static void ApplyLevelMetadata(WordSearchData data, LevelConfig level)
