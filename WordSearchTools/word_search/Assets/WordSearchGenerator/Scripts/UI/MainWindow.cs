@@ -86,6 +86,7 @@ namespace WordSearchGenerator.UI
         private const string PP_THEME_INDEX   = "WSG_Last_ThemeIndex";
         private const string PP_LEVEL_INDEX   = "WSG_Last_LevelIdIndex";
         private const string PP_SIGNATURE     = "WSG_Last_ExcelSignature";
+        private const string PP_GRID_SIZE_INDEX = "WSG_Last_GridSizeIndex"; // 上次手动选择的网格尺寸
 
         // Excel 解析数据
         private List<PackConfig> excelPacks = new List<PackConfig>();
@@ -183,7 +184,18 @@ namespace WordSearchGenerator.UI
                     "9×9", "9×10", "9×11", "9×12",
                     "10×10"
                 });
-                gridSizeDropdown.value = 0;
+                // 恢复上次用户手动选择（没有保存过则默认 "自动"）
+                int savedGridIdx = PlayerPrefs.GetInt(PP_GRID_SIZE_INDEX, 0);
+                savedGridIdx = Mathf.Clamp(savedGridIdx, 0, gridSizeDropdown.options.Count - 1);
+                isRestoringSelection = true;
+                try
+                {
+                    gridSizeDropdown.value = savedGridIdx;
+                    gridSizeDropdown.RefreshShownValue();
+                }
+                finally { isRestoringSelection = false; }
+
+                gridSizeDropdown.onValueChanged.AddListener(OnGridSizeDropdownChanged);
             }
             
             // 初始状态
@@ -620,6 +632,51 @@ namespace WordSearchGenerator.UI
                 case 21: return (10, 10); // 10×10
                 default: return (null, null); // 自动
             }
+        }
+
+        /// <summary>
+        /// 根据 (rows, cols) 反查 gridSizeDropdown 的 index。
+        /// 未匹配返回 0（自动）。与 GetGridSize 中的映射保持一致。
+        /// </summary>
+        int FindGridSizeIndex(int rows, int cols)
+        {
+            // key = rows * 100 + cols
+            switch (rows * 100 + cols)
+            {
+                case 5  * 100 + 5 : return 1;   // 5×5
+                case 6  * 100 + 5 : return 2;   // 5×6
+                case 7  * 100 + 5 : return 3;   // 5×7
+                case 6  * 100 + 6 : return 4;   // 6×6
+                case 7  * 100 + 6 : return 5;   // 6×7
+                case 8  * 100 + 6 : return 6;   // 6×8
+                case 9  * 100 + 6 : return 7;   // 6×9
+                case 7  * 100 + 7 : return 8;   // 7×7
+                case 8  * 100 + 7 : return 9;   // 7×8
+                case 9  * 100 + 7 : return 10;  // 7×9
+                case 10 * 100 + 7 : return 11;  // 7×10
+                case 8  * 100 + 8 : return 12;  // 8×8
+                case 9  * 100 + 8 : return 13;  // 8×9
+                case 10 * 100 + 8 : return 14;  // 8×10
+                case 11 * 100 + 8 : return 15;  // 8×11
+                case 12 * 100 + 8 : return 16;  // 8×12
+                case 9  * 100 + 9 : return 17;  // 9×9
+                case 10 * 100 + 9 : return 18;  // 9×10
+                case 11 * 100 + 9 : return 19;  // 9×11
+                case 12 * 100 + 9 : return 20;  // 9×12
+                case 10 * 100 + 10: return 21;  // 10×10
+                default: return 0;              // 自动
+            }
+        }
+
+        /// <summary>
+        /// 用户手动切换网格尺寸时，持久化为"上次选择"。
+        /// 由代码（自动加载关卡）触发的切换通过 isRestoringSelection 过滤。
+        /// </summary>
+        void OnGridSizeDropdownChanged(int value)
+        {
+            if (isRestoringSelection) return;
+            PlayerPrefs.SetInt(PP_GRID_SIZE_INDEX, value);
+            PlayerPrefs.Save();
         }
 
         /// <summary>
@@ -1112,6 +1169,23 @@ namespace WordSearchGenerator.UI
             batchResults.Clear();
             batchIndex = 0;
             StopReplayIfRunning();
+
+            // 自动加载关卡时：按关卡存储的 rows/cols 反查并设置下拉
+            // 使用 isRestoringSelection 守护，避免写入 PP_GRID_SIZE_INDEX
+            if (gridSizeDropdown != null && data.rows > 0 && data.cols > 0)
+            {
+                int idx = FindGridSizeIndex(data.rows, data.cols);
+                if (idx != gridSizeDropdown.value)
+                {
+                    isRestoringSelection = true;
+                    try
+                    {
+                        gridSizeDropdown.value = idx;
+                        gridSizeDropdown.RefreshShownValue();
+                    }
+                    finally { isRestoringSelection = false; }
+                }
+            }
 
             if (resultGridContainer != null && gridCellPrefab != null)
             {
