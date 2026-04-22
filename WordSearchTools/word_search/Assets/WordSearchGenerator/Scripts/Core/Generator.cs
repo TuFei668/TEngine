@@ -1,11 +1,20 @@
 /*
  * Word Search Generator - Core Generator Class
- * 
+ *
  * 核心生成器：使用回溯算法生成单词搜索拼图
- * 
- * 对应Python: algorithm.py 中的 Generator 类
- * 
- * This file is part of Word Search Generator Unity Version.
+ *
+ * 本文件在原 Python/Unity 回溯算法基础上，按 P0 / P1 方案做了以下改造：
+ *   P0-1  单词按长度降序进入回溯（长词先占黄金位置）
+ *   P0-2  候选位置排序由单一交叉偏好改为 LayoutScorer 多目标打分
+ *   P0-3  紧邻惩罚（由 LayoutScorer 统一处理）
+ *   P0-4  贴边/对角线偏好（由 LayoutScorer 统一处理）
+ *   P0-5  Auto 模式在紧凑尺寸基础上额外 padding
+ *   P0-6  Best-of-N 尝试取综合分最高者
+ *   P1-1  可选 seed（不传则由 Guid 生成一个，写入 WordSearchData.seed）
+ *   P1-3  生成完成后调用 LayoutScorer 计算难度分项，写入 WordSearchData
+ *
+ * 保持向后兼容：公开的 GenerateWordSearch 签名新增可选参数，老调用点不需要改动。
+ *
  * Based on: https://github.com/thelabcat/word-search-generator
  * License: GPL-3.0
  */
@@ -20,43 +29,39 @@ namespace WordSearchGenerator
 {
     /// <summary>
     /// 单词搜索拼图生成器
-    /// 对应Python: class Generator
     /// </summary>
     public class Generator
     {
         // ========== 私有字段 ==========
-        
-        private char[,] table;                                    // 拼图网格
-        private List<string> words;                               // 单词列表
-        private int dim;                                          // 拼图维度（自动模式，正方形）
-        private int rows;                                         // 行数
-        private int cols;                                         // 列数
-        private bool isFixedSize;                                 // 是否固定尺寸模式
-        private Vector2Int[] directions;                          // 使用的方向
-        private int sizeFactor;                                   // 尺寸因子
-        private int intersectBias;                                // 交叉偏好
-        private Dictionary<string, List<Position>> allWorkablePositions;  // 位置缓存
-        private Dictionary<string, Position> finalPlacedPositions;       // 最终放置位置（回溯完成后使用）
-        private List<char[,]> tableHistory;                       // 历史记录（用于回溯）
-        private List<Position> allPossiblePositions;              // 所有可能位置
-        private int currentIndex;                                 // 当前处理的单词索引
-        private bool isHalted;                                    // 是否中止
-        private System.Random random;                             // 随机数生成器
-        
-        private Action progressCallback;                          // 进度回调
-        
+
+        private char[,] table;                                             // 拼图网格
+        private List<string> words;                                        // 原始输入顺序（供输出用）
+        private List<string> placementOrder;                               // 回溯放置顺序（长度降序）
+        private int dim;                                                   // 维度（auto 模式正方形边长）
+        private int rows;                                                  // 行数
+        private int cols;                                                  // 列数
+        private bool isFixedSize;                                          // 是否固定尺寸
+        private Vector2Int[] directions;                                   // 使用的方向
+        private int sizeFactor;
+        private int intersectBias;
+        private Dictionary<string, List<Position>> allWorkablePositions;   // 每个单词候选位置缓存
+        private Dictionary<string, Position> finalPlacedPositions;         // 成功布局的位置
+        private List<char[,]> tableHistory;                                // 回溯历史
+        private List<Position> allPossiblePositions;                       // 所有合法起点×方向组合
+        private int currentIndex;                                          // 当前 placementOrder 下标
+        private bool isHalted;
+        private System.Random random;
+
+        private Action progressCallback;
+
         // ========== 构造函数 ==========
-        
-        /// <summary>
-        /// 创建生成器实例
-        /// 对应Python: def __init__(self, progress_step: callable = None)
-        /// </summary>
-        /// <param name="progressCallback">进度回调（可选）</param>
+
         public Generator(Action progressCallback = null)
         {
             this.progressCallback = progressCallback;
             this.random = new System.Random();
             this.words = null;
+            this.placementOrder = null;
             this.sizeFactor = Constants.SIZE_FACTOR_DEFAULT;
             this.dim = 1;
             this.rows = 1;
@@ -65,366 +70,174 @@ namespace WordSearchGenerator
             this.directions = Constants.EASY_DIRECTIONS;
             this.intersectBias = 0;
             this.isHalted = true;
-            
+
             ResetGenerationData();
         }
-        
-        // ========== 私有辅助方法 ==========
-        
-        /// <summary>
-        /// 重置生成数据
-        /// 对应Python: def reset_generation_data(self)
-        /// </summary>
-        private void ResetGenerationData()
+
+        // ========== 中止 ==========
+
+        public void Halt()
         {
-            table = CreateEmptyTable(rows, cols);
-            allWorkablePositions = new Dictionary<string, List<Position>>();
-            finalPlacedPositions = new Dictionary<string, Position>();
-            allPossiblePositions = AllPositions(rows, cols, directions);
-            tableHistory = new List<char[,]>();
-            currentIndex = 0;
-        }
-        
-        /// <summary>
-        /// 报告进度
-        /// 对应Python: def progress_step(self)
-        /// </summary>
-        private void ProgressStep()
-        {
-            progressCallback?.Invoke();
-        }
-        
-        /// <summary>
-        /// 获取当前单词
-        /// 对应Python: @property def cur_word(self) -> str | None
-        /// </summary>
-        private string CurrentWord
-        {
-            get
-            {
-                if (words == null || currentIndex >= words.Count)
-                {
-                    return null;
-                }
-                return words[currentIndex];
-            }
-        }
-        
-        /// <summary>
-        /// 获取当前单词的可用位置
-        /// 对应Python: @property def cur_workable_posits(self)
-        /// </summary>
-        private List<Position> CurrentWorkablePositions
-        {
-            get
-            {
-                string currentWord = CurrentWord;
-                if (currentWord == null) return null;
-                
-                // 如果已缓存，返回缓存
-                if (allWorkablePositions.ContainsKey(currentWord))
-                {
-                    return allWorkablePositions[currentWord];
-                }
-                
-                // Python逻辑:
-                // cur_workable_posits = [
-                //     pos for pos in self.all_positions
-                //     if Generator.can_place(self.cur_word, pos, self.table)[0]
-                // ]
-                List<Position> workablePositions = new List<Position>();
-                foreach (var pos in allPossiblePositions)
-                {
-                    var (canPlace, _) = CanPlace(currentWord, pos, table);
-                    if (canPlace)
-                    {
-                        workablePositions.Add(pos);
-                    }
-                }
-                
-                // Python: random.shuffle(cur_workable_posits)
-                ShuffleList(workablePositions);
-                
-                // Python: 根据交叉偏好排序
-                // if self.intersect_bias:
-                //     cur_workable_posits.sort(
-                //         key=lambda pos: Generator.can_place(self.cur_word, pos, self.table)[1]
-                //     )
-                //     if self.intersect_bias > 0:
-                //         cur_workable_posits.reverse()
-                
-                if (intersectBias != 0)
-                {
-                    // 按交叉数量排序
-                    workablePositions.Sort((a, b) =>
-                    {
-                        var (_, intersectA) = CanPlace(currentWord, a, table);
-                        var (_, intersectB) = CanPlace(currentWord, b, table);
-                        return intersectA.CompareTo(intersectB);
-                    });
-                    
-                    // 如果偏好交叉，反转列表
-                    if (intersectBias > 0)
-                    {
-                        workablePositions.Reverse();
-                    }
-                }
-                
-                allWorkablePositions[currentWord] = workablePositions;
-                return workablePositions;
-            }
-        }
-        
-        /// <summary>
-        /// 删除当前单词的可用位置缓存
-        /// 对应Python: @cur_workable_posits.deleter
-        /// </summary>
-        private void DeleteCurrentWorkablePositions()
-        {
-            string currentWord = CurrentWord;
-            if (currentWord != null && allWorkablePositions.ContainsKey(currentWord))
-            {
-                allWorkablePositions.Remove(currentWord);
-            }
-        }
-        
-        /// <summary>
-        /// 洗牌算法（Fisher-Yates）
-        /// </summary>
-        private void ShuffleList<T>(List<T> list)
-        {
-            int n = list.Count;
-            for (int i = n - 1; i > 0; i--)
-            {
-                int j = random.Next(i + 1);
-                T temp = list[i];
-                list[i] = list[j];
-                list[j] = temp;
-            }
-        }
-        
-        /// <summary>
-        /// 深拷贝二维数组
-        /// </summary>
-        private char[,] CloneTable(char[,] source)
-        {
-            int rows = source.GetLength(0);
-            int cols = source.GetLength(1);
-            char[,] result = new char[rows, cols];
-            Array.Copy(source, result, source.Length);
-            return result;
-        }
-        
-        // ========== 静态方法 ==========
-        
-        /// <summary>
-        /// 计算拼图维度
-        /// 对应Python: @staticmethod def get_puzzle_dim(words: list[str], size_fac: int)
-        /// </summary>
-        /// <param name="words">单词列表</param>
-        /// <param name="sizeFactor">尺寸因子</param>
-        /// <returns>拼图边长</returns>
-        public static int GetPuzzleDimension(List<string> words, int sizeFactor)
-        {
-            // Python: word_letter_total = sum((len(word) for word in words))
-            int wordLetterTotal = words.Sum(word => word.Length);
-            
-            // Python: return max((
-            //     int((word_letter_total * size_fac) ** 0.5),
-            //     len(max(words, key=len)),
-            // ))
-            
-            int fromLetterCount = (int)Math.Sqrt(wordLetterTotal * sizeFactor);
-            int fromLongestWord = words.Max(word => word.Length);
-            
-            return Math.Max(fromLetterCount, fromLongestWord);
-        }
-        
-        public static char[,] CreateEmptyTable(int dim)
-        {
-            return CreateEmptyTable(dim, dim);
+            isHalted = true;
         }
 
-        /// <summary>
-        /// 创建空矩形网格
-        /// </summary>
-        public static char[,] CreateEmptyTable(int rows, int cols)
-        {
-            return new char[cols, rows];
-        }
-        
-        /// <summary>
-        /// 生成所有可能的位置（正方形，兼容旧接口）
-        /// </summary>
-        public static List<Position> AllPositions(int dim, Vector2Int[] directions)
-        {
-            return AllPositions(dim, dim, directions);
-        }
+        // ========== 对外主入口 ==========
 
         /// <summary>
-        /// 生成所有可能的位置（矩形网格）
-        /// </summary>
-        public static List<Position> AllPositions(int rows, int cols, Vector2Int[] directions)
-        {
-            List<Position> positions = new List<Position>();
-            for (int x = 0; x < cols; x++)
-            {
-                for (int y = 0; y < rows; y++)
-                {
-                    foreach (var direction in directions)
-                    {
-                        positions.Add(new Position(x, y, direction));
-                    }
-                }
-            }
-            return positions;
-        }
-        
-        /// <summary>
-        /// 检查是否可以放置单词
-        /// 对应Python: @staticmethod def can_place(word: str, pos: Position, puzzle: np.array) -> (bool, int)
-        /// </summary>
-        /// <param name="word">单词</param>
-        /// <param name="pos">位置</param>
-        /// <param name="puzzle">拼图网格</param>
-        /// <returns>(是否可以放置, 交叉次数)</returns>
-        public static (bool canPlace, int intersections) CanPlace(string word, Position pos, char[,] puzzle)
-        {
-            int wordLen = word.Length;
-            int puzzleRows = puzzle.GetLength(1);
-            int puzzleCols = puzzle.GetLength(0);
-            
-            if (!pos.BoundsCheck(wordLen, puzzleRows, puzzleCols))
-            {
-                return (false, 0);
-            }
-            
-            var (xIndices, yIndices) = pos.GetIndices(wordLen);
-            
-            // 检查每个位置
-            int intersectionCount = 0;
-            for (int i = 0; i < wordLen; i++)
-            {
-                int x = xIndices[i];
-                int y = yIndices[i];
-                char currentChar = puzzle[x, y];
-                char wordChar = word[i];
-                
-                // Python逻辑:
-                // intersecion_arr = puzzle[indices] == wordarr
-                // blankspots = puzzle[indices] == ""
-                // success_arr = np.logical_or(intersecion_arr, blankspots)
-                // return False not in success_arr, int(sum(intersecion_arr))
-                
-                if (currentChar == '\0' || currentChar == ' ')
-                {
-                    // 空白位置，可以放置
-                    continue;
-                }
-                else if (currentChar == wordChar)
-                {
-                    // 匹配的字母（交叉）
-                    intersectionCount++;
-                }
-                else
-                {
-                    // 冲突，不能放置
-                    return (false, 0);
-                }
-            }
-            
-            return (true, intersectionCount);
-        }
-        
-        /// <summary>
-        /// 生成单词搜索拼图
+        /// 生成单词搜索拼图。新增参数全部可选，保持向后兼容。
         /// </summary>
         /// <param name="words">单词列表</param>
-        /// <param name="directions">方向数组（可选）</param>
-        /// <param name="sizeFactor">尺寸因子（可选，自动模式有效）</param>
-        /// <param name="intersectBias">交叉偏好（可选）</param>
-        /// <param name="fixedRows">固定行数（非null时启用矩形固定尺寸模式）</param>
-        /// <param name="fixedCols">固定列数（非null时启用矩形固定尺寸模式）</param>
+        /// <param name="directions">方向数组</param>
+        /// <param name="sizeFactor">尺寸因子（auto 模式）</param>
+        /// <param name="intersectBias">交叉偏好 -1 / 0 / +1</param>
+        /// <param name="fixedRows">固定行数</param>
+        /// <param name="fixedCols">固定列数</param>
+        /// <param name="seed">P1-1 随机种子，null 表示使用时间戳</param>
+        /// <param name="bestOfN">P0-6 尝试次数，null 表示使用默认</param>
         public WordSearchData GenerateWordSearch(
             List<string> words,
             Vector2Int[] directions = null,
             int? sizeFactor = null,
             int? intersectBias = null,
             int? fixedRows = null,
-            int? fixedCols = null)
+            int? fixedCols = null,
+            int? seed = null,
+            int? bestOfN = null)
         {
-            if (words != null)
-            {
-                this.words = words;
-            }
-            
-            this.words = this.words.Distinct().ToList();
-            
+            if (words != null) this.words = words;
             if (this.words == null || this.words.Count == 0)
-            {
                 throw new ArgumentException("No words were passed or stored in object data");
-            }
-            
-            if (directions != null)
-            {
-                this.directions = directions;
-            }
-            
-            if (intersectBias.HasValue)
-            {
-                this.intersectBias = intersectBias.Value;
-            }
 
-            // 判断模式
+            // 去重（保持原顺序）
+            var seen = new HashSet<string>();
+            var dedup = new List<string>();
+            foreach (var w in this.words)
+            {
+                if (!string.IsNullOrEmpty(w) && seen.Add(w)) dedup.Add(w);
+            }
+            this.words = dedup;
+
+            if (directions != null)     this.directions = directions;
+            if (intersectBias.HasValue) this.intersectBias = intersectBias.Value;
+
             isFixedSize = fixedRows.HasValue && fixedCols.HasValue;
 
             if (isFixedSize)
             {
-                // 固定尺寸模式：直接使用指定的行列数
                 this.rows = fixedRows.Value;
                 this.cols = fixedCols.Value;
-                this.dim = Mathf.Max(this.rows, this.cols);
+                this.dim  = Mathf.Max(this.rows, this.cols);
             }
             else
             {
-                // 自动模式：根据单词计算正方形尺寸
-                if (sizeFactor.HasValue)
-                {
-                    this.sizeFactor = sizeFactor.Value;
-                }
-                this.dim = GetPuzzleDimension(this.words, this.sizeFactor);
+                if (sizeFactor.HasValue) this.sizeFactor = sizeFactor.Value;
+                // P0-5：紧凑尺寸 + padding，视觉上立刻更松散
+                this.dim  = GetPuzzleDimension(this.words, this.sizeFactor)
+                          + Constants.AUTO_DIMENSION_PADDING;
                 this.rows = this.dim;
                 this.cols = this.dim;
             }
-            
-            ResetGenerationData();
-            
+
+            // P1-1：确定 seed
+            int baseSeed = seed ?? Guid.NewGuid().GetHashCode();
+
+            // P0-6：尝试次数
+            int attempts = Mathf.Clamp(
+                bestOfN ?? Constants.BEST_OF_N_DEFAULT,
+                1, Constants.BEST_OF_N_MAX);
+
             isHalted = false;
-            while (currentIndex < this.words.Count && !isHalted)
+
+            WordSearchData best = null;
+            float bestScore = float.NegativeInfinity;
+            int   bestSeed  = baseSeed;
+            Exception lastError = null;
+
+            for (int attempt = 0; attempt < attempts; attempt++)
+            {
+                if (isHalted) break;
+
+                int attemptSeed = unchecked(baseSeed + attempt * 9973);
+                try
+                {
+                    var candidate = GenerateSingleAttempt(attemptSeed);
+                    if (candidate == null) continue;  // 被 Halt 或失败
+
+                    candidate.seed    = attemptSeed;
+                    candidate.bestOfN = attempts;
+
+                    if (candidate.layoutScore > bestScore)
+                    {
+                        best      = candidate;
+                        bestScore = candidate.layoutScore;
+                        bestSeed  = attemptSeed;
+                    }
+                }
+                catch (InvalidOperationException ex)
+                {
+                    // 固定尺寸模式下该次尝试失败（grid 装不下），换下一个 seed 再试
+                    lastError = ex;
+                }
+            }
+
+            isHalted = true;
+
+            if (best == null)
+            {
+                if (lastError != null) throw lastError;
+                return null;  // 全部被取消
+            }
+
+            // 仅对最终选中的那张做文本渲染（省时）
+            best.puzzleText    = RenderPuzzle(best.grid, best.rows, best.cols, false, null);
+            best.answerKeyText = RenderPuzzle(best.grid, best.rows, best.cols, true, best.wordPositions);
+            best.GridToString();
+
+            return best;
+        }
+
+        // ========== 单次尝试 ==========
+
+        /// <summary>
+        /// 执行一次完整的回溯生成，返回包含网格+指标的 WordSearchData。
+        /// Auto 模式下内部可能多次 dim++ 直到能放下。
+        /// Fixed 模式下若放不下则抛 InvalidOperationException。
+        /// </summary>
+        private WordSearchData GenerateSingleAttempt(int seed)
+        {
+            this.random = new System.Random(seed);
+
+            // P0-1：按长度降序放置，稳定排序（相同长度保留原顺序）
+            placementOrder = this.words
+                .Select((w, idx) => new { w, idx })
+                .OrderByDescending(x => x.w.Length)
+                .ThenBy(x => x.idx)
+                .Select(x => x.w)
+                .ToList();
+
+            ResetGenerationData();
+
+            while (currentIndex < placementOrder.Count && !isHalted)
             {
                 var currentWorkablePos = CurrentWorkablePositions;
-                
+
                 if (currentWorkablePos == null || currentWorkablePos.Count == 0)
                 {
                     DeleteCurrentWorkablePositions();
                     currentIndex--;
-                    
+
                     if (currentIndex < 0)
                     {
                         if (isFixedSize)
                         {
-                            // 固定尺寸模式：不扩展，直接失败
                             throw new InvalidOperationException(
                                 $"网格尺寸不足（{cols}×{rows}），无法放置所有单词，请选择更大的网格或减少单词数量");
                         }
-                        else
-                        {
-                            // 自动模式：扩大正方形
-                            dim++;
-                            rows = dim;
-                            cols = dim;
-                            ResetGenerationData();
-                        }
+                        // Auto：扩大正方形
+                        dim++;
+                        rows = dim;
+                        cols = dim;
+                        ResetGenerationData();
                     }
                     else
                     {
@@ -436,30 +249,30 @@ namespace WordSearchGenerator
                 else
                 {
                     tableHistory.Add(CloneTable(table));
-                    
+
                     Position firstPos = currentWorkablePos[0];
                     var (xIndices, yIndices) = firstPos.GetIndices(CurrentWord.Length);
-                    
+
                     for (int i = 0; i < CurrentWord.Length; i++)
                     {
                         table[xIndices[i], yIndices[i]] = CurrentWord[i];
                     }
-                    
+
                     finalPlacedPositions[CurrentWord] = firstPos;
                     currentIndex++;
                 }
-                
+
                 ProgressStep();
             }
-            
-            if (isHalted)
-            {
-                return null;
-            }
-            
-            isHalted = true;
-            
-            // 填充随机字母
+
+            if (isHalted) return null;
+
+            // P1-3：评估本次布局 → 指标 + 综合分
+            var metrics = LayoutScorer.EvaluateLayout(
+                table, finalPlacedPositions, this.words,
+                rows, cols, directions?.Length ?? 8);
+
+            // 填充随机干扰字母（注意：这里仍然是纯随机，P2-1 再替换为智能填充）
             char[,] filledGrid = CloneTable(table);
             for (int x = 0; x < cols; x++)
             {
@@ -471,20 +284,22 @@ namespace WordSearchGenerator
                     }
                 }
             }
-            
-            WordSearchData data = new WordSearchData
+
+            var data = new WordSearchData
             {
-                dimension = dim,
-                rows = this.rows,
-                cols = this.cols,
-                useHardDirections = (this.directions == Constants.ALL_DIRECTIONS),
-                sizeFactor = this.sizeFactor,
-                intersectBias = this.intersectBias,
-                words = new List<string>(this.words),
-                grid = filledGrid,
-                wordPositions = new List<WordPosition>()
+                dimension         = dim,
+                rows              = this.rows,
+                cols              = this.cols,
+                useHardDirections = (this.directions == Constants.ALL_DIRECTIONS
+                                     || this.directions == Constants.EIGHT_DIRECTIONS),
+                sizeFactor        = this.sizeFactor,
+                intersectBias     = this.intersectBias,
+                words             = new List<string>(this.words),
+                grid              = filledGrid,
+                wordPositions     = new List<WordPosition>()
             };
-            
+
+            // 输出按原始输入顺序组装 wordPositions
             foreach (var word in this.words)
             {
                 if (finalPlacedPositions.TryGetValue(word, out Position pos))
@@ -492,63 +307,195 @@ namespace WordSearchGenerator
                     data.wordPositions.Add(new WordPosition(word, pos, word.Length));
                 }
             }
-            
-            data.puzzleText = RenderPuzzle(data.grid, data.rows, data.cols, false, null);
-            data.answerKeyText = RenderPuzzle(data.grid, data.rows, data.cols, true, data.wordPositions);
-            data.GridToString();
-            
+
+            LayoutScorer.WriteDifficultyFields(data, metrics, this.words);
             return data;
         }
-        
-        /// <summary>
-        /// 中止生成
-        /// </summary>
-        public void Halt()
+
+        // ========== 候选位置计算 / 打分 ==========
+
+        private void ResetGenerationData()
         {
-            isHalted = true;
+            table = CreateEmptyTable(rows, cols);
+            allWorkablePositions = new Dictionary<string, List<Position>>();
+            finalPlacedPositions = new Dictionary<string, Position>();
+            allPossiblePositions = AllPositions(rows, cols, directions);
+            tableHistory = new List<char[,]>();
+            currentIndex = 0;
         }
-        
+
+        private void ProgressStep()
+        {
+            progressCallback?.Invoke();
+        }
+
+        private string CurrentWord
+        {
+            get
+            {
+                if (placementOrder == null || currentIndex >= placementOrder.Count) return null;
+                return placementOrder[currentIndex];
+            }
+        }
+
+        /// <summary>
+        /// 当前单词的候选位置列表（带缓存）
+        /// P0-2/3/4：排序不再是单一的交叉偏好，改为 LayoutScorer.ScoreCandidate 多目标打分
+        /// </summary>
+        private List<Position> CurrentWorkablePositions
+        {
+            get
+            {
+                string currentWord = CurrentWord;
+                if (currentWord == null) return null;
+
+                if (allWorkablePositions.TryGetValue(currentWord, out var cached))
+                    return cached;
+
+                var candidates = new List<(Position pos, int intersect)>();
+                foreach (var pos in allPossiblePositions)
+                {
+                    var (canPlace, intersect) = CanPlace(currentWord, pos, table);
+                    if (canPlace) candidates.Add((pos, intersect));
+                }
+
+                // 先随机打散（给相同分数的候选一个随机 tie-break）
+                ShuffleList(candidates);
+
+                // 按多目标综合分降序排列
+                candidates.Sort((a, b) =>
+                {
+                    float sa = LayoutScorer.ScoreCandidate(
+                        currentWord, a.pos, table, rows, cols, a.intersect, intersectBias);
+                    float sb = LayoutScorer.ScoreCandidate(
+                        currentWord, b.pos, table, rows, cols, b.intersect, intersectBias);
+                    return sb.CompareTo(sa);  // 降序
+                });
+
+                var result = candidates.Select(c => c.pos).ToList();
+                allWorkablePositions[currentWord] = result;
+                return result;
+            }
+        }
+
+        private void DeleteCurrentWorkablePositions()
+        {
+            string currentWord = CurrentWord;
+            if (currentWord != null && allWorkablePositions.ContainsKey(currentWord))
+                allWorkablePositions.Remove(currentWord);
+        }
+
+        // ========== 通用工具 ==========
+
+        private void ShuffleList<T>(List<T> list)
+        {
+            for (int i = list.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                (list[i], list[j]) = (list[j], list[i]);
+            }
+        }
+
+        private char[,] CloneTable(char[,] source)
+        {
+            int r = source.GetLength(0);
+            int c = source.GetLength(1);
+            char[,] result = new char[r, c];
+            Array.Copy(source, result, source.Length);
+            return result;
+        }
+
+        // ========== 静态辅助 ==========
+
+        public static int GetPuzzleDimension(List<string> words, int sizeFactor)
+        {
+            int wordLetterTotal = words.Sum(word => word.Length);
+            int fromLetterCount = (int)Math.Sqrt(wordLetterTotal * sizeFactor);
+            int fromLongestWord = words.Max(word => word.Length);
+            return Math.Max(fromLetterCount, fromLongestWord);
+        }
+
+        public static char[,] CreateEmptyTable(int dim)
+        {
+            return CreateEmptyTable(dim, dim);
+        }
+
+        public static char[,] CreateEmptyTable(int rows, int cols)
+        {
+            return new char[cols, rows];
+        }
+
+        public static List<Position> AllPositions(int dim, Vector2Int[] directions)
+        {
+            return AllPositions(dim, dim, directions);
+        }
+
+        public static List<Position> AllPositions(int rows, int cols, Vector2Int[] directions)
+        {
+            var positions = new List<Position>();
+            for (int x = 0; x < cols; x++)
+                for (int y = 0; y < rows; y++)
+                    foreach (var direction in directions)
+                        positions.Add(new Position(x, y, direction));
+            return positions;
+        }
+
+        /// <summary>
+        /// 检查 word 能否放在 pos 上；返回 (能否放置, 交叉字母数)
+        /// </summary>
+        public static (bool canPlace, int intersections) CanPlace(string word, Position pos, char[,] puzzle)
+        {
+            int wordLen = word.Length;
+            int puzzleRows = puzzle.GetLength(1);
+            int puzzleCols = puzzle.GetLength(0);
+
+            if (!pos.BoundsCheck(wordLen, puzzleRows, puzzleCols)) return (false, 0);
+
+            var (xIndices, yIndices) = pos.GetIndices(wordLen);
+
+            int intersectionCount = 0;
+            for (int i = 0; i < wordLen; i++)
+            {
+                int x = xIndices[i];
+                int y = yIndices[i];
+                char currentChar = puzzle[x, y];
+                char wordChar = word[i];
+
+                if (currentChar == '\0' || currentChar == ' ')          continue;
+                else if (currentChar == wordChar)                        intersectionCount++;
+                else                                                     return (false, 0);
+            }
+
+            return (true, intersectionCount);
+        }
+
+        // ========== 文本渲染 ==========
+
         private string RenderPuzzle(char[,] grid, int rows, int cols, bool answerKey, List<WordPosition> wordPositions)
         {
             char[,] renderTable = CloneTable(grid);
-            
+
             if (answerKey)
             {
                 for (int x = 0; x < cols; x++)
-                {
                     for (int y = 0; y < rows; y++)
-                    {
-                        if (renderTable[x, y] == '\0' || renderTable[x, y] == ' ')
-                            renderTable[x, y] = '·';
-                        else
-                            renderTable[x, y] = char.ToLower(renderTable[x, y]);
-                    }
-                }
-                
+                        renderTable[x, y] = (renderTable[x, y] == '\0' || renderTable[x, y] == ' ')
+                            ? '·'
+                            : char.ToLower(renderTable[x, y]);
+
                 if (wordPositions != null)
-                {
                     foreach (var wp in wordPositions)
-                    {
                         renderTable[wp.startX, wp.startY] = char.ToUpper(renderTable[wp.startX, wp.startY]);
-                    }
-                }
             }
             else
             {
                 for (int x = 0; x < cols; x++)
-                {
                     for (int y = 0; y < rows; y++)
-                    {
                         if (renderTable[x, y] == '\0' || renderTable[x, y] == ' ')
-                        {
                             renderTable[x, y] = Constants.ALL_CHARS[random.Next(Constants.ALL_CHARS.Length)];
-                        }
-                    }
-                }
             }
-            
-            // 直接按行列输出，不做旋转（grid[x,y] 已是正确坐标）
-            StringBuilder sb = new StringBuilder();
+
+            var sb = new StringBuilder();
             for (int y = 0; y < rows; y++)
             {
                 for (int x = 0; x < cols; x++)
@@ -558,26 +505,7 @@ namespace WordSearchGenerator
                 }
                 if (y < rows - 1) sb.AppendLine();
             }
-            
             return sb.ToString();
-        }
-        
-        private char[,] RotateAndFlip(char[,] table, int rows, int cols)
-        {
-            // 模拟 Python: np.rot90(np.fliplr(table))
-            // numpy table[y, x]，fliplr 后 [y, cols-1-x]，rot90 后输出 shape=(cols, rows)
-            // 结果 result[y, x] = table[x, cols-1-y]
-            // 转为 C# [x, y] 坐标：result[x, y] = table[y, cols-1-x]
-            // 输出尺寸：[cols, rows]
-            char[,] result = new char[cols, rows];
-            for (int x = 0; x < cols; x++)
-            {
-                for (int y = 0; y < rows; y++)
-                {
-                    result[x, y] = table[y, cols - 1 - x];
-                }
-            }
-            return result;
         }
     }
 }

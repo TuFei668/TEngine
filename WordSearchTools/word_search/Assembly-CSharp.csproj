@@ -81,6 +81,7 @@
     <Compile Include="Assets/WordSearchGenerator/Scripts/Data/FileManager.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Core/LevelGenerationHelper.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Utils/Json/VectorTemplates.cs" />
+    <Compile Include="Assets/WordSearchGenerator/Scripts/Core/LayoutScorer.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/UI/GridDisplayHelper.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/UI/LegendItem.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Core/Generator.cs" />

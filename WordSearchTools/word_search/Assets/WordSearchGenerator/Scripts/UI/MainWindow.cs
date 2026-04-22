@@ -466,7 +466,12 @@ namespace WordSearchGenerator.UI
                 saveTxtButton.interactable = true;
                 viewAnswersButton.interactable = true;
                 
-                Debug.Log($"✓ 生成成功！拼图尺寸: {result.cols}x{result.rows}");
+                Debug.Log($"✓ 生成成功！拼图尺寸: {result.cols}x{result.rows}  " +
+                          $"| Seed={result.seed} BestOfN={result.bestOfN} " +
+                          $"LayoutScore={result.layoutScore:F2} Difficulty={result.difficultyAuto:F1}  " +
+                          $"| adjacent={result.adjacentPairs} dirs={result.directionDiversity*8:F0} " +
+                          $"rev={result.reverseRatio:P0} diag={result.diagonalRatio:P0} " +
+                          $"density={result.wordDensity:P0}");
                 // ShowNotification("生成成功！");
             }
             else

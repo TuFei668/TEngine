@@ -40,7 +40,9 @@ namespace WordSearchGenerator
             int sizeFactor,
             int intersectBias,
             int? fixedRows,
-            int? fixedCols)
+            int? fixedCols,
+            int? seed = null,
+            int? bestOfN = null)
         {
             if (level == null) throw new ArgumentNullException(nameof(level));
             if (generator == null) throw new ArgumentNullException(nameof(generator));
@@ -56,7 +58,8 @@ namespace WordSearchGenerator
                 throw new InvalidOperationException($"关卡 {level.UniqueKey} 没有任何有效单词");
 
             WordSearchData data = generator.GenerateWordSearch(
-                allWords, directions, sizeFactor, intersectBias, fixedRows, fixedCols);
+                allWords, directions, sizeFactor, intersectBias, fixedRows, fixedCols,
+                seed, bestOfN);
 
             if (data == null) return null; // 被取消
 

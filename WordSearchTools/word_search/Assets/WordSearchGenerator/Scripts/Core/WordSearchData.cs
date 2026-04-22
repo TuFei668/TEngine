@@ -167,6 +167,48 @@ namespace WordSearchGenerator
         public string puzzleText;                    // 拼图文本（带随机字母）
         public string answerKeyText;                 // 答案文本（带点）
         
+        // ========== P1 生成质量元数据 ==========
+        //
+        // 这些字段由生成器在完成布局后自动填充，用于：
+        //   1. 复现同一张谜题（seed）
+        //   2. 工具侧批量生成时按质量排序筛选
+        //   3. 让策划/QA 直观看到自动估算的难度
+        //
+        // 客户端若不识别这些字段可直接忽略，不影响玩法
+        
+        /// <summary>随机种子（P1-1）。0 表示未记录</summary>
+        public int seed;
+        
+        /// <summary>本次用于择优的 Best-of-N 次数（P0-6）</summary>
+        public int bestOfN;
+        
+        /// <summary>布局综合分（P0-6）。由 LayoutScorer.EvaluateLayout 生成，越大越松散美观</summary>
+        public float layoutScore;
+        
+        /// <summary>自动估算难度（P1-3）。加权和，范围参考 Constants.W_DIFF_*</summary>
+        public float difficultyAuto;
+        
+        /// <summary>交叉率：交叉点数 / 单词数</summary>
+        public float intersectionRatio;
+        
+        /// <summary>方向多样性：使用的不同方向数 / 可用方向总数</summary>
+        public float directionDiversity;
+        
+        /// <summary>反向词比例：反向方向的单词数 / 总单词数</summary>
+        public float reverseRatio;
+        
+        /// <summary>对角词比例：对角方向的单词数 / 总单词数</summary>
+        public float diagonalRatio;
+        
+        /// <summary>单词占用格子 / 总格子数（不含干扰字母的密度）</summary>
+        public float wordDensity;
+        
+        /// <summary>
+        /// 紧邻对数：两个不同单词的字母在 4 邻接上相邻、但不是交叉的组合数。
+        /// 越少代表布局越"松散"，视觉越清爽
+        /// </summary>
+        public int adjacentPairs;
+        
         // ========== 构造函数 ==========
         
         public WordSearchData()
