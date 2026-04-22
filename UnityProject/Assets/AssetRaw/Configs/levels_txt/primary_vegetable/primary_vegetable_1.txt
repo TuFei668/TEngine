@@ -1,0 +1,45 @@
+﻿=== Word Search Puzzle ===
+Created: 2026-04-22 10:55:27
+Puzzle ID: level-primary-vegetable-001
+Size: 9x9
+Hard Mode: False
+Size Factor: 4
+Intersect Bias: Avoid
+
+--- Words to Find ---
+CARROT
+POTATO
+TOMATO
+CABBAGE
+SPINACH
+LETTUCE
+
+--- Puzzle ---
+S B Y P E P P E R
+P C A B B A G E K
+I P H E F G B T P
+N C A R R O T O O
+A Q T B D N Z M T
+C H V S O R A A A
+H F S I H U R T T
+T W N D E O D O O
+X O L E T T U C E
+
+--- Answer Key ---
+S b y P e p p e r
+p C a b b a g e k
+i p h e f g b T P
+n C a r r o t o o
+a q t b d n z m t
+c h v s o r a a a
+h f s i h u r t t
+t w n d e o d o o
+x O L e t t u c e
+
+--- Word Positions ---
+CARROT: Start(1,3) → Right
+POTATO: Start(8,2) ↓ Down
+TOMATO: Start(7,2) ↓ Down
+CABBAGE: Start(1,1) → Right
+SPINACH: Start(0,0) ↓ Down
+LETTUCE: Start(2,8) → Right

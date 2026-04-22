@@ -57,9 +57,9 @@ namespace WordSearchGenerator
             new Vector2Int( 1,  1),  // ↘ 右下
             new Vector2Int( 0,  1),  // ↓ 下
             new Vector2Int(-1,  1),  // ↙ 左下（↗右上的反向，禁用以避免单词逆向）
-            // new Vector2Int(-1,  0),  // ← 左  （→右  的反向，禁用以避免单词逆向）
-            // new Vector2Int(-1, -1),  // ↖ 左上（↘右下的反向，禁用以避免单词逆向）
-            // new Vector2Int( 0, -1),  // ↑ 上  （↓下  的反向，禁用以避免单词逆向）
+            new Vector2Int(-1,  0),  // ← 左  （→右  的反向，禁用以避免单词逆向）
+            new Vector2Int(-1, -1),  // ↖ 左上（↘右下的反向，禁用以避免单词逆向）
+            new Vector2Int( 0, -1),  // ↑ 上  （↓下  的反向，禁用以避免单词逆向）
         };
         
         /// <summary>

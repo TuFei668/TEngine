@@ -9,6 +9,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using UnityEngine;
 using UnityEngine.UI;
@@ -58,7 +59,27 @@ namespace WordSearchGenerator.UI
         [Header("书本与关卡")]
         [SerializeField] private InputField bookIdInputField;
         [SerializeField] private Dropdown levelDifficultyDropdown;
-        
+
+        [Header("Excel 关卡（新功能）")]
+        [SerializeField] private Dropdown stageDropdown;       // 大类型
+        [SerializeField] private Dropdown themeDropdown;       // 主题
+        [SerializeField] private Dropdown levelIdDropdown;     // 关卡id
+        [SerializeField] private Button   refreshExcelButton;  // 可选：手动刷新 Excel
+
+        // PlayerPrefs Keys（记忆上次三级选择）
+        private const string PP_STAGE_INDEX   = "WSG_Last_StageIndex";
+        private const string PP_THEME_INDEX   = "WSG_Last_ThemeIndex";
+        private const string PP_LEVEL_INDEX   = "WSG_Last_LevelIdIndex";
+        private const string PP_SIGNATURE     = "WSG_Last_ExcelSignature";
+
+        // Excel 解析数据
+        private List<PackConfig> excelPacks = new List<PackConfig>();
+        private List<string> stageKeys = new List<string>();        // 对应 excelPacks 顺序
+        private List<string> currentThemeKeys = new List<string>(); // 当前 stage 下主题 key 顺序
+        private List<int>    currentLevelIds  = new List<int>();    // 当前 theme 下关卡id 顺序
+        private LevelConfig currentLevel;                            // 当前三级选择对应的关卡
+        private bool isRestoringSelection = false;                   // 恢复选择期间抑制事件
+
         // 生成器和数据
         private Generator generator;
         private WordSearchData currentPuzzleData;
@@ -77,6 +98,8 @@ namespace WordSearchGenerator.UI
         {
             InitializeUI();
             generator = new Generator(() => UpdateProgress());
+
+            InitializeExcelDropdowns();
         }
         
         /// <summary>
@@ -251,20 +274,27 @@ namespace WordSearchGenerator.UI
         }
         
         /// <summary>
-        /// 生成按钮点击
+        /// 生成按钮点击：
+        /// - 若已选择 Excel 关卡，则始终用 Excel 数据生成（输入框仅预览）
+        /// - 否则回退到手动输入的单词
         /// </summary>
         void OnGenerateButtonClick()
         {
             if (isGenerating) return;
-            
+
+            if (currentLevel != null)
+            {
+                StartGenerationFromLevel(currentLevel);
+                return;
+            }
+
             var words = GetCurrentWords();
             if (words.Count == 0)
             {
                 Debug.LogWarning("没有输入单词");
                 return;
             }
-            
-            // 开始生成
+
             StartGeneration(words);
         }
         
@@ -280,7 +310,8 @@ namespace WordSearchGenerator.UI
         }
         
         /// <summary>
-        /// 保存按钮点击（同时写加密json、明文json、明文txt）
+        /// 保存按钮点击：将当前谜题保存为加密二进制 .bytes 文件
+        /// 路径：{项目父目录}/level_config/{pack_id}_{theme_en}/{pack_id}_{theme_en}_{level_id}.bytes
         /// </summary>
         void OnSaveButtonClick()
         {
@@ -290,17 +321,23 @@ namespace WordSearchGenerator.UI
                 return;
             }
 
-            string bookId = bookIdInputField != null ? bookIdInputField.text.Trim() : "";
-            if (string.IsNullOrEmpty(bookId))
+            if (string.IsNullOrEmpty(currentPuzzleData.pack_id) ||
+                string.IsNullOrEmpty(currentPuzzleData.theme_en) ||
+                currentPuzzleData.level_id <= 0)
             {
-                ShowNotification("请先填写 Book ID");
+                ShowNotification("当前谜题缺少 Excel 元数据（pack/theme/levelId），无法保存。请先通过 Dropdown 选择关卡后重新生成。");
                 return;
             }
 
-            string difficulty = GetDifficultyString();
-
-            bool ok = FileManager.SavePuzzleWithBookId(currentPuzzleData, bookId, difficulty);
-            ShowNotification(ok ? $"保存成功 [{bookId} / {difficulty}]" : "保存失败，请查看控制台");
+            string path = FileManager.SavePuzzleAsEncryptedBytes(currentPuzzleData);
+            if (!string.IsNullOrEmpty(path))
+            {
+                ShowNotification($"保存成功: {System.IO.Path.GetFileName(path)}");
+            }
+            else
+            {
+                ShowNotification("保存失败，请查看控制台");
+            }
         }
         
         /// <summary>
@@ -628,8 +665,397 @@ namespace WordSearchGenerator.UI
                 bookIdInputField = FindComp<InputField>("Header/BookIdInputField");
             if (levelDifficultyDropdown == null)
                 levelDifficultyDropdown = FindComp<Dropdown>("Header/LevelDifficultyDropdown");
+
+            // ===== Excel 三级 Dropdown（ExcelPanel 下） =====
+            if (stageDropdown == null)
+                stageDropdown = FindComp<Dropdown>("ExcelPanel/StageDropdown");
+            if (themeDropdown == null)
+                themeDropdown = FindComp<Dropdown>("ExcelPanel/ThemeDropdown");
+            if (levelIdDropdown == null)
+                levelIdDropdown = FindComp<Dropdown>("ExcelPanel/LevelIdDropdown");
+            if (refreshExcelButton == null)
+                refreshExcelButton = FindComp<Button>("ExcelPanel/RefreshExcelButton");
         }
-        
+
+        // ==================== Excel 级联 Dropdown 相关 ====================
+
+        /// <summary>
+        /// 初始化 Excel 三级 Dropdown：扫描目录 + 填充 Dropdown1 + 恢复上次选择
+        /// </summary>
+        void InitializeExcelDropdowns()
+        {
+            if (stageDropdown != null)
+                stageDropdown.onValueChanged.AddListener(OnStageChanged);
+            if (themeDropdown != null)
+                themeDropdown.onValueChanged.AddListener(OnThemeChanged);
+            if (levelIdDropdown != null)
+                levelIdDropdown.onValueChanged.AddListener(OnLevelIdChanged);
+            if (refreshExcelButton != null)
+                refreshExcelButton.onClick.AddListener(ReloadExcelFiles);
+
+            ReloadExcelFiles();
+        }
+
+        /// <summary>
+        /// 扫描 Assets/Excel 目录，重建 stageDropdown，恢复上次选择
+        /// </summary>
+        void ReloadExcelFiles()
+        {
+            excelPacks = ExcelLevelReader.ReadAllExcelsInDirectory(ExcelLevelReader.DefaultExcelDirectory);
+
+            stageKeys.Clear();
+            var stageLabels = new List<string>();
+            foreach (var pack in excelPacks)
+            {
+                // 以 stage 原名作为唯一 key（同一 stage 如在多个文件中出现应该合并；当前按首次出现为准）
+                if (stageKeys.Contains(pack.stage)) continue;
+                stageKeys.Add(pack.stage);
+                stageLabels.Add(pack.stage);
+            }
+
+            if (stageDropdown == null) return;
+
+            isRestoringSelection = true;
+            try
+            {
+                stageDropdown.ClearOptions();
+                stageDropdown.AddOptions(stageLabels);
+
+                if (stageKeys.Count == 0)
+                {
+                    themeDropdown?.ClearOptions();
+                    levelIdDropdown?.ClearOptions();
+                    currentLevel = null;
+                    Debug.LogWarning($"[MainWindow] 未在 {ExcelLevelReader.DefaultExcelDirectory} 下找到可解析的 xlsx 文件");
+                    return;
+                }
+
+                string currentSig = BuildExcelSignature();
+                string savedSig = PlayerPrefs.GetString(PP_SIGNATURE, "");
+                int stageIdx = 0, themeIdx = 0, levelIdx = 0;
+                if (savedSig == currentSig)
+                {
+                    stageIdx = PlayerPrefs.GetInt(PP_STAGE_INDEX, 0);
+                    themeIdx = PlayerPrefs.GetInt(PP_THEME_INDEX, 0);
+                    levelIdx = PlayerPrefs.GetInt(PP_LEVEL_INDEX, 0);
+                }
+                else
+                {
+                    PlayerPrefs.SetString(PP_SIGNATURE, currentSig);
+                }
+
+                stageIdx = Mathf.Clamp(stageIdx, 0, stageKeys.Count - 1);
+                stageDropdown.value = stageIdx;
+                stageDropdown.RefreshShownValue();
+
+                RebuildThemeDropdown(stageIdx, themeIdx, levelIdx);
+            }
+            finally
+            {
+                isRestoringSelection = false;
+            }
+
+            TryAutoLoadOrPrompt();
+        }
+
+        /// <summary>
+        /// Excel 签名：用于判断 Excel 内容是否发生变化（决定是否恢复选择）
+        /// </summary>
+        string BuildExcelSignature()
+        {
+            var sb = new System.Text.StringBuilder();
+            foreach (var pack in excelPacks)
+            {
+                sb.Append(pack.stage).Append(':');
+                foreach (var theme in pack.themeOrder)
+                {
+                    sb.Append(theme).Append('=');
+                    if (pack.themes.TryGetValue(theme, out var dict))
+                    {
+                        foreach (var kv in dict) sb.Append(kv.Key).Append(',');
+                    }
+                    sb.Append(';');
+                }
+                sb.Append('|');
+            }
+            return sb.ToString();
+        }
+
+        void RebuildThemeDropdown(int stageIndex, int themeIndex = 0, int levelIndex = 0)
+        {
+            currentThemeKeys.Clear();
+            if (themeDropdown == null) return;
+
+            if (stageIndex < 0 || stageIndex >= stageKeys.Count)
+            {
+                themeDropdown.ClearOptions();
+                RebuildLevelIdDropdown(-1);
+                return;
+            }
+
+            string stageKey = stageKeys[stageIndex];
+            // 合并所有同 stage 的 pack（理论上同名 stage 一般只来自一个文件）
+            var themeLabels = new List<string>();
+            foreach (var pack in excelPacks)
+            {
+                if (pack.stage != stageKey) continue;
+                foreach (var t in pack.themeOrder)
+                {
+                    if (!currentThemeKeys.Contains(t))
+                    {
+                        currentThemeKeys.Add(t);
+                        // 展示英文（主）+ 中文（辅）
+                        var firstLevel = pack.themes[t].Values.FirstOrDefault();
+                        string zh = firstLevel != null ? firstLevel.themeZh : "";
+                        themeLabels.Add(string.IsNullOrEmpty(zh) ? t : $"{t}  ({zh})");
+                    }
+                }
+            }
+
+            themeDropdown.ClearOptions();
+            themeDropdown.AddOptions(themeLabels);
+
+            if (currentThemeKeys.Count == 0)
+            {
+                RebuildLevelIdDropdown(-1);
+                return;
+            }
+
+            themeIndex = Mathf.Clamp(themeIndex, 0, currentThemeKeys.Count - 1);
+            themeDropdown.value = themeIndex;
+            themeDropdown.RefreshShownValue();
+
+            RebuildLevelIdDropdown(themeIndex, levelIndex);
+        }
+
+        void RebuildLevelIdDropdown(int themeIndex, int levelIndex = 0)
+        {
+            currentLevelIds.Clear();
+            if (levelIdDropdown == null) return;
+
+            if (themeIndex < 0 || themeIndex >= currentThemeKeys.Count ||
+                stageDropdown == null || stageDropdown.value < 0 || stageDropdown.value >= stageKeys.Count)
+            {
+                levelIdDropdown.ClearOptions();
+                currentLevel = null;
+                return;
+            }
+
+            string stageKey = stageKeys[stageDropdown.value];
+            string themeKey = currentThemeKeys[themeIndex];
+
+            foreach (var pack in excelPacks)
+            {
+                if (pack.stage != stageKey) continue;
+                if (!pack.themes.TryGetValue(themeKey, out var dict)) continue;
+                foreach (var kv in dict)
+                    if (!currentLevelIds.Contains(kv.Key))
+                        currentLevelIds.Add(kv.Key);
+            }
+            currentLevelIds.Sort();
+
+            var labels = new List<string>();
+            foreach (var id in currentLevelIds) labels.Add(id.ToString());
+
+            levelIdDropdown.ClearOptions();
+            levelIdDropdown.AddOptions(labels);
+
+            if (currentLevelIds.Count == 0)
+            {
+                currentLevel = null;
+                return;
+            }
+
+            levelIndex = Mathf.Clamp(levelIndex, 0, currentLevelIds.Count - 1);
+            levelIdDropdown.value = levelIndex;
+            levelIdDropdown.RefreshShownValue();
+
+            UpdateCurrentLevel();
+        }
+
+        void UpdateCurrentLevel()
+        {
+            currentLevel = null;
+            if (stageDropdown == null || themeDropdown == null || levelIdDropdown == null) return;
+            if (stageKeys.Count == 0 || currentThemeKeys.Count == 0 || currentLevelIds.Count == 0) return;
+
+            string stageKey = stageKeys[stageDropdown.value];
+            string themeKey = currentThemeKeys[themeDropdown.value];
+            int levelId = currentLevelIds[levelIdDropdown.value];
+
+            foreach (var pack in excelPacks)
+            {
+                if (pack.stage != stageKey) continue;
+                if (pack.themes.TryGetValue(themeKey, out var dict) &&
+                    dict.TryGetValue(levelId, out var level))
+                {
+                    currentLevel = level;
+                    return;
+                }
+            }
+        }
+
+        void OnStageChanged(int idx)
+        {
+            if (isRestoringSelection) return;
+            SaveSelectionToPrefs();
+            isRestoringSelection = true;
+            try { RebuildThemeDropdown(idx); }
+            finally { isRestoringSelection = false; }
+            SaveSelectionToPrefs();
+            TryAutoLoadOrPrompt();
+        }
+
+        void OnThemeChanged(int idx)
+        {
+            if (isRestoringSelection) return;
+            SaveSelectionToPrefs();
+            isRestoringSelection = true;
+            try { RebuildLevelIdDropdown(idx); }
+            finally { isRestoringSelection = false; }
+            SaveSelectionToPrefs();
+            TryAutoLoadOrPrompt();
+        }
+
+        void OnLevelIdChanged(int idx)
+        {
+            if (isRestoringSelection) return;
+            UpdateCurrentLevel();
+            SaveSelectionToPrefs();
+            TryAutoLoadOrPrompt();
+        }
+
+        void SaveSelectionToPrefs()
+        {
+            if (stageDropdown != null)   PlayerPrefs.SetInt(PP_STAGE_INDEX, stageDropdown.value);
+            if (themeDropdown != null)   PlayerPrefs.SetInt(PP_THEME_INDEX, themeDropdown.value);
+            if (levelIdDropdown != null) PlayerPrefs.SetInt(PP_LEVEL_INDEX, levelIdDropdown.value);
+            PlayerPrefs.Save();
+        }
+
+        /// <summary>
+        /// 根据当前 currentLevel 决定：文件存在则加载、不存在则填预览并自动生成一次
+        /// </summary>
+        void TryAutoLoadOrPrompt()
+        {
+            UpdateCurrentLevel();
+            if (currentLevel == null) return;
+
+            // 预览：把三类词填到 wordInputField（只作为显示，生成时走 Excel 数据）
+            PreviewLevelInInputField(currentLevel);
+
+            if (FileManager.EncryptedBytesExists(currentLevel.packId, currentLevel.themeEn, currentLevel.levelId))
+            {
+                var data = FileManager.LoadPuzzleFromEncryptedBytes(
+                    currentLevel.packId, currentLevel.themeEn, currentLevel.levelId);
+                if (data != null)
+                {
+                    LoadExistingPuzzle(data);
+                    return;
+                }
+                Debug.LogWarning($"[MainWindow] 解密失败，将重新生成: {currentLevel.UniqueKey}");
+            }
+
+            // 无文件或加载失败 → 自动生成一次
+            if (!isGenerating)
+                StartGenerationFromLevel(currentLevel);
+        }
+
+        /// <summary>
+        /// 把关卡三类词合并预览到 wordInputField（只读预览用途）
+        /// </summary>
+        void PreviewLevelInInputField(LevelConfig level)
+        {
+            if (wordInputField == null || level == null) return;
+
+            var sb = new System.Text.StringBuilder();
+            if (level.words.Count > 0)
+            {
+                sb.AppendLine("# Words");
+                foreach (var w in level.words) sb.AppendLine(w);
+            }
+            if (level.bonusWords.Count > 0)
+            {
+                sb.AppendLine("# BonusWords");
+                foreach (var w in level.bonusWords) sb.AppendLine(w);
+            }
+            if (level.hiddenWords.Count > 0)
+            {
+                sb.AppendLine("# HiddenWords");
+                foreach (var w in level.hiddenWords) sb.AppendLine(w);
+            }
+            wordInputField.text = sb.ToString().TrimEnd();
+            if (wordCountText != null)
+                wordCountText.text = $"Words(Main/Bonus/Hidden): {level.words.Count}/{level.bonusWords.Count}/{level.hiddenWords.Count}";
+        }
+
+        /// <summary>
+        /// 加载已保存的谜题：展示网格与文本，不触发生成线程
+        /// </summary>
+        void LoadExistingPuzzle(WordSearchData data)
+        {
+            currentPuzzleData = data;
+
+            if (resultGridContainer != null && gridCellPrefab != null)
+            {
+                GridDisplayHelper.DisplayPuzzleGrid(data, resultGridContainer, resultGridLayout,
+                    gridCellPrefab, resultCellSize, resultCellSpacing);
+            }
+            if (resultText != null)
+            {
+                resultText.text = $"=== Loaded Puzzle ({data.puzzleId}) ===\n\n{data.puzzleText}";
+            }
+
+            saveJsonButton.interactable = true;
+            saveTxtButton.interactable = true;
+            viewAnswersButton.interactable = true;
+
+            if (progressText != null) progressText.text = "Loaded";
+            ShowNotification($"已加载已保存关卡: {data.puzzleId}");
+        }
+
+        /// <summary>
+        /// 基于 Excel 关卡配置启动后台生成（线程）
+        /// </summary>
+        void StartGenerationFromLevel(LevelConfig level)
+        {
+            if (level == null) return;
+            if (isGenerating) return;
+
+            isGenerating = true;
+            UpdateUIForGeneration(true);
+
+            if (resultText != null) resultText.text = "";
+
+            var directions   = useHardToggle.isOn ? Constants.ALL_DIRECTIONS : Constants.EASY_DIRECTIONS;
+            int sizeFactor   = Mathf.RoundToInt(sizeFactorSlider.value);
+            int intersectBias = GetIntersectBias();
+            var (fixedRows, fixedCols) = GetGridSize();
+
+            int totalWords = level.words.Count + level.bonusWords.Count + level.hiddenWords.Count;
+            progressBar.value = 0;
+            progressBar.maxValue = Mathf.Max(1, totalWords);
+
+            var levelSnapshot = level; // 捕获
+
+            generatorThread = new Thread(() =>
+            {
+                try
+                {
+                    var result = LevelGenerationHelper.GenerateFromLevelConfig(
+                        levelSnapshot, generator, directions, sizeFactor, intersectBias, fixedRows, fixedCols);
+
+                    UnityMainThreadDispatcher.Instance.Enqueue(() => OnGenerationComplete(result));
+                }
+                catch (System.Exception e)
+                {
+                    UnityMainThreadDispatcher.Instance.Enqueue(() => OnGenerationError(e));
+                }
+            });
+            generatorThread.IsBackground = true;
+            generatorThread.Start();
+        }
+
         void OnDestroy()
         {
             // 清理线程

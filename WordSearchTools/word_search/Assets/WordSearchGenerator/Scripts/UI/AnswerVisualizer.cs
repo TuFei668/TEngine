@@ -100,11 +100,34 @@ namespace WordSearchGenerator.UI
             if (gridCellPrefab != null && gridContainer != null)
                 GridDisplayHelper.DisplayPuzzleGrid(data, gridContainer, gridLayout, gridCellPrefab, cellSize, cellSpacing);
             
-            // 创建图例（需要 wordColors，Helper 已写入 data.wordPositions[].wordColor）
+            // 合并三类词作为图例（Helper 已写入每项的 wordColor）
+            var legendList = new List<WordPosition>();
             Dictionary<string, Color> wordColors = new Dictionary<string, Color>();
-            foreach (var wp in data.wordPositions)
-                wordColors[wp.word] = wp.wordColor.ToColor();
-            CreateLegend(data.wordPositions, wordColors);
+            if (data.wordPositions != null)
+            {
+                foreach (var wp in data.wordPositions)
+                {
+                    legendList.Add(wp);
+                    wordColors[wp.word] = wp.wordColor.ToColor();
+                }
+            }
+            if (data.bonusWords != null)
+            {
+                foreach (var wp in data.bonusWords)
+                {
+                    legendList.Add(wp);
+                    wordColors[wp.word] = wp.wordColor.ToColor();
+                }
+            }
+            if (data.hiddenWords != null)
+            {
+                foreach (var wp in data.hiddenWords)
+                {
+                    legendList.Add(wp);
+                    wordColors[wp.word] = wp.wordColor.ToColor();
+                }
+            }
+            CreateLegend(legendList, wordColors);
             
             if (puzzleInfoText != null)
                 puzzleInfoText.text = $"Puzzle ID: {data.puzzleId.Substring(0, 8)} | Created: {data.createTime} | Size: {data.cols}x{data.rows}";

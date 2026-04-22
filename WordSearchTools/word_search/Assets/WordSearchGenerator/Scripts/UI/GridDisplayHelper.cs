@@ -76,16 +76,52 @@ namespace WordSearchGenerator.UI
             layout.cellSize = new Vector2(cs, cs);
             layout.spacing = new Vector2(sp, sp);
 
+            // 收集三类词的位置与颜色：
+            //   - 主 words：若预先未上色（wordColor 接近白色/透明0），则用 ColorManager 动态分配彩色；
+            //              若已上色（例如 LevelGenerationHelper 已经配色），则保留原色。
+            //   - bonusWords / hiddenWords：一律保留已有颜色（灰 / 深灰）。
+            // 合并到一个 allPositions 列表，统一参与格子着色。
             ColorManager colorManager = new ColorManager();
-            Dictionary<string, Color> wordColors = new Dictionary<string, Color>();
-            for (int i = 0; i < data.wordPositions.Count; i++)
+            List<WordPosition> allPositions = new List<WordPosition>();
+
+            if (data.wordPositions != null)
             {
-                var wordPos = data.wordPositions[i];
-                Color color = data.wordPositions.Count > colorManager.PaletteSize
-                    ? colorManager.GenerateColor(i, data.wordPositions.Count)
-                    : colorManager.GetColor(i);
-                wordPos.wordColor = ColorSerializable.FromColor(color);
-                wordColors[wordPos.word] = color;
+                int mainCount = data.wordPositions.Count;
+                for (int i = 0; i < mainCount; i++)
+                {
+                    var wp = data.wordPositions[i];
+                    if (wp == null) continue;
+                    if (!HasValidColor(wp.wordColor))
+                    {
+                        Color color = mainCount > colorManager.PaletteSize
+                            ? colorManager.GenerateColor(i, mainCount)
+                            : colorManager.GetColor(i);
+                        wp.wordColor = ColorSerializable.FromColor(color);
+                    }
+                    allPositions.Add(wp);
+                }
+            }
+
+            if (data.bonusWords != null)
+            {
+                foreach (var wp in data.bonusWords)
+                {
+                    if (wp == null) continue;
+                    if (!HasValidColor(wp.wordColor))
+                        wp.wordColor = ColorSerializable.FromColor(LevelGenerationHelper.BonusColor);
+                    allPositions.Add(wp);
+                }
+            }
+
+            if (data.hiddenWords != null)
+            {
+                foreach (var wp in data.hiddenWords)
+                {
+                    if (wp == null) continue;
+                    if (!HasValidColor(wp.wordColor))
+                        wp.wordColor = ColorSerializable.FromColor(LevelGenerationHelper.HiddenColor);
+                    allPositions.Add(wp);
+                }
             }
 
             int rows = data.rows;
@@ -94,7 +130,7 @@ namespace WordSearchGenerator.UI
             {
                 for (int x = 0; x < cols; x++)
                 {
-                    CreateCell(x, y, data, wordColors, gridContainer, gridCellPrefab);
+                    CreateCell(x, y, data, allPositions, gridContainer, gridCellPrefab);
                 }
             }
 
@@ -114,7 +150,7 @@ namespace WordSearchGenerator.UI
             }
         }
 
-        static void CreateCell(int x, int y, WordSearchData data, Dictionary<string, Color> wordColors,
+        static void CreateCell(int x, int y, WordSearchData data, List<WordPosition> allPositions,
             Transform gridContainer, GameObject gridCellPrefab)
         {
             GameObject cell = Object.Instantiate(gridCellPrefab, gridContainer);
@@ -128,13 +164,14 @@ namespace WordSearchGenerator.UI
             cellScript.SetLetter(data.grid[x, y]);
 
             List<Color> cellColors = new List<Color>();
-            foreach (var wordPos in data.wordPositions)
+            foreach (var wordPos in allPositions)
             {
+                if (wordPos == null || wordPos.cellPositions == null) continue;
                 foreach (var cellPos in wordPos.cellPositions)
                 {
                     if (cellPos.x == x && cellPos.y == y)
                     {
-                        cellColors.Add(wordColors[wordPos.word]);
+                        cellColors.Add(wordPos.wordColor != null ? wordPos.wordColor.ToColor() : Color.gray);
                         break;
                     }
                 }
@@ -153,6 +190,19 @@ namespace WordSearchGenerator.UI
                 cellScript.SetBackgroundColor(new Color(0.85f, 0.85f, 0.85f, 1f));
                 cellScript.SetTextColor(new Color(0.2f, 0.2f, 0.2f));
             }
+        }
+
+        /// <summary>
+        /// 判定一个 ColorSerializable 是否已经是有意义的颜色（而不是默认白色占位）。
+        /// 规则：alpha &gt; 0 且不是 (1,1,1,*)。
+        /// </summary>
+        static bool HasValidColor(ColorSerializable c)
+        {
+            if (c == null) return false;
+            if (c.a <= 0f) return false;
+            // 默认构造时是白色 (1,1,1,1)。只要 r/g/b 任意不是 1，或 a 不是 1，都视作已经被显式上色。
+            bool isDefaultWhite = Mathf.Approximately(c.r, 1f) && Mathf.Approximately(c.g, 1f) && Mathf.Approximately(c.b, 1f) && Mathf.Approximately(c.a, 1f);
+            return !isDefaultWhite;
         }
     }
 }

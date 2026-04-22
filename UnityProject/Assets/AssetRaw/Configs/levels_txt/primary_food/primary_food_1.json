@@ -1,0 +1,336 @@
+﻿{
+    "puzzleId": "level-primary-food-001",
+    "level_id": 1,
+    "pack_id": "primary",
+    "stage": "primary",
+    "theme": "食物",
+    "theme_en": "food",
+    "difficulty": 1,
+    "type": "normal",
+    "bonus_coin_multiplier": 1,
+    "createTime": "2026-04-22 10:55:16",
+    "generateTime": "2026-04-22 10:55:16",
+    "version": "1.0",
+    "dimension": 9,
+    "rows": 9,
+    "cols": 9,
+    "useHardDirections": false,
+    "sizeFactor": 4,
+    "intersectBias": -1,
+    "gridString": "LWYEARSHX|ZOFXFSAIP|TRADDUHHI|HLSTILLOZ|IDWHYQDRW|NSTUDYFKT|GMDWSUCHX|SDHGCLNLF|TURNTTXDJ",
+    "words": [
+        "STILL",
+        "STUDY",
+        "SUCH",
+        "THINGS",
+        "TURN",
+        "SHOW"
+    ],
+    "wordPositions": [
+        {
+            "word": "STILL",
+            "startX": 2,
+            "startY": 3,
+            "directionX": 1,
+            "directionY": 0,
+            "cellPositions": [
+                {
+                    "x": 2,
+                    "y": 3
+                },
+                {
+                    "x": 3,
+                    "y": 3
+                },
+                {
+                    "x": 4,
+                    "y": 3
+                },
+                {
+                    "x": 5,
+                    "y": 3
+                },
+                {
+                    "x": 6,
+                    "y": 3
+                }
+            ],
+            "wordColor": {
+                "r": 1.0,
+                "g": 0.0,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "STUDY",
+            "startX": 1,
+            "startY": 5,
+            "directionX": 1,
+            "directionY": 0,
+            "cellPositions": [
+                {
+                    "x": 1,
+                    "y": 5
+                },
+                {
+                    "x": 2,
+                    "y": 5
+                },
+                {
+                    "x": 3,
+                    "y": 5
+                },
+                {
+                    "x": 4,
+                    "y": 5
+                },
+                {
+                    "x": 5,
+                    "y": 5
+                }
+            ],
+            "wordColor": {
+                "r": 0.0,
+                "g": 0.5,
+                "b": 1.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "SUCH",
+            "startX": 4,
+            "startY": 6,
+            "directionX": 1,
+            "directionY": 0,
+            "cellPositions": [
+                {
+                    "x": 4,
+                    "y": 6
+                },
+                {
+                    "x": 5,
+                    "y": 6
+                },
+                {
+                    "x": 6,
+                    "y": 6
+                },
+                {
+                    "x": 7,
+                    "y": 6
+                }
+            ],
+            "wordColor": {
+                "r": 0.0,
+                "g": 0.800000011920929,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "THINGS",
+            "startX": 0,
+            "startY": 2,
+            "directionX": 0,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 0,
+                    "y": 2
+                },
+                {
+                    "x": 0,
+                    "y": 3
+                },
+                {
+                    "x": 0,
+                    "y": 4
+                },
+                {
+                    "x": 0,
+                    "y": 5
+                },
+                {
+                    "x": 0,
+                    "y": 6
+                },
+                {
+                    "x": 0,
+                    "y": 7
+                }
+            ],
+            "wordColor": {
+                "r": 1.0,
+                "g": 0.6000000238418579,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "TURN",
+            "startX": 0,
+            "startY": 8,
+            "directionX": 1,
+            "directionY": 0,
+            "cellPositions": [
+                {
+                    "x": 0,
+                    "y": 8
+                },
+                {
+                    "x": 1,
+                    "y": 8
+                },
+                {
+                    "x": 2,
+                    "y": 8
+                },
+                {
+                    "x": 3,
+                    "y": 8
+                }
+            ],
+            "wordColor": {
+                "r": 0.6000000238418579,
+                "g": 0.0,
+                "b": 1.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "SHOW",
+            "startX": 5,
+            "startY": 1,
+            "directionX": 1,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 5,
+                    "y": 1
+                },
+                {
+                    "x": 6,
+                    "y": 2
+                },
+                {
+                    "x": 7,
+                    "y": 3
+                },
+                {
+                    "x": 8,
+                    "y": 4
+                }
+            ],
+            "wordColor": {
+                "r": 1.0,
+                "g": 0.800000011920929,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        }
+    ],
+    "bonusWords": [
+        {
+            "word": "YEARS",
+            "startX": 2,
+            "startY": 0,
+            "directionX": 1,
+            "directionY": 0,
+            "cellPositions": [
+                {
+                    "x": 2,
+                    "y": 0
+                },
+                {
+                    "x": 3,
+                    "y": 0
+                },
+                {
+                    "x": 4,
+                    "y": 0
+                },
+                {
+                    "x": 5,
+                    "y": 0
+                },
+                {
+                    "x": 6,
+                    "y": 0
+                }
+            ],
+            "wordColor": {
+                "r": 0.5,
+                "g": 0.5,
+                "b": 0.5,
+                "a": 0.6000000238418579
+            }
+        }
+    ],
+    "hiddenWords": [
+        {
+            "word": "WORLD",
+            "startX": 1,
+            "startY": 0,
+            "directionX": 0,
+            "directionY": 1,
+            "cellPositions": [
+                {
+                    "x": 1,
+                    "y": 0
+                },
+                {
+                    "x": 1,
+                    "y": 1
+                },
+                {
+                    "x": 1,
+                    "y": 2
+                },
+                {
+                    "x": 1,
+                    "y": 3
+                },
+                {
+                    "x": 1,
+                    "y": 4
+                }
+            ],
+            "wordColor": {
+                "r": 0.25,
+                "g": 0.25,
+                "b": 0.25,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "ADD",
+            "startX": 2,
+            "startY": 2,
+            "directionX": 1,
+            "directionY": 0,
+            "cellPositions": [
+                {
+                    "x": 2,
+                    "y": 2
+                },
+                {
+                    "x": 3,
+                    "y": 2
+                },
+                {
+                    "x": 4,
+                    "y": 2
+                }
+            ],
+            "wordColor": {
+                "r": 0.25,
+                "g": 0.25,
+                "b": 0.25,
+                "a": 0.6000000238418579
+            }
+        }
+    ],
+    "puzzleText": "L W Y E A R S H X\nZ O F X F S A I P\nT R A D D U H H I\nH L S T I L L O Z\nI D W H Y Q D R W\nN S T U D Y F K T\nG M D W S U C H X\nS D H G C L N L F\nT U R N T T X D J",
+    "answerKeyText": "l W Y e a r s h x\nz o f x f S a i p\nT r A d d u h h i\nh l S t i l l o z\ni d w h y q d r w\nn S t u d y f k t\ng m d w S u c h x\ns d h g c l n l f\nT u r n t t x d j"
+}

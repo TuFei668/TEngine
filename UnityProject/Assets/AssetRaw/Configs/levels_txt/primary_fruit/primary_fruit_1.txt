@@ -1,0 +1,41 @@
+﻿=== Word Search Puzzle ===
+Created: 2026-04-22 10:54:53
+Puzzle ID: level-primary-fruit-001
+Size: 9x9
+Hard Mode: False
+Size Factor: 4
+Intersect Bias: Avoid
+
+--- Words to Find ---
+APPLE
+BANANA
+ORANGE
+MANGO
+
+--- Puzzle ---
+P M A N G O B X O
+A O D Y G A B W W
+P F H F N J R E N
+A E B A Y G G F P
+Y R N X C N A T G
+A A N X A Y U H F
+S H A R A P P L E
+A G O N W C U M G
+P I N E A P P L E
+
+--- Answer Key ---
+P M a n g o B x O
+a o d y g a b w w
+p f h f n j r e n
+a e b a y g g f p
+y r n x c n a t g
+a a n x a y u h f
+s h a r A p p l e
+a g O n w c u m g
+P i n e a p p l e
+
+--- Word Positions ---
+APPLE: Start(4,6) → Right
+BANANA: Start(6,0) ↙ Down-Left
+ORANGE: Start(2,7) ↗ Up-Right
+MANGO: Start(1,0) → Right

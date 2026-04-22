@@ -75,8 +75,11 @@
     <Compile Include="Assets/WordSearchGenerator/Scripts/Core/WordSearchData.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Utils/string_util/StringUtil.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Utils/Json/JSONObject.cs" />
+    <Compile Include="Assets/WordSearchGenerator/Scripts/Data/ExcelLevelReader.cs" />
+    <Compile Include="Assets/WordSearchGenerator/Scripts/Data/LevelConfig.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Utils/AES/AES.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Data/FileManager.cs" />
+    <Compile Include="Assets/WordSearchGenerator/Scripts/Core/LevelGenerationHelper.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Utils/Json/VectorTemplates.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/UI/GridDisplayHelper.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/UI/LegendItem.cs" />
@@ -432,6 +435,14 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Library/PackageCache/com.unity.nuget.newtonsoft-json@3.2.1/Runtime/Newtonsoft.Json.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Excel">
+      <HintPath>Assets/Plugins/excel_dll/Excel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>Assets/Plugins/excel_dll/ICSharpCode.SharpZipLib.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">

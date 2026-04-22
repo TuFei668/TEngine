@@ -527,6 +527,238 @@ namespace WordSearchGenerator
             return LoadPuzzleFromBookId(latestBookId, files[0]);
         }
 
+        // ========== 加密二进制 (.bytes) 存储 ==========
+
+        /// <summary>
+        /// 获取加密二进制文件所在目录：{ProjectSiblingRoot}/level_config/{packId}_{themeEn}/
+        /// </summary>
+        public static string GetEncryptedBytesDirectory(string packId, string themeEn)
+        {
+            return Path.Combine(ProjectSiblingRoot, "level_config", $"{packId}_{themeEn}");
+        }
+
+        /// <summary>
+        /// 获取明文调试文件（.json / .txt）所在目录：{ProjectSiblingRoot}/level_config_txt/{packId}_{themeEn}/
+        /// </summary>
+        public static string GetPlainTextDirectory(string packId, string themeEn)
+        {
+            return Path.Combine(ProjectSiblingRoot, "level_config_txt", $"{packId}_{themeEn}");
+        }
+
+        /// <summary>
+        /// 获取加密二进制文件完整路径：.../{packId}_{themeEn}_{levelId}.bytes
+        /// </summary>
+        public static string GetEncryptedBytesPath(string packId, string themeEn, int levelId)
+        {
+            string dir = GetEncryptedBytesDirectory(packId, themeEn);
+            string fileName = $"{packId}_{themeEn}_{levelId}.bytes";
+            return Path.Combine(dir, fileName);
+        }
+
+        /// <summary>
+        /// 判断指定关卡的加密二进制文件是否存在
+        /// </summary>
+        public static bool EncryptedBytesExists(string packId, string themeEn, int levelId)
+        {
+            return File.Exists(GetEncryptedBytesPath(packId, themeEn, levelId));
+        }
+
+        // ---- 二进制文件格式 v1 ----
+        //  [4] magic         = "WSGB"  (0x57 0x53 0x47 0x42)
+        //  [4] version       = int32 (LittleEndian)，当前=1
+        //  [4] elementsLen   = int32
+        //  [N] elementsBytes = AES 密文的原始字节（不是 Base64）
+        //  [4] codeLen       = int32
+        //  [M] codeBytes     = code 字符串 UTF8 字节
+        // 说明：与 common_json_encrypt_tool 协同——加密产物是
+        //       { "elements": base64(密文), "code": md5 交错串 }
+        //       写入时把 elements 还原为原始字节，读取时再 Base64 回去调现有解密。
+        private static readonly byte[] BINARY_MAGIC = new byte[] { 0x57, 0x53, 0x47, 0x42 }; // "WSGB"
+        private const int BINARY_VERSION = 1;
+
+        /// <summary>
+        /// 保存为真二进制加密文件：JSON → 加密 → 拆成(密文字节 + code) → BinaryWriter 写入 .bytes
+        /// </summary>
+        /// <returns>写入的文件绝对路径，失败返回 null</returns>
+        public static string SavePuzzleAsEncryptedBytes(WordSearchData data)
+        {
+            if (data == null)
+            {
+                Debug.LogError("SavePuzzleAsEncryptedBytes: data 为 null");
+                return null;
+            }
+            if (string.IsNullOrEmpty(data.pack_id) || string.IsNullOrEmpty(data.theme_en) || data.level_id <= 0)
+            {
+                Debug.LogError($"SavePuzzleAsEncryptedBytes: 缺少 pack_id/theme_en/level_id (pack={data.pack_id} theme={data.theme_en} level={data.level_id})");
+                return null;
+            }
+
+            try
+            {
+                string dir = GetEncryptedBytesDirectory(data.pack_id, data.theme_en);
+                Directory.CreateDirectory(dir);
+
+                data.GridToString();
+                string plainJson = JsonUtility.ToJson(data, true);
+
+                // 调用现有加密工具得到 { elements, code } 字符串
+                string encryptedStr = common_json_encrypt_tool.encrypt_json_string(plainJson);
+                if (string.IsNullOrEmpty(encryptedStr))
+                {
+                    Debug.LogError("SavePuzzleAsEncryptedBytes: 加密返回空字符串");
+                    return null;
+                }
+
+                // 拆出 elements(base64 密文) 和 code
+                var outer = new JSONObject(encryptedStr);
+                if (outer == null || !outer.HasField("elements") || !outer.HasField("code"))
+                {
+                    Debug.LogError("SavePuzzleAsEncryptedBytes: 加密产物缺少 elements/code 字段");
+                    return null;
+                }
+                string elementsBase64 = outer.GetField("elements").str ?? "";
+                string codeStr        = outer.GetField("code").str ?? "";
+
+                byte[] elementsBytes = string.IsNullOrEmpty(elementsBase64)
+                    ? new byte[0]
+                    : Convert.FromBase64String(elementsBase64);
+                byte[] codeBytes = Encoding.UTF8.GetBytes(codeStr);
+
+                string filePath = GetEncryptedBytesPath(data.pack_id, data.theme_en, data.level_id);
+                bool overwrite = File.Exists(filePath);
+
+                using (var fs = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None))
+                using (var bw = new BinaryWriter(fs))
+                {
+                    bw.Write(BINARY_MAGIC);
+                    bw.Write(BINARY_VERSION);
+                    bw.Write(elementsBytes.Length);
+                    if (elementsBytes.Length > 0) bw.Write(elementsBytes);
+                    bw.Write(codeBytes.Length);
+                    if (codeBytes.Length > 0) bw.Write(codeBytes);
+                }
+
+                long fileSize = new FileInfo(filePath).Length;
+                Debug.Log($"✓ 已{(overwrite ? "覆盖" : "保存")}加密二进制: {filePath} ({fileSize} bytes, cipher={elementsBytes.Length})");
+
+                // 同步输出明文 JSON / TXT 到 level_config_txt 独立目录，便于策划人工核对
+                try
+                {
+                    string plainDir = GetPlainTextDirectory(data.pack_id, data.theme_en);
+                    Directory.CreateDirectory(plainDir);
+
+                    string baseName = $"{data.pack_id}_{data.theme_en}_{data.level_id}";
+
+                    string jsonPath = Path.Combine(plainDir, baseName + ".json");
+                    File.WriteAllText(jsonPath, plainJson, Encoding.UTF8);
+
+                    string txtPath = Path.Combine(plainDir, baseName + ".txt");
+                    File.WriteAllText(txtPath, BuildTxtContent(data), Encoding.UTF8);
+
+                    Debug.Log($"✓ 同步写出明文: {jsonPath}");
+                }
+                catch (Exception ie)
+                {
+                    Debug.LogWarning($"写出明文 json/txt 失败（不影响加密二进制）: {ie.Message}");
+                }
+
+                return filePath;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"SavePuzzleAsEncryptedBytes 失败: {e.Message}\n{e.StackTrace}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 从真二进制加密文件加载谜题数据
+        /// </summary>
+        public static WordSearchData LoadPuzzleFromEncryptedBytes(string packId, string themeEn, int levelId)
+        {
+            string filePath = GetEncryptedBytesPath(packId, themeEn, levelId);
+            if (!File.Exists(filePath))
+            {
+                Debug.LogWarning($"LoadPuzzleFromEncryptedBytes: 文件不存在 {filePath}");
+                return null;
+            }
+
+            try
+            {
+                byte[] elementsBytes;
+                string codeStr;
+                using (var fs = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read))
+                using (var br = new BinaryReader(fs))
+                {
+                    byte[] magic = br.ReadBytes(4);
+                    if (magic.Length < 4 ||
+                        magic[0] != BINARY_MAGIC[0] || magic[1] != BINARY_MAGIC[1] ||
+                        magic[2] != BINARY_MAGIC[2] || magic[3] != BINARY_MAGIC[3])
+                    {
+                        Debug.LogError($"LoadPuzzleFromEncryptedBytes: 文件 magic 不匹配 {filePath}");
+                        return null;
+                    }
+
+                    int version = br.ReadInt32();
+                    if (version != BINARY_VERSION)
+                    {
+                        Debug.LogError($"LoadPuzzleFromEncryptedBytes: 不支持的版本 {version} (当前支持 {BINARY_VERSION})");
+                        return null;
+                    }
+
+                    int elementsLen = br.ReadInt32();
+                    if (elementsLen < 0 || elementsLen > 64 * 1024 * 1024)
+                    {
+                        Debug.LogError($"LoadPuzzleFromEncryptedBytes: 非法 elementsLen {elementsLen}");
+                        return null;
+                    }
+                    elementsBytes = elementsLen > 0 ? br.ReadBytes(elementsLen) : new byte[0];
+
+                    int codeLen = br.ReadInt32();
+                    if (codeLen < 0 || codeLen > 1024)
+                    {
+                        Debug.LogError($"LoadPuzzleFromEncryptedBytes: 非法 codeLen {codeLen}");
+                        return null;
+                    }
+                    byte[] codeBytes = codeLen > 0 ? br.ReadBytes(codeLen) : new byte[0];
+                    codeStr = Encoding.UTF8.GetString(codeBytes);
+                }
+
+                // 还原 { elements:base64, code } 字符串交给现有工具解密+校验
+                string elementsBase64 = Convert.ToBase64String(elementsBytes);
+                var outer = new JSONObject(JSONObject.Type.OBJECT);
+                outer.AddField("elements", elementsBase64);
+                outer.AddField("code", codeStr);
+                string encryptedStr = outer.ToString();
+
+                string plainJson = common_json_encrypt_tool.decrypt_json_string(encryptedStr);
+                if (string.IsNullOrEmpty(plainJson))
+                {
+                    Debug.LogError($"LoadPuzzleFromEncryptedBytes: 解密失败 {filePath}");
+                    return null;
+                }
+
+                WordSearchData data = JsonUtility.FromJson<WordSearchData>(plainJson);
+                if (data == null)
+                {
+                    Debug.LogError($"LoadPuzzleFromEncryptedBytes: JsonUtility 反序列化返回 null");
+                    return null;
+                }
+
+                data.StringToGrid();
+                if (data.rows == 0) data.rows = data.dimension;
+                if (data.cols == 0) data.cols = data.dimension;
+
+                Debug.Log($"✓ 已加载加密二进制: {filePath}");
+                return data;
+            }
+            catch (Exception e)
+            {
+                Debug.LogError($"LoadPuzzleFromEncryptedBytes 失败: {e.Message}\n{e.StackTrace}");
+                return null;
+            }
+        }
+
         /// <summary>
         /// 构建 txt 文本内容
         /// </summary>
