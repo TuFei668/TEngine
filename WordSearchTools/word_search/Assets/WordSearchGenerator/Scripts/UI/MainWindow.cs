@@ -56,6 +56,10 @@ namespace WordSearchGenerator.UI
         [Header("答案视图（同场景内 Panel）")]
         [SerializeField] private GameObject answerPanel;
 
+        [Header("方向图例（LegendPanel，可选）")]
+        [SerializeField] private Transform legendContainer;
+        [SerializeField] private GameObject legendItemPrefab;
+
         [Header("批量生成 / 候选切换（均可选，未绑定则功能隐藏）")]
         [SerializeField] private Button batchGenerateButton;           // 点击触发批量生成
         [SerializeField] private InputField batchCountInputField;      // N 数量（可选，默认 Constants.BATCH_COUNT_DEFAULT）
@@ -65,7 +69,7 @@ namespace WordSearchGenerator.UI
 
         [Header("回放（可选）")]
         [SerializeField] private Button replayButton;
-        [SerializeField] private float replayStepSeconds = 0.4f;       // 每步停顿时长
+        [SerializeField] private float replayStepSeconds = 0.1f;       // 每步停顿时长
 
         [Header("书本与关卡")]
         [SerializeField] private InputField bookIdInputField;
@@ -489,6 +493,8 @@ namespace WordSearchGenerator.UI
                     GridDisplayHelper.DisplayPuzzleGrid(result, resultGridContainer, resultGridLayout,
                         gridCellPrefab, resultCellSize, resultCellSpacing);
                 }
+                // Legend 依赖 DisplayPuzzleGrid 可能写入的 wordColor，因此放在网格渲染之后
+                RefreshDirectionLegend(currentPuzzleData);
                 
                 if (resultText != null)
                 {
@@ -755,6 +761,17 @@ namespace WordSearchGenerator.UI
                 var t = transform.parent.Find("AnswerPanel");
                 if (t != null)
                     answerPanel = t.gameObject;
+            }
+
+            // ===== 方向图例（LegendPanel，可选）=====
+            if (legendContainer == null)
+                legendContainer = transform.Find("LegendPanel/LegendScrollView/Viewport/LegendContainer");
+            if (legendItemPrefab == null && legendContainer != null)
+            {
+                // 约定：LegendContainer 下可能放了一个禁用的模板项（命名 LegendItem），用作 prefab
+                var template = legendContainer.Find("LegendItem");
+                if (template != null) legendItemPrefab = template.gameObject;
+                else if (legendContainer.childCount > 0) legendItemPrefab = legendContainer.GetChild(0).gameObject;
             }
 
             // ===== 书本与关卡（Header 下） =====
@@ -1101,6 +1118,8 @@ namespace WordSearchGenerator.UI
                 GridDisplayHelper.DisplayPuzzleGrid(data, resultGridContainer, resultGridLayout,
                     gridCellPrefab, resultCellSize, resultCellSpacing);
             }
+            // Legend 依赖 DisplayPuzzleGrid 可能写入的 wordColor，因此放在网格渲染之后
+            RefreshDirectionLegend(currentPuzzleData);
             if (resultText != null)
             {
                 resultText.text = $"=== Loaded Puzzle ({data.puzzleId}) ===\n\n{data.puzzleText}";
@@ -1312,6 +1331,8 @@ namespace WordSearchGenerator.UI
                 GridDisplayHelper.DisplayPuzzleGrid(data, resultGridContainer, resultGridLayout,
                     gridCellPrefab, resultCellSize, resultCellSpacing);
             }
+            // Legend 依赖 DisplayPuzzleGrid 可能写入的 wordColor，因此放在网格渲染之后
+            RefreshDirectionLegend(currentPuzzleData);
 
             if (resultText != null)
             {
@@ -1436,6 +1457,68 @@ namespace WordSearchGenerator.UI
                 foreach (var wp in src.hiddenWords)   if (wp != null && show.Contains(wp.word)) dst.hiddenWords.Add(wp);
 
             return dst;
+        }
+
+        // ==================== 方向图例（LegendPanel） ====================
+
+        void RefreshDirectionLegend(WordSearchData data)
+        {
+            if (legendContainer == null || legendItemPrefab == null) return;
+            if (data == null) { ClearLegendContainer(); return; }
+
+            ClearLegendContainer();
+
+            // 逐词展示：每个单词一条，显示对应颜色与方向（与 AnswerVisualizer 一致）
+            // 注意：GridDisplayHelper.DisplayPuzzleGrid 会在必要时为 wordPositions 自动分配颜色，
+            // 所以这里应在它之后调用，或再次兜底一次颜色为空的情况。
+            AddLegendItems(data.wordPositions);
+            AddLegendItems(data.bonusWords);
+            AddLegendItems(data.hiddenWords);
+        }
+
+        void AddLegendItems(List<WordPosition> list)
+        {
+            if (legendContainer == null || legendItemPrefab == null) return;
+            if (list == null) return;
+
+            foreach (var wp in list)
+            {
+                if (wp == null) continue;
+
+                GameObject item = Instantiate(legendItemPrefab, legendContainer);
+                item.SetActive(true);
+
+                var legend = item.GetComponent<LegendItem>();
+                if (legend == null)
+                {
+                    Destroy(item);
+                    continue;
+                }
+
+                legend.SetWord(wp.word);
+                legend.SetPosition(string.Empty);
+                legend.SetDirection(Constants.GetDirectionName(new Vector2Int(wp.directionX, wp.directionY)));
+
+                // 颜色：优先使用 wp.wordColor（由生成器或 GridDisplayHelper 写入）
+                Color c = (wp.wordColor != null) ? wp.wordColor.ToColor() : Color.white;
+                legend.SetColor(c);
+            }
+        }
+
+        void ClearLegendContainer()
+        {
+            if (legendContainer == null) return;
+
+            for (int i = legendContainer.childCount - 1; i >= 0; i--)
+            {
+                var child = legendContainer.GetChild(i).gameObject;
+                if (legendItemPrefab != null && child == legendItemPrefab) continue; // 保留模板
+                Destroy(child);
+            }
+
+            // 模板项在容器内时，确保保持禁用（避免显示一条空白）
+            if (legendItemPrefab != null && legendItemPrefab.transform.parent == legendContainer)
+                legendItemPrefab.SetActive(false);
         }
 
         void OnDestroy()

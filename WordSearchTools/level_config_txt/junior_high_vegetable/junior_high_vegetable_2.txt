@@ -1,7 +1,7 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 11:59:01
+Created: 2026-04-22 17:15:31
 Puzzle ID: level-junior_high-vegetable-002
-Size: 12x12
+Size: 6x9
 Hard Mode: False
 Size Factor: 4
 Intersect Bias: Avoid
@@ -13,35 +13,29 @@ TOMATO
 CABBAGE
 
 --- Puzzle ---
-Z X N W C F N P A C C C
-T Z T R X L N E P I A R
-D L Q T D S O P S O B G
-U T E A S N A P O P B Q
-M S O T Q M G E N H A N
-P H P M T E X R I R G Q
-C Y G I A U B A O J E R
-R A Y W N T C W N I K L
-D E P U I A O E Y I V E
-Z B W Y S W C D L F K S
-J J U L I L D H O O X K
-U S B L I Z R M V D X C
+T O M A T O
+O N I O N L
+S L A C V E
+P P R A V T
+I E D B O T
+N P R B F U
+A P W A J C
+C E N G I E
+H R Q E M M
 
 --- Answer Key ---
-z x n w c f n P a c C c
-t z t r x l n e p i a r
-d L q t d s o p s o b g
-u T e a s n a p O p b q
-m S o t q m g e n h a n
-p h p m t e x r i r g q
-c y g i a u b a o j e r
-r a y w n t c w n i k l
-d e p u i a o e y i v e
-z b w y s w c d l f k s
-j j u l i l d h o o x k
-u s b l i z r m v d x c
+T o m a t o
+O n i o n L
+S l a C v e
+p P r a v t
+i e d b o t
+n p r b f u
+a p w a j c
+c e n g i e
+h r q e m m
 
 --- Word Positions ---
-LETTUCE: Start(1,2) ↘ Down-Right
-SPINACH: Start(1,4) ↘ Down-Right
-TOMATO: Start(1,3) ↘ Down-Right
-CABBAGE: Start(10,0) ↓ Down
+LETTUCE: Start(5,1) ↓ Down
+SPINACH: Start(0,2) ↓ Down
+TOMATO: Start(0,0) → Right
+CABBAGE: Start(3,2) ↓ Down
