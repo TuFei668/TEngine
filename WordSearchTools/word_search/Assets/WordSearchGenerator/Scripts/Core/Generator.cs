@@ -422,6 +422,8 @@ namespace WordSearchGenerator
         /// <summary>
         /// 当前单词的候选位置列表（带缓存）
         /// P0-2/3/4：排序不再是单一的交叉偏好，改为 LayoutScorer.ScoreCandidate 多目标打分
+        /// Step 2：打分时传入 LayoutContext（按"还缺什么结构"给配额加成）；
+        ///         排序完再把 Top-K 按 softmax 概率打乱，[0] 变成随机抽中的候选而非固定贪心。
         /// </summary>
         private List<Position> CurrentWorkablePositions
         {
@@ -433,29 +435,102 @@ namespace WordSearchGenerator
                 if (allWorkablePositions.TryGetValue(currentWord, out var cached))
                     return cached;
 
-                var candidates = new List<(Position pos, int intersect)>();
+                // Step 2：构建当前布局的全局结构上下文
+                var ctx = BuildLayoutContext();
+
+                var candidates = new List<(Position pos, int intersect, float score)>();
                 foreach (var pos in allPossiblePositions)
                 {
                     var (canPlace, intersect) = CanPlace(currentWord, pos, table);
-                    if (canPlace) candidates.Add((pos, intersect));
+                    if (!canPlace) continue;
+
+                    float score = LayoutScorer.ScoreCandidate(
+                        currentWord, pos, table, rows, cols,
+                        intersect, intersectBias, ctx);
+                    candidates.Add((pos, intersect, score));
                 }
 
                 // 先随机打散（给相同分数的候选一个随机 tie-break）
                 ShuffleList(candidates);
 
-                // 按多目标综合分降序排列
-                candidates.Sort((a, b) =>
-                {
-                    float sa = LayoutScorer.ScoreCandidate(
-                        currentWord, a.pos, table, rows, cols, a.intersect, intersectBias);
-                    float sb = LayoutScorer.ScoreCandidate(
-                        currentWord, b.pos, table, rows, cols, b.intersect, intersectBias);
-                    return sb.CompareTo(sa);  // 降序
-                });
+                // 按综合分降序稳定排序
+                candidates.Sort((a, b) => b.score.CompareTo(a.score));
+
+                // Step 2：Top-K softmax 采样，把抽中的候选换到 [0]
+                SampleTopKIntoFront(candidates);
 
                 var result = candidates.Select(c => c.pos).ToList();
                 allWorkablePositions[currentWord] = result;
                 return result;
+            }
+        }
+
+        // ========== Step 2：全局结构上下文 + Top-K 采样 ==========
+
+        /// <summary>
+        /// 根据当前 placementOrder[0..currentIndex] 已放置的单词，重建全局布局上下文。
+        /// 每次新词开始挑候选前调用一次；单次生成的复杂度 O(words²)，可忽略。
+        ///
+        /// Step 2 小修：在应用已放置单词前先调用 ApplyBiasPreset，让 UI 的 intersectBias 切换
+        /// 能直接影响 X / 对角 / 贴边 / 竖直栈的配额，从而产生可见的风格差异。
+        /// </summary>
+        private LayoutContext BuildLayoutContext()
+        {
+            var ctx = new LayoutContext(rows, cols);
+            ctx.ApplyBiasPreset(intersectBias);
+
+            for (int i = 0; i < currentIndex; i++)
+            {
+                string w = placementOrder[i];
+                if (finalPlacedPositions.TryGetValue(w, out var p))
+                    ctx.Apply(w, p);
+            }
+            return ctx;
+        }
+
+        /// <summary>
+        /// 从 candidates 的前 K 名按 softmax(score/T) 概率抽一个，换到 [0]。
+        /// 这样上层回溯仍然 `firstPos = [0]`；RemoveAt(0) 语义不变；
+        /// 但同分或接近分的候选不再总是固定排序靠前的那一个，实现结构多样性。
+        ///
+        /// T → 0 退化为贪心；T 越大越接近均匀随机抽。
+        /// </summary>
+        private void SampleTopKIntoFront(List<(Position pos, int intersect, float score)> candidates)
+        {
+            int K = Mathf.Min(Constants.DEFAULT_TOP_K, candidates.Count);
+            if (K <= 1) return;
+
+            float T = Constants.DEFAULT_SOFTMAX_TEMPERATURE;
+            if (T <= 0.0001f) return; // 纯贪心模式不采样
+
+            // Log-sum-exp 稳定化
+            float maxScore = candidates[0].score;
+            for (int i = 1; i < K; i++)
+                if (candidates[i].score > maxScore) maxScore = candidates[i].score;
+
+            float sum = 0f;
+            float[] weights = new float[K];
+            for (int i = 0; i < K; i++)
+            {
+                weights[i] = Mathf.Exp((candidates[i].score - maxScore) / T);
+                sum += weights[i];
+            }
+            if (sum <= 0f) return;
+
+            float r = (float)(random.NextDouble() * sum);
+            float acc = 0f;
+            int picked = 0;
+            for (int i = 0; i < K; i++)
+            {
+                acc += weights[i];
+                if (r <= acc) { picked = i; break; }
+            }
+
+            if (picked != 0)
+            {
+                var tmp = candidates[0];
+                candidates[0] = candidates[picked];
+                candidates[picked] = tmp;
             }
         }
 

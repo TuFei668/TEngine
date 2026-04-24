@@ -135,7 +135,8 @@ namespace WordSearchGenerator.UI
             sizeFactorSlider.minValue = Constants.SIZE_FACTOR_MIN;
             sizeFactorSlider.maxValue = Constants.SIZE_FACTOR_MAX;
             sizeFactorSlider.value = Constants.SIZE_FACTOR_DEFAULT;
-            biasRandomToggle.isOn = true;
+            // S1：UI 初始默认跟随 Constants.INTERSECT_BIAS_DEFAULT，不再硬编码为 Random
+            ApplyDefaultBiasToggle(Constants.INTERSECT_BIAS_DEFAULT);
             
             // 绑定事件
             sizeFactorSlider.onValueChanged.AddListener(OnSizeFactorChanged);
@@ -595,6 +596,19 @@ namespace WordSearchGenerator.UI
             if (biasAvoidToggle.isOn) return Constants.INTERSECT_BIAS_AVOID;
             if (biasPreferToggle.isOn) return Constants.INTERSECT_BIAS_PREFER;
             return Constants.INTERSECT_BIAS_RANDOM;
+        }
+
+        /// <summary>
+        /// S1：按给定 bias 勾选对应 Toggle（传参形式避免 const switch 分支不可达警告）。
+        /// </summary>
+        private void ApplyDefaultBiasToggle(int bias)
+        {
+            switch (bias)
+            {
+                case Constants.INTERSECT_BIAS_AVOID:  biasAvoidToggle.isOn  = true; break;
+                case Constants.INTERSECT_BIAS_PREFER: biasPreferToggle.isOn = true; break;
+                default:                              biasRandomToggle.isOn = true; break;
+            }
         }
 
         /// <summary>

@@ -84,7 +84,8 @@ namespace WordSearchGenerator
         public const int INTERSECT_BIAS_AVOID  = -1;
         public const int INTERSECT_BIAS_RANDOM =  0;
         public const int INTERSECT_BIAS_PREFER =  1;
-        public const int INTERSECT_BIAS_DEFAULT = INTERSECT_BIAS_RANDOM;
+        // S1：默认改为 AVOID（参考图中词间极少交叉，且避免交叉能让对角 / X 骨架有容身空间）
+        public const int INTERSECT_BIAS_DEFAULT = INTERSECT_BIAS_AVOID;
 
         // ========== P0 布局评分权重 ==========
         //
@@ -92,10 +93,11 @@ namespace WordSearchGenerator
         //   score = W_INTERSECT  * intersections * biasSign
         //         - W_ADJACENT   * adjacentCount       (紧邻他词字母 → 负分)
         //         + W_BORDER     * isOnBorder          (贴网格边 → 正分)
-        //         + W_DIAGONAL   * isOnMainDiagonal    (在主/副对角线上 → 正分)
+        //         + W_DIAGONAL   * isDiagonalDirection (方向是对角 → 正分，S1 拆两层)
+        //         + W_DIAG_CENTER_BONUS * inCenterBand (对角且路径穿过中心带 → 额外加成)
         //         + W_SPREAD     * minDistToPlaced     (离其他已放置单词越远越好)
         //         + W_LONG_BORDER_BONUS * (isLong && isOnBorder)
-        //         + W_LONG_DIAGONAL_BONUS * (isLong && isOnMainDiagonal)
+        //         + W_LONG_DIAGONAL_BONUS * (isLong && isDiagonalDirection)
         //
         // biasSign: 偏好交叉=+1 / 随机=0 / 避免交叉=-1
         //
@@ -103,7 +105,10 @@ namespace WordSearchGenerator
         public const float W_INTERSECT            = 3.0f;
         public const float W_ADJACENT             = 2.5f;
         public const float W_BORDER               = 1.0f;
-        public const float W_DIAGONAL             = 0.8f;
+        // S1：W_DIAGONAL 从 0.8 提到 1.0，与贴边基础分持平；
+        // 对角压中心带的额外加成由 W_DIAG_CENTER_BONUS 负责，避免单一常量同时承担两层语义。
+        public const float W_DIAGONAL             = 1.0f;
+        public const float W_DIAG_CENTER_BONUS    = 0.3f;
         public const float W_SPREAD               = 0.25f;
         public const float W_LONG_BORDER_BONUS    = 1.5f;
         public const float W_LONG_DIAGONAL_BONUS  = 1.5f;
@@ -112,6 +117,41 @@ namespace WordSearchGenerator
         /// 判定"长单词"的最小长度。≥ 该长度的单词才享受 W_LONG_*_BONUS。
         /// </summary>
         public const int LONG_WORD_MIN_LENGTH = 5;
+
+        // ========== Step 2：上下文感知加成 ==========
+        //
+        // 核心思想：候选打分除了看"这一步放下去有多好"，还要看"全局还差什么骨架"。
+        //   - 缺口 > 0：结构加分 × W_GAP_BOOST（鼓励去补缺）
+        //   - 缺口 = 0：结构加分 × W_GAP_SATURATED（该类已饱和，降权避免扎堆）
+        //
+        // 默认配额（本阶段硬编码为 Normal 档位的经验值；S4 由 LevelProfile 覆盖）：
+        //   - 贴边       : 3 条（顶/底/左/右选其中 3 边）
+        //   - 对角       : 2 条（利于形成 X）
+        //   - X 十字     : 1 次（两条对角在中心带相交）
+        //   - 竖直栈     : 2 对（相邻列都有竖直词）
+        //   - 贴边反向偏好: 0.6（贴边长词倾向反向书写）
+
+        public const float W_GAP_BOOST      = 2.0f;
+        public const float W_GAP_SATURATED  = 0.3f;
+
+        public const float W_X_CROSS_BONUS          = 3.5f;
+        public const float W_VSTACK_BONUS           = 1.5f;
+        public const float W_REVERSE_BORDER_BONUS   = 1.0f;
+
+        public const int   DEFAULT_BORDER_QUOTA         = 3;
+        public const int   DEFAULT_DIAGONAL_QUOTA       = 2;
+        public const int   DEFAULT_X_CROSS_QUOTA        = 1;
+        public const int   DEFAULT_VERTICAL_STACK_QUOTA = 2;
+        public const float DEFAULT_BORDER_REVERSE_PREF  = 0.6f;
+
+        // ========== Step 2：Top-K 采样 ==========
+        //
+        // 把回溯时贪心的 "candidates[0]" 改成"top-K 里按 softmax 概率随机抽一个"，
+        // 同分候选有机会被选中，避免同一词表批量生成收敛到同一骨架。
+        // 温度 T → 0 时退化为贪心；T 越大越随机。
+
+        public const int   DEFAULT_TOP_K               = 3;
+        public const float DEFAULT_SOFTMAX_TEMPERATURE = 0.5f;
 
         // ========== P0-6 Best-of-N ==========
 
