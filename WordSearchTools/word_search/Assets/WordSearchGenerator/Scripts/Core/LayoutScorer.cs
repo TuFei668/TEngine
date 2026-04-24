@@ -113,8 +113,7 @@ namespace WordSearchGenerator
         ///    0 (RANDOM) : 默认风格——对角 2、X 1、贴边 3
         ///   +1 (PREFER) : 密集多骨架——对角 3、X 2、贴边 4
         ///
-        /// S4 的 LevelProfile 会在这之后再覆盖一次（档位优先于 bias），
-        /// 但在档位功能上线前，这一步确保三种 bias 切换产生不同关卡形态。
+        /// 当 LevelProfile 未被指定时使用此预设；一旦选了档位则由 ApplyProfile 覆盖。
         /// </summary>
         public void ApplyBiasPreset(int intersectBias)
         {
@@ -144,6 +143,20 @@ namespace WordSearchGenerator
                     borderReversePreference  = Constants.DEFAULT_BORDER_REVERSE_PREF;
                     break;
             }
+        }
+
+        /// <summary>
+        /// Step 4：从 LevelProfile 直接套配额（档位优先于 bias 预设）。
+        /// 只覆盖 LayoutContext 范围内的配额字段，不改变 intersectBias 等生成器级参数。
+        /// </summary>
+        public void ApplyProfile(LevelProfile profile)
+        {
+            if (profile == null) return;
+            borderQuota              = profile.borderQuota;
+            diagonalQuota            = profile.diagonalQuota;
+            xCrossQuota              = profile.xCrossQuota;
+            verticalStackQuota       = profile.verticalStackQuota;
+            borderReversePreference  = profile.borderReversePreference;
         }
 
         /// <summary>

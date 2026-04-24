@@ -77,6 +77,7 @@
     <Compile Include="Assets/WordSearchGenerator/Scripts/Utils/Json/JSONObject.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Data/ExcelLevelReader.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Data/LevelConfig.cs" />
+    <Compile Include="Assets/WordSearchGenerator/Scripts/Core/LevelProfile.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Utils/AES/AES.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Data/FileManager.cs" />
     <Compile Include="Assets/WordSearchGenerator/Scripts/Core/LevelGenerationHelper.cs" />

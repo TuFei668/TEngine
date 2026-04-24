@@ -1,10 +1,10 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 17:44:32
+Created: 2026-04-24 14:16:15
 Puzzle ID: level-primary-fruit-002
 Size: 7x8
 Hard Mode: False
 Size Factor: 4
-Intersect Bias: Random
+Intersect Bias: Avoid
 
 --- Words to Find ---
 MANGO
@@ -14,28 +14,28 @@ KIND
 LIGHT
 
 --- Puzzle ---
-L I G H T S P
-H Q H D T H E
-O E K Q S O A
-M Y I E Q W C
-A V N Z E H H
-N L D Z V P U
-G M B M J Z I
-O L N E V E R
+L I G H T D G
+P F T D K S M
+F K I N D H A
+P Z N D F O N
+E K E E R W G
+A Z E E V X O
+C J E E R E I
+H D Z I P W R
 
 --- Answer Key ---
-L i g h t S P
-h q h d t h e
-o e K q s o a
-M y i e q w c
-a v n z e h h
-n l d z v p u
-g m b m j z i
-o l N e v e r
+L i g h t d g
+p f t d k S M
+f K i n d h a
+P z N d f o n
+e K e e r w g
+a z e e v x o
+c j e e r e i
+h d z i p w r
 
 --- Word Positions ---
-MANGO: Start(0,3) ↓ Down
-PEACH: Start(6,0) ↓ Down
-KEEP: Start(2,2) ↘ Down-Right
-KIND: Start(2,2) ↓ Down
+MANGO: Start(6,1) ↓ Down
+PEACH: Start(0,3) ↓ Down
+KEEP: Start(1,4) ↘ Down-Right
+KIND: Start(1,2) → Right
 LIGHT: Start(0,0) → Right

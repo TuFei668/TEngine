@@ -1,10 +1,10 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 17:44:12
+Created: 2026-04-24 14:16:05
 Puzzle ID: level-primary-fruit-001
 Size: 7x10
 Hard Mode: False
 Size Factor: 4
-Intersect Bias: Random
+Intersect Bias: Avoid
 
 --- Words to Find ---
 APPLE
@@ -13,31 +13,31 @@ ORANGE
 MANGO
 
 --- Puzzle ---
-A P P L E I P
-H A D D G L I
-I M I O W N N
-B A Z R B M E
-A N N A M Z A
-N G J N U O P
-A O D G X W P
-N R V E F O L
-A S O Q I C E
-P A P A Y A K
+O R A N G E I
+O W H A L H P
+A P P L E T I
+D K Q B G W N
+B W U P H G E
+A M B A O B A
+N A E P W L P
+A N A A N D P
+N G O Y C H L
+A O T A W A E
 
 --- Answer Key ---
-A p p l e i P
-h a d d g l i
-i M i O w n n
-B a z r b m e
-a n n a m z a
-n g j n u o p
-a o d g x w p
-n r v e f o l
-a s o q i c e
-P a p a y a k
+O r a n g e i
+o w h a l h P
+A p p l e t i
+d k q b g w n
+B w u P h g e
+a M b a O b a
+n a e p w l p
+a n a a n d p
+n g o y c h l
+a o t a w a e
 
 --- Word Positions ---
-APPLE: Start(0,0) → Right
-BANANA: Start(0,3) ↓ Down
-ORANGE: Start(3,2) ↓ Down
-MANGO: Start(1,2) ↓ Down
+APPLE: Start(0,2) → Right
+BANANA: Start(0,4) ↓ Down
+ORANGE: Start(0,0) → Right
+MANGO: Start(1,5) ↓ Down

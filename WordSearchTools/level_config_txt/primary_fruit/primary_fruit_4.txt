@@ -1,0 +1,43 @@
+﻿=== Word Search Puzzle ===
+Created: 2026-04-24 12:41:25
+Puzzle ID: level-primary-fruit-004
+Size: 6x7
+Hard Mode: False
+Size Factor: 4
+Intersect Bias: Avoid
+
+--- Words to Find ---
+BEAR
+BED
+COW
+JAGUAR
+LION
+MOUSE
+STOOL
+
+--- Puzzle ---
+J S T O O L
+I A Y U C I
+B Z G U O O
+E B G U W N
+A Z E T A G
+R O V D K R
+M O U S E J
+
+--- Answer Key ---
+J S t o o L
+i a y u C i
+B z g u o o
+e B g u w n
+a z e t a g
+r o v d k r
+M o u s e j
+
+--- Word Positions ---
+BEAR: Start(0,2) ↓ Down
+BED: Start(1,3) ↘ Down-Right
+COW: Start(4,1) ↓ Down
+JAGUAR: Start(0,0) ↘ Down-Right
+LION: Start(5,0) ↓ Down
+MOUSE: Start(0,6) → Right
+STOOL: Start(1,0) → Right

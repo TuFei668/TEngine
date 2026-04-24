@@ -81,12 +81,16 @@ namespace WordSearchGenerator.UI
         [SerializeField] private Dropdown levelIdDropdown;     // 关卡id
         [SerializeField] private Button   refreshExcelButton;  // 可选：手动刷新 Excel
 
+        [Header("Step 4：难度档位（可选）")]
+        [SerializeField] private Dropdown difficultyProfileDropdown;
+
         // PlayerPrefs Keys（记忆上次三级选择）
         private const string PP_STAGE_INDEX   = "WSG_Last_StageIndex";
         private const string PP_THEME_INDEX   = "WSG_Last_ThemeIndex";
         private const string PP_LEVEL_INDEX   = "WSG_Last_LevelIdIndex";
         private const string PP_SIGNATURE     = "WSG_Last_ExcelSignature";
         private const string PP_GRID_SIZE_INDEX = "WSG_Last_GridSizeIndex"; // 上次手动选择的网格尺寸
+        private const string PP_PROFILE_INDEX   = "WSG_Last_ProfileIndex";   // Step 4：上次档位
 
         // Excel 解析数据
         private List<PackConfig> excelPacks = new List<PackConfig>();
@@ -108,6 +112,21 @@ namespace WordSearchGenerator.UI
 
         // 回放协程（P1-4）
         private Coroutine replayCoroutine;
+
+        // ========== Step 4：档位状态 ==========
+        //
+        // availableProfiles[0] = null（Custom，表示"不走档位，UI 控制"）；
+        // availableProfiles[1..] = LevelProfile.GetBuiltIns() 的 6 个内置档位。
+        //
+        // biasUserOverride / useHardUserOverride：用户在当前档位下是否手动改动过这些 UI 控件。
+        //   档位切换会清零这两个标志，切完后用户再动 UI 则置 1，生成时显式覆盖 profile 对应字段。
+        //
+        // isSyncingProfileToUI：ApplyProfileToUI 期间的护栏，避免我们自己程序化改 Toggle.isOn
+        //   被误判为"用户改动"而置 override 标志。
+        private List<LevelProfile> availableProfiles = new List<LevelProfile>();
+        private bool biasUserOverride    = false;
+        private bool useHardUserOverride = false;
+        private bool isSyncingProfileToUI = false;
         
         /// <summary>
         /// 在Start之前通过transform.Find自动绑定引用（含同级的 AnswerPanel）
@@ -146,6 +165,12 @@ namespace WordSearchGenerator.UI
             saveJsonButton.onClick.AddListener(OnSaveButtonClick);
             saveTxtButton.onClick.AddListener(OnSaveButtonClick);
             viewAnswersButton.onClick.AddListener(OnViewAnswersButtonClick);
+
+            // Step 4：记录 bias / useHard 是否被用户手动改动（ApplyProfileToUI 期间由 isSyncingProfileToUI 门禁）
+            if (biasAvoidToggle  != null) biasAvoidToggle.onValueChanged.AddListener(_  => { if (!isSyncingProfileToUI) biasUserOverride = true; });
+            if (biasRandomToggle != null) biasRandomToggle.onValueChanged.AddListener(_ => { if (!isSyncingProfileToUI) biasUserOverride = true; });
+            if (biasPreferToggle != null) biasPreferToggle.onValueChanged.AddListener(_ => { if (!isSyncingProfileToUI) biasUserOverride = true; });
+            if (useHardToggle    != null) useHardToggle.onValueChanged.AddListener(_    => { if (!isSyncingProfileToUI) useHardUserOverride = true; });
 
             // 可选 UI 绑定（P1-2 / P1-4）：未在场景中配置则跳过
             if (batchGenerateButton != null)
@@ -198,7 +223,10 @@ namespace WordSearchGenerator.UI
 
                 gridSizeDropdown.onValueChanged.AddListener(OnGridSizeDropdownChanged);
             }
-            
+
+            // Step 4：档位下拉（未绑定则整个档位功能退化为 Custom 模式，保持旧行为）
+            InitializeProfileDropdown();
+
             // 初始状态
             cancelButton.gameObject.SetActive(false);
             saveJsonButton.interactable = false;
@@ -427,10 +455,9 @@ namespace WordSearchGenerator.UI
                 resultText.text = "";
             }
 
-            // 获取配置
-            var directions = useHardToggle.isOn ? Constants.ALL_DIRECTIONS : Constants.EASY_DIRECTIONS;
+            // Step 4：按档位/Custom 合并配置
+            var gp = ResolveGenerationParams();
             int sizeFactor = Mathf.RoundToInt(sizeFactorSlider.value);
-            int intersectBias = GetIntersectBias();
             var (fixedRows, fixedCols) = GetGridSize();
             
             // 重置进度
@@ -442,8 +469,14 @@ namespace WordSearchGenerator.UI
             {
                 try
                 {
-                    var result = generator.GenerateWordSearch(words, directions, sizeFactor, intersectBias, fixedRows, fixedCols);
-                    
+                    WordSearchData result = gp.profile == null
+                        ? generator.GenerateWordSearch(
+                            words, gp.customDirections, sizeFactor, gp.customBias,
+                            fixedRows, fixedCols)
+                        : generator.GenerateWordSearch(
+                            words, gp.profile, gp.overrideDirections, gp.overrideBias,
+                            sizeFactor, fixedRows, fixedCols);
+
                     // 切回主线程处理结果
                     UnityMainThreadDispatcher.Instance.Enqueue(() =>
                     {
@@ -611,6 +644,119 @@ namespace WordSearchGenerator.UI
             }
         }
 
+        // ==================== Step 4：档位下拉 ====================
+
+        /// <summary>
+        /// 初始化档位下拉：index 0 为 "Custom"（无档位），其后是 LevelProfile.GetBuiltIns() 的 6 个内置档位。
+        /// 若场景中未绑定 difficultyProfileDropdown，则 availableProfiles 保持空，所有生成路径走 Custom 分支（旧行为）。
+        /// </summary>
+        void InitializeProfileDropdown()
+        {
+            availableProfiles.Clear();
+
+            // Custom 放首位，代表"不使用档位，UI 控制"
+            availableProfiles.Add(null);
+            availableProfiles.AddRange(LevelProfile.GetBuiltIns());
+
+            if (difficultyProfileDropdown == null) return;
+
+            var labels = new List<string> { "Custom" };
+            for (int i = 1; i < availableProfiles.Count; i++)
+            {
+                labels.Add(availableProfiles[i].tierName);
+            }
+            difficultyProfileDropdown.ClearOptions();
+            difficultyProfileDropdown.AddOptions(labels);
+
+            int saved = PlayerPrefs.GetInt(PP_PROFILE_INDEX, 0);
+            saved = Mathf.Clamp(saved, 0, labels.Count - 1);
+
+            isSyncingProfileToUI = true;
+            try
+            {
+                difficultyProfileDropdown.value = saved;
+                difficultyProfileDropdown.RefreshShownValue();
+            }
+            finally { isSyncingProfileToUI = false; }
+
+            difficultyProfileDropdown.onValueChanged.AddListener(OnProfileDropdownChanged);
+
+            // 初始同步（档位 → UI），并重置 override 标志位
+            ApplyProfileToUI(GetSelectedProfile());
+            biasUserOverride    = false;
+            useHardUserOverride = false;
+        }
+
+        /// <summary>档位切换回调：持久化索引、同步到 UI、重置 override。</summary>
+        void OnProfileDropdownChanged(int idx)
+        {
+            PlayerPrefs.SetInt(PP_PROFILE_INDEX, idx);
+
+            ApplyProfileToUI(GetSelectedProfile());
+
+            // 每次档位切换都清零 override：用户在旧档位下的手动覆盖不再对新档位生效
+            biasUserOverride    = false;
+            useHardUserOverride = false;
+        }
+
+        /// <summary>从 availableProfiles 取当前选中档位。返回 null 表示 Custom 模式。</summary>
+        LevelProfile GetSelectedProfile()
+        {
+            if (difficultyProfileDropdown == null) return null;
+            int idx = difficultyProfileDropdown.value;
+            if (idx < 0 || idx >= availableProfiles.Count) return null;
+            return availableProfiles[idx];
+        }
+
+        /// <summary>
+        /// Step 4：按 D5 规则合并 UI 与 profile 的生成参数。
+        ///
+        /// - Custom 模式（profile == null）：directions / bias 均来自 UI。
+        /// - Profile 模式：默认走 profile；UI 若被用户显式改动（override 标志为 true）则 UI 胜。
+        ///
+        /// 返回 overrideDirections == null 表示"让 Generator 用 profile.directionPreset 决定方向"；
+        /// overrideBias == null 同理。
+        /// </summary>
+        (LevelProfile profile, Vector2Int[] customDirections, int customBias,
+         Vector2Int[] overrideDirections, int? overrideBias) ResolveGenerationParams()
+        {
+            var profile = GetSelectedProfile();
+
+            if (profile == null)
+            {
+                var dirs = useHardToggle.isOn ? Constants.ALL_DIRECTIONS : Constants.EASY_DIRECTIONS;
+                int bias = GetIntersectBias();
+                return (null, dirs, bias, null, null);
+            }
+
+            Vector2Int[] overrideDirs = useHardUserOverride
+                ? (useHardToggle.isOn ? Constants.ALL_DIRECTIONS : Constants.EASY_DIRECTIONS)
+                : null;
+            int? overrideBias = biasUserOverride ? (int?)GetIntersectBias() : null;
+            return (profile, null, 0, overrideDirs, overrideBias);
+        }
+
+        /// <summary>
+        /// 将 profile 的推荐值同步到 UI（bias / useHard 两个 Toggle）。
+        /// 使用 isSyncingProfileToUI 门禁避免被 Toggle.onValueChanged 误判为"用户改动"。
+        /// profile == null（Custom）时不做任何修改，UI 保留当前状态。
+        /// </summary>
+        void ApplyProfileToUI(LevelProfile profile)
+        {
+            if (profile == null) return;
+
+            isSyncingProfileToUI = true;
+            try
+            {
+                ApplyDefaultBiasToggle(profile.intersectBias);
+
+                // 方向 UI 只有 2 档（4 向 / 8 向），SixNoAntiDiag 视为"非 Hard"即可；
+                // 真实 6 向使用由 profile.directionPreset 在生成时注入。
+                useHardToggle.isOn = profile.directionPreset == DirectionPreset.EightAll;
+            }
+            finally { isSyncingProfileToUI = false; }
+        }
+
         /// <summary>
         /// 根据下拉框选项返回 (fixedRows, fixedCols)，自动模式返回 null。
         /// 下拉 label 约定为 "宽×高"，即 cols×rows。
@@ -766,7 +912,10 @@ namespace WordSearchGenerator.UI
                 biasPreferToggle = FindComp<Toggle>("SettingsPanel/BiasPreferToggle");
             if (gridSizeDropdown == null)
                 gridSizeDropdown = FindComp<Dropdown>("SettingsPanel/GridSizeDropdown");
-            
+            // Step 4：档位下拉（未配置则静默跳过，走 Custom 路径）
+            if (difficultyProfileDropdown == null)
+                difficultyProfileDropdown = SilentFind<Dropdown>("SettingsPanel/DifficultyProfileDropdown");
+
             // ===== 单词输入（InputPanel 下） =====
             if (wordInputField == null)
                 wordInputField = FindComp<InputField>("InputPanel/WordInputField");
@@ -1235,9 +1384,8 @@ namespace WordSearchGenerator.UI
 
             if (resultText != null) resultText.text = "";
 
-            var directions   = useHardToggle.isOn ? Constants.ALL_DIRECTIONS : Constants.EASY_DIRECTIONS;
-            int sizeFactor   = Mathf.RoundToInt(sizeFactorSlider.value);
-            int intersectBias = GetIntersectBias();
+            var gp = ResolveGenerationParams();
+            int sizeFactor = Mathf.RoundToInt(sizeFactorSlider.value);
             var (fixedRows, fixedCols) = GetGridSize();
 
             int totalWords = level.words.Count + level.bonusWords.Count + level.hiddenWords.Count;
@@ -1250,8 +1398,14 @@ namespace WordSearchGenerator.UI
             {
                 try
                 {
-                    var result = LevelGenerationHelper.GenerateFromLevelConfig(
-                        levelSnapshot, generator, directions, sizeFactor, intersectBias, fixedRows, fixedCols);
+                    WordSearchData result = gp.profile == null
+                        ? LevelGenerationHelper.GenerateFromLevelConfig(
+                            levelSnapshot, generator, gp.customDirections, sizeFactor,
+                            gp.customBias, fixedRows, fixedCols)
+                        : LevelGenerationHelper.GenerateFromLevelConfig(
+                            levelSnapshot, generator, gp.profile,
+                            gp.overrideDirections, gp.overrideBias, sizeFactor,
+                            fixedRows, fixedCols);
 
                     UnityMainThreadDispatcher.Instance.Enqueue(() => OnGenerationComplete(result));
                 }
@@ -1307,9 +1461,8 @@ namespace WordSearchGenerator.UI
 
             if (resultText != null) resultText.text = "";
 
-            var directions   = useHardToggle.isOn ? Constants.ALL_DIRECTIONS : Constants.EASY_DIRECTIONS;
-            int sizeFactor   = Mathf.RoundToInt(sizeFactorSlider.value);
-            int intersectBias = GetIntersectBias();
+            var gp = ResolveGenerationParams();
+            int sizeFactor = Mathf.RoundToInt(sizeFactorSlider.value);
             var (fixedRows, fixedCols) = GetGridSize();
 
             progressBar.value = 0;
@@ -1319,9 +1472,13 @@ namespace WordSearchGenerator.UI
             {
                 try
                 {
-                    var list = generator.GenerateBatch(
-                        words, count, directions, sizeFactor, intersectBias,
-                        fixedRows, fixedCols);
+                    List<WordSearchData> list = gp.profile == null
+                        ? generator.GenerateBatch(
+                            words, count, gp.customDirections, sizeFactor, gp.customBias,
+                            fixedRows, fixedCols)
+                        : generator.GenerateBatch(
+                            words, gp.profile, count, gp.overrideDirections, gp.overrideBias,
+                            sizeFactor, fixedRows, fixedCols);
                     UnityMainThreadDispatcher.Instance.Enqueue(() => OnBatchGenerationComplete(list));
                 }
                 catch (System.Exception e)
@@ -1339,9 +1496,8 @@ namespace WordSearchGenerator.UI
             UpdateUIForGeneration(true);
             if (resultText != null) resultText.text = "";
 
-            var directions   = useHardToggle.isOn ? Constants.ALL_DIRECTIONS : Constants.EASY_DIRECTIONS;
-            int sizeFactor   = Mathf.RoundToInt(sizeFactorSlider.value);
-            int intersectBias = GetIntersectBias();
+            var gp = ResolveGenerationParams();
+            int sizeFactor = Mathf.RoundToInt(sizeFactorSlider.value);
             var (fixedRows, fixedCols) = GetGridSize();
 
             int totalWords = level.words.Count + level.bonusWords.Count + level.hiddenWords.Count;
@@ -1354,9 +1510,14 @@ namespace WordSearchGenerator.UI
             {
                 try
                 {
-                    var list = LevelGenerationHelper.GenerateBatchFromLevelConfig(
-                        levelSnapshot, generator, count, directions, sizeFactor, intersectBias,
-                        fixedRows, fixedCols);
+                    List<WordSearchData> list = gp.profile == null
+                        ? LevelGenerationHelper.GenerateBatchFromLevelConfig(
+                            levelSnapshot, generator, count, gp.customDirections,
+                            sizeFactor, gp.customBias, fixedRows, fixedCols)
+                        : LevelGenerationHelper.GenerateBatchFromLevelConfig(
+                            levelSnapshot, generator, gp.profile, count,
+                            gp.overrideDirections, gp.overrideBias, sizeFactor,
+                            fixedRows, fixedCols);
                     UnityMainThreadDispatcher.Instance.Enqueue(() => OnBatchGenerationComplete(list));
                 }
                 catch (System.Exception e)

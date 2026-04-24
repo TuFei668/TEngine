@@ -1,6 +1,6 @@
 ﻿{
-    "puzzleId": "level-primary-fruit-002",
-    "level_id": 2,
+    "puzzleId": "level-primary-fruit-004",
+    "level_id": 4,
     "pack_id": "primary",
     "stage": "primary",
     "theme": "水果",
@@ -8,49 +8,47 @@
     "difficulty": 1,
     "type": "normal",
     "bonus_coin_multiplier": 1,
-    "createTime": "2026-04-24 14:16:15",
-    "generateTime": "2026-04-24 14:16:15",
+    "createTime": "2026-04-24 12:41:25",
+    "generateTime": "2026-04-24 12:41:25",
     "version": "1.0",
-    "dimension": 8,
-    "rows": 8,
-    "cols": 7,
+    "dimension": 7,
+    "rows": 7,
+    "cols": 6,
     "useHardDirections": false,
     "sizeFactor": 4,
     "intersectBias": -1,
-    "gridString": "LIGHTDG|PFTDKSM|FKINDHA|PZNDFON|EKEERWG|AZEEVXO|CJEEREI|HDZIPWR",
+    "gridString": "JSTOOL|IAYUCI|BZGUOO|EBGUWN|AZETAG|ROVDKR|MOUSEJ",
     "words": [
-        "MANGO",
-        "PEACH",
-        "KEEP",
-        "KIND",
-        "LIGHT"
+        "BEAR",
+        "BED",
+        "COW",
+        "JAGUAR",
+        "LION",
+        "MOUSE",
+        "STOOL"
     ],
     "wordPositions": [
         {
-            "word": "MANGO",
-            "startX": 6,
-            "startY": 1,
+            "word": "BEAR",
+            "startX": 0,
+            "startY": 2,
             "directionX": 0,
             "directionY": 1,
             "cellPositions": [
                 {
-                    "x": 6,
-                    "y": 1
-                },
-                {
-                    "x": 6,
+                    "x": 0,
                     "y": 2
                 },
                 {
-                    "x": 6,
+                    "x": 0,
                     "y": 3
                 },
                 {
-                    "x": 6,
+                    "x": 0,
                     "y": 4
                 },
                 {
-                    "x": 6,
+                    "x": 0,
                     "y": 5
                 }
             ],
@@ -62,31 +60,23 @@
             }
         },
         {
-            "word": "PEACH",
-            "startX": 0,
+            "word": "BED",
+            "startX": 1,
             "startY": 3,
-            "directionX": 0,
+            "directionX": 1,
             "directionY": 1,
             "cellPositions": [
                 {
-                    "x": 0,
+                    "x": 1,
                     "y": 3
                 },
                 {
-                    "x": 0,
+                    "x": 2,
                     "y": 4
                 },
                 {
-                    "x": 0,
+                    "x": 3,
                     "y": 5
-                },
-                {
-                    "x": 0,
-                    "y": 6
-                },
-                {
-                    "x": 0,
-                    "y": 7
                 }
             ],
             "wordColor": {
@@ -97,27 +87,23 @@
             }
         },
         {
-            "word": "KEEP",
-            "startX": 1,
-            "startY": 4,
-            "directionX": 1,
+            "word": "COW",
+            "startX": 4,
+            "startY": 1,
+            "directionX": 0,
             "directionY": 1,
             "cellPositions": [
                 {
-                    "x": 1,
-                    "y": 4
-                },
-                {
-                    "x": 2,
-                    "y": 5
-                },
-                {
-                    "x": 3,
-                    "y": 6
+                    "x": 4,
+                    "y": 1
                 },
                 {
                     "x": 4,
-                    "y": 7
+                    "y": 2
+                },
+                {
+                    "x": 4,
+                    "y": 3
                 }
             ],
             "wordColor": {
@@ -128,15 +114,19 @@
             }
         },
         {
-            "word": "KIND",
-            "startX": 1,
-            "startY": 2,
+            "word": "JAGUAR",
+            "startX": 0,
+            "startY": 0,
             "directionX": 1,
-            "directionY": 0,
+            "directionY": 1,
             "cellPositions": [
                 {
+                    "x": 0,
+                    "y": 0
+                },
+                {
                     "x": 1,
-                    "y": 2
+                    "y": 1
                 },
                 {
                     "x": 2,
@@ -144,11 +134,15 @@
                 },
                 {
                     "x": 3,
-                    "y": 2
+                    "y": 3
                 },
                 {
                     "x": 4,
-                    "y": 2
+                    "y": 4
+                },
+                {
+                    "x": 5,
+                    "y": 5
                 }
             ],
             "wordColor": {
@@ -159,49 +153,16 @@
             }
         },
         {
-            "word": "LIGHT",
-            "startX": 0,
-            "startY": 0,
-            "directionX": 1,
-            "directionY": 0,
-            "cellPositions": [
-                {
-                    "x": 0,
-                    "y": 0
-                },
-                {
-                    "x": 1,
-                    "y": 0
-                },
-                {
-                    "x": 2,
-                    "y": 0
-                },
-                {
-                    "x": 3,
-                    "y": 0
-                },
-                {
-                    "x": 4,
-                    "y": 0
-                }
-            ],
-            "wordColor": {
-                "r": 0.6000000238418579,
-                "g": 0.0,
-                "b": 1.0,
-                "a": 0.6000000238418579
-            }
-        }
-    ],
-    "bonusWords": [
-        {
-            "word": "SHOW",
+            "word": "LION",
             "startX": 5,
-            "startY": 1,
+            "startY": 0,
             "directionX": 0,
             "directionY": 1,
             "cellPositions": [
+                {
+                    "x": 5,
+                    "y": 0
+                },
                 {
                     "x": 5,
                     "y": 1
@@ -213,80 +174,111 @@
                 {
                     "x": 5,
                     "y": 3
-                },
-                {
-                    "x": 5,
-                    "y": 4
                 }
             ],
             "wordColor": {
-                "r": 0.5,
-                "g": 0.5,
-                "b": 0.5,
+                "r": 0.6000000238418579,
+                "g": 0.0,
+                "b": 1.0,
                 "a": 0.6000000238418579
             }
-        }
-    ],
-    "hiddenWords": [
+        },
         {
-            "word": "NEVER",
-            "startX": 2,
-            "startY": 3,
+            "word": "MOUSE",
+            "startX": 0,
+            "startY": 6,
             "directionX": 1,
-            "directionY": 1,
+            "directionY": 0,
             "cellPositions": [
                 {
-                    "x": 2,
-                    "y": 3
-                },
-                {
-                    "x": 3,
-                    "y": 4
-                },
-                {
-                    "x": 4,
-                    "y": 5
-                },
-                {
-                    "x": 5,
+                    "x": 0,
                     "y": 6
                 },
                 {
-                    "x": 6,
-                    "y": 7
+                    "x": 1,
+                    "y": 6
+                },
+                {
+                    "x": 2,
+                    "y": 6
+                },
+                {
+                    "x": 3,
+                    "y": 6
+                },
+                {
+                    "x": 4,
+                    "y": 6
                 }
             ],
             "wordColor": {
-                "r": 0.25,
-                "g": 0.25,
-                "b": 0.25,
+                "r": 1.0,
+                "g": 0.800000011920929,
+                "b": 0.0,
+                "a": 0.6000000238418579
+            }
+        },
+        {
+            "word": "STOOL",
+            "startX": 1,
+            "startY": 0,
+            "directionX": 1,
+            "directionY": 0,
+            "cellPositions": [
+                {
+                    "x": 1,
+                    "y": 0
+                },
+                {
+                    "x": 2,
+                    "y": 0
+                },
+                {
+                    "x": 3,
+                    "y": 0
+                },
+                {
+                    "x": 4,
+                    "y": 0
+                },
+                {
+                    "x": 5,
+                    "y": 0
+                }
+            ],
+            "wordColor": {
+                "r": 0.0,
+                "g": 0.800000011920929,
+                "b": 0.800000011920929,
                 "a": 0.6000000238418579
             }
         }
     ],
-    "puzzleText": "L I G H T D G\nP F T D K S M\nF K I N D H A\nP Z N D F O N\nE K E E R W G\nA Z E E V X O\nC J E E R E I\nH D Z I P W R",
-    "answerKeyText": "L i g h t d g\np f t d k S M\nf K i n d h a\nP z N d f o n\ne K e e r w g\na z e e v x o\nc j e e r e i\nh d z i p w r",
-    "seed": 1054594532,
-    "bestOfN": 1,
-    "layoutScore": 2.6703598499298097,
-    "difficultyAuto": 19.64285659790039,
-    "intersectionRatio": 0.0,
+    "bonusWords": [],
+    "hiddenWords": [],
+    "puzzleText": "J S T O O L\nI A Y U C I\nB Z G U O O\nE B G U W N\nA Z E T A G\nR O V D K R\nM O U S E J",
+    "answerKeyText": "J S t o o L\ni a y u C i\nB z g u o o\ne B g u w n\na z e t a g\nr o v d k r\nM o u s e j",
+    "seed": 1344658208,
+    "bestOfN": 5,
+    "layoutScore": 2.9913389682769777,
+    "difficultyAuto": 19.642858505249025,
+    "intersectionRatio": 0.1428571492433548,
     "directionDiversity": 0.375,
     "reverseRatio": 0.0,
     "diagonalRatio": 0.2857142984867096,
-    "wordDensity": 0.5714285969734192,
-    "adjacentPairs": 25,
-    "frameCoverage": 0.75,
+    "wordDensity": 0.6904761791229248,
+    "adjacentPairs": 27,
+    "frameCoverage": 1.0,
     "xCrossCount": 0,
-    "centroidBias": 0.09166666865348816,
-    "pairwiseDistVar": 0.0271375123411417,
+    "centroidBias": 0.04774541035294533,
+    "pairwiseDistVar": 0.028847752138972284,
     "placementSequence": [
-        "MANGO",
-        "PEACH",
-        "LIGHT",
-        "NEVER",
-        "KEEP",
-        "KIND",
-        "SHOW"
+        "JAGUAR",
+        "MOUSE",
+        "STOOL",
+        "BEAR",
+        "LION",
+        "BED",
+        "COW"
     ]
 }

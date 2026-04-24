@@ -55,6 +55,16 @@ namespace WordSearchGenerator
 
         private Action progressCallback;
 
+        // ========== Step 4：档位相关的运行期字段 ==========
+        //
+        // activeProfile 为 null 时走"老 API + bias 驱动"路径，保持向后兼容；
+        // 非 null 时档位字段会覆盖 topK / softmaxTemp / dimensionScale，并在 BuildLayoutContext 里改用 ApplyProfile。
+
+        private LevelProfile activeProfile;
+        private int   activeTopK            = Constants.DEFAULT_TOP_K;
+        private float activeSoftmaxT        = Constants.DEFAULT_SOFTMAX_TEMPERATURE;
+        private float activeDimensionScale  = Constants.AUTO_DIMENSION_SCALE;
+
         // ========== 构造函数 ==========
 
         public Generator(Action progressCallback = null)
@@ -112,8 +122,48 @@ namespace WordSearchGenerator
         {
             // 用户主动发起的新一次生成，重置取消标志
             cancelRequested = false;
+            // 老 API 路径：清掉 profile 状态，回退到 bias 驱动（兼容旧调用方）
+            ApplyProfile(null);
             return GenerateInternal(words, directions, sizeFactor, intersectBias,
                 fixedRows, fixedCols, seed, bestOfN);
+        }
+
+        /// <summary>
+        /// Step 4：LevelProfile 重载。档位参数作为默认值，显式传入的参数覆盖档位值（满足 D5）。
+        ///
+        /// 合并规则：
+        ///   directions / intersectBias / bestOfN：显式参数 > profile 默认 > 原全局默认
+        ///   topK / softmaxTemperature / dimensionScale：只走 profile 值（UI 不暴露这几项）
+        ///   骨架配额（border/diag/X/vstack）：走 profile，通过 BuildLayoutContext → ApplyProfile 注入 LayoutContext
+        ///
+        /// 传 profile == null 时等价于老 API。
+        /// </summary>
+        public WordSearchData GenerateWordSearch(
+            List<string> words,
+            LevelProfile profile,
+            Vector2Int[] directions = null,
+            int? intersectBias = null,
+            int? sizeFactor = null,
+            int? fixedRows = null,
+            int? fixedCols = null,
+            int? seed = null,
+            int? bestOfN = null)
+        {
+            cancelRequested = false;
+            ApplyProfile(profile);
+
+            var effDirs = directions ?? (profile != null
+                ? LevelProfile.GetDirections(profile.directionPreset)
+                : null);
+            int? effBias = intersectBias ?? (profile != null
+                ? (int?)profile.intersectBias
+                : null);
+            int? effN = bestOfN ?? (profile != null
+                ? (int?)profile.bestOfN
+                : null);
+
+            return GenerateInternal(words, effDirs, sizeFactor, effBias,
+                fixedRows, fixedCols, seed, effN);
         }
 
         /// <summary>
@@ -138,6 +188,7 @@ namespace WordSearchGenerator
             int perCandidate = bestOfNPerCandidate ?? 1;
 
             cancelRequested = false;
+            ApplyProfile(null);
 
             var results = new List<WordSearchData>();
             Exception lastError = null;
@@ -164,6 +215,72 @@ namespace WordSearchGenerator
 
             results.Sort((a, b) => b.layoutScore.CompareTo(a.layoutScore));
             return results;
+        }
+
+        /// <summary>
+        /// Step 4：LevelProfile 批量生成重载。和单张版行为一致，profile 提供默认参数，显式参数覆盖之。
+        /// </summary>
+        public List<WordSearchData> GenerateBatch(
+            List<string> words,
+            LevelProfile profile,
+            int count,
+            Vector2Int[] directions = null,
+            int? intersectBias = null,
+            int? sizeFactor = null,
+            int? fixedRows = null,
+            int? fixedCols = null,
+            int? baseSeed = null,
+            int? bestOfNPerCandidate = null)
+        {
+            count = Mathf.Clamp(count, 1, Constants.BATCH_COUNT_MAX);
+            int seedBase = baseSeed ?? Guid.NewGuid().GetHashCode();
+
+            cancelRequested = false;
+            ApplyProfile(profile);
+
+            var effDirs = directions ?? (profile != null
+                ? LevelProfile.GetDirections(profile.directionPreset)
+                : null);
+            int? effBias = intersectBias ?? (profile != null
+                ? (int?)profile.intersectBias
+                : null);
+            int perCandidate = bestOfNPerCandidate ?? (profile != null ? profile.bestOfN : 1);
+
+            var results = new List<WordSearchData>();
+            Exception lastError = null;
+
+            for (int i = 0; i < count; i++)
+            {
+                if (cancelRequested) break;
+
+                int s = unchecked(seedBase + i * 9973);
+                try
+                {
+                    var r = GenerateInternal(words, effDirs, sizeFactor, effBias,
+                        fixedRows, fixedCols, s, perCandidate);
+                    if (r != null) results.Add(r);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    lastError = ex;
+                }
+            }
+
+            if (results.Count == 0 && lastError != null) throw lastError;
+
+            results.Sort((a, b) => b.layoutScore.CompareTo(a.layoutScore));
+            return results;
+        }
+
+        /// <summary>
+        /// Step 4：内部档位参数落地到 Generator 字段；profile==null 时还原默认值。
+        /// </summary>
+        private void ApplyProfile(LevelProfile profile)
+        {
+            activeProfile        = profile;
+            activeTopK           = profile != null ? profile.topK             : Constants.DEFAULT_TOP_K;
+            activeSoftmaxT       = profile != null ? profile.softmaxTemperature : Constants.DEFAULT_SOFTMAX_TEMPERATURE;
+            activeDimensionScale = profile != null ? profile.dimensionScale   : Constants.AUTO_DIMENSION_SCALE;
         }
 
         /// <summary>
@@ -206,11 +323,10 @@ namespace WordSearchGenerator
             else
             {
                 if (sizeFactor.HasValue) this.sizeFactor = sizeFactor.Value;
-                // P0-5 / Step 3：紧凑尺寸 × 膨胀系数 + padding。
-                // 单纯 +1 对小网格留白不够；×1.15 后再 +1 能给骨架算法充足的空间
-                // 用于形成 X / 贴边 / 竖直栈，不至于被挤成一团。
+                // P0-5 / Step 3 / Step 4：紧凑尺寸 × 档位膨胀系数 + padding。
+                // scale 由 activeProfile 决定（无 profile 时回退到 Constants.AUTO_DIMENSION_SCALE=1.15）。
                 int baseDim = GetPuzzleDimension(this.words, this.sizeFactor);
-                this.dim  = Mathf.CeilToInt(baseDim * Constants.AUTO_DIMENSION_SCALE)
+                this.dim  = Mathf.CeilToInt(baseDim * activeDimensionScale)
                           + Constants.AUTO_DIMENSION_PADDING;
                 this.rows = this.dim;
                 this.cols = this.dim;
@@ -474,13 +590,15 @@ namespace WordSearchGenerator
         /// 根据当前 placementOrder[0..currentIndex] 已放置的单词，重建全局布局上下文。
         /// 每次新词开始挑候选前调用一次；单次生成的复杂度 O(words²)，可忽略。
         ///
-        /// Step 2 小修：在应用已放置单词前先调用 ApplyBiasPreset，让 UI 的 intersectBias 切换
-        /// 能直接影响 X / 对角 / 贴边 / 竖直栈的配额，从而产生可见的风格差异。
+        /// 配额来源（Step 4）：
+        ///   - 有 activeProfile：走 ctx.ApplyProfile(profile)，档位直接决定配额
+        ///   - 无 activeProfile：走 ctx.ApplyBiasPreset(intersectBias)，bias 间接决定配额（S2 旧路径）
         /// </summary>
         private LayoutContext BuildLayoutContext()
         {
             var ctx = new LayoutContext(rows, cols);
-            ctx.ApplyBiasPreset(intersectBias);
+            if (activeProfile != null) ctx.ApplyProfile(activeProfile);
+            else                       ctx.ApplyBiasPreset(intersectBias);
 
             for (int i = 0; i < currentIndex; i++)
             {
@@ -500,10 +618,10 @@ namespace WordSearchGenerator
         /// </summary>
         private void SampleTopKIntoFront(List<(Position pos, int intersect, float score)> candidates)
         {
-            int K = Mathf.Min(Constants.DEFAULT_TOP_K, candidates.Count);
+            int K = Mathf.Min(activeTopK, candidates.Count);
             if (K <= 1) return;
 
-            float T = Constants.DEFAULT_SOFTMAX_TEMPERATURE;
+            float T = activeSoftmaxT;
             if (T <= 0.0001f) return; // 纯贪心模式不采样
 
             // Log-sum-exp 稳定化

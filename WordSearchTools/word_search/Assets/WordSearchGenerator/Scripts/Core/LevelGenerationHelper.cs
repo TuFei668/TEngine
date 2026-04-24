@@ -69,6 +69,46 @@ namespace WordSearchGenerator
         }
 
         /// <summary>
+        /// Step 4：带 LevelProfile 的单张生成重载。
+        /// profile 提供档位默认（配额 / 方向集 / bestOfN / topK / 温度），
+        /// directions / intersectBias 参数显式传入时覆盖档位值（对应 UI 的显式勾选优先）。
+        /// </summary>
+        public static WordSearchData GenerateFromLevelConfig(
+            LevelConfig level,
+            Generator generator,
+            LevelProfile profile,
+            Vector2Int[] directions = null,
+            int? intersectBias = null,
+            int? sizeFactor = null,
+            int? fixedRows = null,
+            int? fixedCols = null,
+            int? seed = null,
+            int? bestOfN = null)
+        {
+            if (level == null) throw new ArgumentNullException(nameof(level));
+            if (generator == null) throw new ArgumentNullException(nameof(generator));
+
+            var allWords = new List<string>();
+            allWords.AddRange(level.words);
+            allWords.AddRange(level.bonusWords);
+            allWords.AddRange(level.hiddenWords);
+            allWords = allWords.Where(w => !string.IsNullOrEmpty(w)).Distinct().ToList();
+
+            if (allWords.Count == 0)
+                throw new InvalidOperationException($"关卡 {level.UniqueKey} 没有任何有效单词");
+
+            WordSearchData data = generator.GenerateWordSearch(
+                allWords, profile, directions, intersectBias, sizeFactor,
+                fixedRows, fixedCols, seed, bestOfN);
+
+            if (data == null) return null;
+
+            ApplyLevelMetadata(data, level);
+            SplitAndColorize(data, level);
+            return data;
+        }
+
+        /// <summary>
         /// P1-2：基于关卡配置批量生成多张候选（按 layoutScore 降序）。
         /// </summary>
         public static List<WordSearchData> GenerateBatchFromLevelConfig(
@@ -97,6 +137,49 @@ namespace WordSearchGenerator
 
             var list = generator.GenerateBatch(
                 allWords, count, directions, sizeFactor, intersectBias,
+                fixedRows, fixedCols, baseSeed, bestOfNPerCandidate);
+
+            if (list == null) return null;
+
+            foreach (var data in list)
+            {
+                if (data == null) continue;
+                ApplyLevelMetadata(data, level);
+                SplitAndColorize(data, level);
+            }
+            return list;
+        }
+
+        /// <summary>
+        /// Step 4：带 LevelProfile 的批量生成重载。行为与单张版一致，profile 驱动档位默认。
+        /// </summary>
+        public static List<WordSearchData> GenerateBatchFromLevelConfig(
+            LevelConfig level,
+            Generator generator,
+            LevelProfile profile,
+            int count,
+            Vector2Int[] directions = null,
+            int? intersectBias = null,
+            int? sizeFactor = null,
+            int? fixedRows = null,
+            int? fixedCols = null,
+            int? baseSeed = null,
+            int? bestOfNPerCandidate = null)
+        {
+            if (level == null) throw new ArgumentNullException(nameof(level));
+            if (generator == null) throw new ArgumentNullException(nameof(generator));
+
+            var allWords = new List<string>();
+            allWords.AddRange(level.words);
+            allWords.AddRange(level.bonusWords);
+            allWords.AddRange(level.hiddenWords);
+            allWords = allWords.Where(w => !string.IsNullOrEmpty(w)).Distinct().ToList();
+
+            if (allWords.Count == 0)
+                throw new InvalidOperationException($"关卡 {level.UniqueKey} 没有任何有效单词");
+
+            var list = generator.GenerateBatch(
+                allWords, profile, count, directions, intersectBias, sizeFactor,
                 fixedRows, fixedCols, baseSeed, bestOfNPerCandidate);
 
             if (list == null) return null;
