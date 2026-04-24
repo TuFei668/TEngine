@@ -427,6 +427,10 @@
       <HintPath>/Applications/Unity/Hub/Editor/2022.3.62f2/Unity.app/Contents/Managed/UnityEngine/UnityEditor.UnityConnectModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Excel">
+      <HintPath>Assets/Plugins/excel_dll/Excel.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Unity.Collections.LowLevel.ILSupport">
       <HintPath>Library/PackageCache/com.unity.collections@1.2.4/Unity.Collections.LowLevel.ILSupport/Unity.Collections.LowLevel.ILSupport.dll</HintPath>
       <Private>False</Private>
@@ -437,10 +441,6 @@
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>Library/PackageCache/com.unity.nuget.newtonsoft-json@3.2.1/Runtime/Newtonsoft.Json.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
-    <Reference Include="Excel">
-      <HintPath>Assets/Plugins/excel_dll/Excel.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="ICSharpCode.SharpZipLib">

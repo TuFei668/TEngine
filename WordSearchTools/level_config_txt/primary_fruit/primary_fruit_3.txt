@@ -1,7 +1,7 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 10:55:05
+Created: 2026-04-24 17:34:39
 Puzzle ID: level-primary-fruit-003
-Size: 9x9
+Size: 7x9
 Hard Mode: False
 Size Factor: 4
 Intersect Bias: Avoid
@@ -14,30 +14,30 @@ BANANA
 PAPAYA
 
 --- Puzzle ---
-K B A N A N A U P
-S M S Y N H U R T
-S T U D Y W F K Y
-H O L D G P S N P
-P I N E A P P L E
-K S G P A P A Y A
-Q U Q G O W P U G
-W C B F I C M J N
-H H E U G N T C Y
+E S U C H J P
+L G N U B A E
+P N R D P B A
+P T Z A V H N
+A C Y Y O E A
+E A U L Z N N
+N G D E W F A
+I Z Y E G X B
+P D Y D U T S
 
 --- Answer Key ---
-k B a n a n a u p
-s m s y n H u r t
-S t u d y w f k y
-H o l d g p s n p
-P i n e a p p l e
-k S g P a p a y a
-q u q g o w p u g
-w c b f i c m j n
-h h e u g n t c y
+e S u c H j P
+l g n u b a e
+p n r d p b a
+p t z a v H n
+a c y y o e a
+e a u l z n n
+n g d e w f a
+i z y e g x B
+P d y d u t S
 
 --- Word Positions ---
-HOLD: Start(0,3) → Right
-HURT: Start(5,1) → Right
-PINEAPPLE: Start(0,4) → Right
-BANANA: Start(1,0) → Right
-PAPAYA: Start(3,5) → Right
+HOLD: Start(5,3) ↙ Down-Left
+HURT: Start(4,0) ↙ Down-Left
+PINEAPPLE: Start(0,8) ↑ Up
+BANANA: Start(6,7) ↑ Up
+PAPAYA: Start(6,0) ↙ Down-Left

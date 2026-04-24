@@ -1,5 +1,5 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 10:55:27
+Created: 2026-04-24 17:35:30
 Puzzle ID: level-primary-vegetable-001
 Size: 9x9
 Hard Mode: False
@@ -15,31 +15,31 @@ SPINACH
 LETTUCE
 
 --- Puzzle ---
-S B Y P E P P E R
-P C A B B A G E K
-I P H E F G B T P
-N C A R R O T O O
-A Q T B D N Z M T
-C H V S O R A A A
-H F S I H U R T T
-T W N D E O D O O
-X O L E T T U C E
+E C U T T E L T H
+Y U V S A Q T E C
+E N O T A M O T A
+G P Q C H D C V N
+A E O K A K M B I
+B P U T Q R O T P
+B P O C A R R J S
+A E Q W S T Q O C
+C R N O I N O C T
 
 --- Answer Key ---
-S b y P e p p e r
-p C a b b a g e k
-i p h e f g b T P
-n C a r r o t o o
-a q t b d n z m t
-c h v s o r a a a
-h f s i h u r t t
-t w n d e o d o o
-x O L e t t u c e
+e c u t t e L t h
+y u v s a q t e c
+e n o t a m o T a
+g P q C h d c v n
+a e o k a k m b i
+b p u t q r o t p
+b p o c a r r j S
+a e q w s t q o c
+C r n o i n O c t
 
 --- Word Positions ---
-CARROT: Start(1,3) → Right
-POTATO: Start(8,2) ↓ Down
-TOMATO: Start(7,2) ↓ Down
-CABBAGE: Start(1,1) → Right
-SPINACH: Start(0,0) ↓ Down
-LETTUCE: Start(2,8) → Right
+CARROT: Start(3,3) ↘ Down-Right
+POTATO: Start(1,3) ↘ Down-Right
+TOMATO: Start(7,2) ← Left
+CABBAGE: Start(0,8) ↑ Up
+SPINACH: Start(8,6) ↑ Up
+LETTUCE: Start(6,0) ← Left

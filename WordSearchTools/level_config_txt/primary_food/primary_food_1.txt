@@ -1,7 +1,7 @@
 ﻿=== Word Search Puzzle ===
-Created: 2026-04-22 11:58:27
+Created: 2026-04-24 17:35:17
 Puzzle ID: level-primary-food-001
-Size: 12x12
+Size: 7x8
 Hard Mode: False
 Size Factor: 4
 Intersect Bias: Avoid
@@ -15,37 +15,29 @@ TURN
 SHOW
 
 --- Puzzle ---
-Y B Z G L L W Q K U E X
-O K O Q E O R N W Z B S
-S Y X W H H D K J H J S
-K T E S I L J R H H U P
-W S Q A R P N B Z C N V
-Q R T O R R P Z H L G V
-S T W U G S K S P E C S
-J T K T D C F S I Z Y W
-C Y I A X Y H T U R N H
-A F E L D S J U M B T B
-S H X T L D N V B R Q N
-D X O T H I N G S I E Z
+T X S T D D Y
+J H C U K D D
+W J I R C A U
+L O J N A H T
+L W R K G V S
+I O Y L X S I
+T H K B D K N
+S S S R A E Y
 
 --- Answer Key ---
-y b z g l l w q k u e x
-o k o q e o r n w z b s
-s Y x w h h d k j h j S
-k t e S i l j r h h u p
-w S q a r p n b z c n v
-q r t o r r p z h l g v
-S t W u g s k s p e c s
-j t k t d c f s i z y w
-c y i A x y h T u r n h
-a f e l d s j u m b t b
-s h x t l d n v b r q n
-d x o T h i n g s i e z
+T x S T d d y
+j h c u k d d
+W j i r c A u
+l o j n a h t
+l w r k g v S
+i o y l x s i
+t h k b d k n
+S S s r a e Y
 
 --- Word Positions ---
-STILL: Start(0,6) ↘ Down-Right
-STUDY: Start(1,4) ↘ Down-Right
-SUCH: Start(11,2) ↙ Down-Left
-THINGS: Start(3,11) → Right
-TURN: Start(7,8) → Right
-SHOW: Start(3,3) ↗ Up-Right
+STILL: Start(0,7) ↑ Up
+STUDY: Start(6,4) ↑ Up
+SUCH: Start(2,0) ↘ Down-Right
+THINGS: Start(0,0) ↘ Down-Right
+TURN: Start(3,0) ↓ Down
+SHOW: Start(1,7) ↑ Up
