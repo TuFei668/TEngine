@@ -23,7 +23,7 @@ namespace TEngine
         /// <summary>
         /// 默认调试器窗口大小。
         /// </summary>
-        internal static readonly Rect DefaultWindowRect = new Rect(10f, 10f, 640f, 480f);
+        internal static readonly Rect DefaultWindowRect = new Rect(10f, 10f, 320f,640f);
 
         /// <summary>
         /// 默认调试器窗口缩放比例。
