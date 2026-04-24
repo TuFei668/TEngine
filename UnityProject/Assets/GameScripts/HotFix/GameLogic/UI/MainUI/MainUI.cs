@@ -58,6 +58,8 @@ namespace GameLogic
             _btnTabCollection?.onClick.AddListener(OnCollectionClick);
 
             AddUIEvent<int>(IOnCoinChanged_Event.OnCoinChanged, OnCoinChanged);
+            AddUIEvent<int, string>(IOnBadgeUpgraded_Event.OnBadgeUpgraded, OnBadgeUpgraded);
+            AddUIEvent(IOnLevelAdvanced_Event.OnLevelAdvanced, OnLevelAdvanced);
         }
 
         protected override void OnCreate()
@@ -153,6 +155,21 @@ namespace GameLogic
         }
 
         private void OnCollectionClick() => GameModule.UI.ShowUIAsync<CollectionUI>();
+
+        private void OnBadgeUpgraded(int newLevel, string title)
+        {
+            // 刷新主界面（称号可能显示在用户卡片上）
+            RefreshUserCard();
+            // 弹出升级庆祝弹窗
+            GameModule.UI.ShowUIAsync<BadgeUpgradeUI>(newLevel, title);
+        }
+
+        private void OnLevelAdvanced()
+        {
+            // 关卡推进后刷新主界面数据
+            RefreshUserCard();
+            RefreshPlayButton();
+        }
 
         protected override void OnDestroy()
         {

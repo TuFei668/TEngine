@@ -1,0 +1,8 @@
+##var,stage_id,stage_name,sort_order,start_pack_id,unlock_next_stage
+##type,string,string,int,string,string?
+##group,c,c,c,c,c
+##,学段ID,学段名称,排序序号,起始关卡包ID,完成后解锁的下一学段ID
+stage_primary,primary,小学,1,primary_fruit,junior_high
+stage_junior_high,junior_high,初中,2,junior_daily_life,senior_high
+stage_senior_high,senior_high,高中,3,senior_society,adult
+stage_adult,adult,成人,4,cet4,

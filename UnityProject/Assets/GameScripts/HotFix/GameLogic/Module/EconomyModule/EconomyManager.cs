@@ -72,6 +72,9 @@ namespace GameLogic
             if (amount <= 0) return;
             _learningScore += amount;
             PlayerDataStorage.SetInt(PlayerDataStorage.KEY_LEARNING_SCORE, _learningScore);
+
+            // 检查称号升级
+            BadgeManager.Instance.CheckBadgeUpgrade();
         }
     }
 }

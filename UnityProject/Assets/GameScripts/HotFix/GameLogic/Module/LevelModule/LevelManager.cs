@@ -77,12 +77,17 @@ namespace GameLogic
             var pack = StageConfigMgr.Instance.GetPackConfig(_progress.CurrentPackId);
             if (pack == null) return;
 
+            bool isPackComplete = false;
+
             if (_progress.CurrentLevelInPack < pack.TotalLevels)
             {
                 _progress.CurrentLevelInPack++;
             }
             else
             {
+                // Pack 全部完成
+                isPackComplete = true;
+
                 var nextPack = StageConfigMgr.Instance.GetNextPack(_progress.CurrentPackId);
                 if (nextPack != null)
                 {
@@ -99,6 +104,18 @@ namespace GameLogic
             }
 
             SaveProgress();
+
+            // Pack 完成奖励（走 coin_rule 配表，action = pack_complete）
+            if (isPackComplete)
+            {
+                EconomyManager.Instance.ApplyCoinRule("pack_complete");
+                Log.Info($"[LevelManager] Pack complete: {pack.PackId}, coin rule applied");
+                GameEvent.Get<IOnPackCompleted>().OnPackCompleted(pack.PackId);
+            }
+
+            // 检查称号升级
+            BadgeManager.Instance.CheckBadgeUpgrade();
+
             GameEvent.Get<IOnLevelAdvanced>().OnLevelAdvanced();
         }
 

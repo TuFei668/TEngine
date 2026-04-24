@@ -18,6 +18,8 @@ namespace GameLogic
         public const string KEY_BONUS_METER        = "player_bonus_meter";
         public const string KEY_PLAYER_NAME        = "player_name";
         public const string KEY_NORMAL_HINT_COUNT  = "player_normal_hint_count";
+        public const string KEY_IS_MINOR           = "player_is_minor";
+        public const string KEY_BADGE_LEVEL        = "player_badge_level";
 
         // ── 基础读写 ──────────────────────────────────────────
 

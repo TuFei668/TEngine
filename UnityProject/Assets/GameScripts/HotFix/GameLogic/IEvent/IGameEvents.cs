@@ -22,4 +22,18 @@ namespace GameLogic
     {
         void OnStageSelected(string stageId);
     }
+
+    /// <summary>称号徽章升级事件</summary>
+    [EventInterface(EEventGroup.GroupLogic)]
+    public interface IOnBadgeUpgraded
+    {
+        void OnBadgeUpgraded(int newLevel, string title);
+    }
+
+    /// <summary>关卡包完成事件（触发+30金币奖励、景区卡片解锁检查）</summary>
+    [EventInterface(EEventGroup.GroupLogic)]
+    public interface IOnPackCompleted
+    {
+        void OnPackCompleted(string packId);
+    }
 }

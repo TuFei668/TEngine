@@ -10,72 +10,80 @@ namespace GameLogic
     public class WordSearchUI : UIWindow
     {
         // ── 节点引用 ──────────────────────────────────────────
-        private Button _btnBack;
+        private Button    _btnBack;
         private Transform _viewRoot;
-        private Image _gridBg;
+        private Image     _gridBg;
         private Transform _gridRoot;
         private Transform _cellContainer;
-        private Image _tipsImage;
+        private Image     _tipsImage;
         private Transform _highlightRoot;
         private Transform _wordListRoot;
         private Transform _animRoot;
         private Transform _timerRoot;
         private GameObject _goGameDes;
         private GameObject _goPausePanel;
-        private Button _btnResume;
+        private Button    _btnResume;
         private Transform _wordAnimRoot;
+        private Transform _itemBarRoot;
+        private Transform _learningCardRoot;
 
         // ── 子组件 ────────────────────────────────────────────
-        private GridView _gridView;
-        private WordListView _wordListView;
-        private HighlightBarView _highlightBarView;
-        private EndPanelWidget _endPanel;
+        private GridView           _gridView;
+        private WordListView       _wordListView;
+        private HighlightBarView   _highlightBarView;
+        private EndPanelWidget     _endPanel;
+        private LearningCardWidget _learningCard;
+        private ItemBarWidget      _itemBar;
 
         // ── 控制器 ────────────────────────────────────────────
         private WordSearchGameController _gameController;
-        private DragController _dragController;
-        private ColorManager _colorManager;
+        private DragController           _dragController;
+        private ColorManager             _colorManager;
 
         // ── 数据 ──────────────────────────────────────────────
         private LevelRuntimeData _runtimeData;
         private string _packId;
-        private int _levelId;
+        private int    _levelId;
 
         // ── 公开访问 ──────────────────────────────────────────
-        public GridView GridView => _gridView;
-        public WordListView WordListView => _wordListView;
-        public HighlightBarView HighlightBarView => _highlightBarView;
-        public ColorManager ColorManager => _colorManager;
-        public LevelRuntimeData RuntimeData => _runtimeData;
-        public Image TipsImage => _tipsImage;
-        public Transform WordAnimRoot => _wordAnimRoot;
-        public Transform TimerRoot => _timerRoot;
-        public GameObject GameDesGo => _goGameDes;
-        public DragController DragController => _dragController;
+        public GridView           GridView          => _gridView;
+        public WordListView       WordListView      => _wordListView;
+        public HighlightBarView   HighlightBarView  => _highlightBarView;
+        public ColorManager       ColorManager      => _colorManager;
+        public LevelRuntimeData   RuntimeData       => _runtimeData;
+        public Image              TipsImage         => _tipsImage;
+        public Transform          WordAnimRoot      => _wordAnimRoot;
+        public Transform          TimerRoot         => _timerRoot;
+        public GameObject         GameDesGo         => _goGameDes;
+        public DragController     DragController    => _dragController;
+        public ItemBarWidget      ItemBar           => _itemBar;
 
         protected override void ScriptGenerator()
         {
-            _btnBack        = FindChildComponent<Button>("bar_back_btn");
-            _viewRoot       = FindChild("view_root");
-            _gridBg         = FindChildComponent<Image>("grid_bg");
-            _gridRoot       = FindChild("grid_root");
-            _cellContainer  = FindChild("grid_root/cell_container");
-            _tipsImage      = FindChildComponent<Image>("grid_root/tipsImage");
-            _highlightRoot  = FindChild("highlight_root");
-            _wordListRoot   = FindChild("word_list_root");
-            _animRoot       = FindChild("anim_root");
-            _timerRoot      = FindChild("timer_root");
-            _goGameDes      = FindChild("gamd_des")?.gameObject;
-            _goPausePanel   = FindChild("pause_panel")?.gameObject;
-            _btnResume      = FindChildComponent<Button>("pause_panel/resume_btn");
-            _wordAnimRoot   = FindChild("word_anim_root");
+            _btnBack          = FindChildComponent<Button>("bar_back_btn");
+            _viewRoot         = FindChild("view_root");
+            _gridBg           = FindChildComponent<Image>("grid_bg");
+            _gridRoot         = FindChild("grid_root");
+            _cellContainer    = FindChild("grid_root/cell_container");
+            _tipsImage        = FindChildComponent<Image>("grid_root/tipsImage");
+            _highlightRoot    = FindChild("highlight_root");
+            _wordListRoot     = FindChild("word_list_root");
+            _animRoot         = FindChild("anim_root");
+            _timerRoot        = FindChild("timer_root");
+            _goGameDes        = FindChild("gamd_des")?.gameObject;
+            _goPausePanel     = FindChild("pause_panel")?.gameObject;
+            _btnResume        = FindChildComponent<Button>("pause_panel/resume_btn");
+            _wordAnimRoot     = FindChild("word_anim_root");
+            _itemBarRoot      = FindChild("item_bar_root");
+            _learningCardRoot = FindChild("learning_card_root");
 
-            // 节点绑定校验
-            if (_cellContainer == null) Log.Error("[WordSearchUI] Node not found: grid_root/cell_container");
-            if (_highlightRoot == null) Log.Error("[WordSearchUI] Node not found: highlight_root");
-            if (_wordListRoot == null) Log.Error("[WordSearchUI] Node not found: word_list_root");
-            if (_viewRoot == null) Log.Error("[WordSearchUI] Node not found: view_root");
-            if (_wordAnimRoot == null) Log.Warning("[WordSearchUI] Node not found: word_anim_root (fly anim disabled)");
+            if (_cellContainer == null)  Log.Error("[WordSearchUI] Node not found: grid_root/cell_container");
+            if (_highlightRoot == null)  Log.Error("[WordSearchUI] Node not found: highlight_root");
+            if (_wordListRoot == null)   Log.Error("[WordSearchUI] Node not found: word_list_root");
+            if (_viewRoot == null)       Log.Error("[WordSearchUI] Node not found: view_root");
+            if (_wordAnimRoot == null)   Log.Warning("[WordSearchUI] Node not found: word_anim_root (fly anim disabled)");
+            if (_itemBarRoot == null)    Log.Warning("[WordSearchUI] Node not found: item_bar_root (item bar disabled)");
+            if (_learningCardRoot == null) Log.Warning("[WordSearchUI] Node not found: learning_card_root (learning card disabled)");
         }
 
         protected override void RegisterEvent()
@@ -94,71 +102,86 @@ namespace GameLogic
 
         protected override void OnCreate()
         {
-            // 从 UserDatas 获取参数
-            _packId = UserDatas[0] as string;
+            _packId  = UserDatas[0] as string;
             _levelId = (int)UserDatas[1];
             Log.Info($"[WordSearchUI] OnCreate pack={_packId} level={_levelId}");
 
             _colorManager = new ColorManager();
 
-            // 隐藏暂停面板和提示图
             if (_goPausePanel != null) _goPausePanel.SetActive(false);
-            if (_tipsImage != null) _tipsImage.gameObject.SetActive(false);
+            if (_tipsImage != null)    _tipsImage.gameObject.SetActive(false);
 
-            LoadAndInit().Forget();
+            // 防沉迷：开始游戏会话
+            AntiAddictionManager.Instance.StartSession();
+            if (AntiAddictionManager.Instance.CheckDailyLimit())
+            {
+                // 超出时长，直接关闭
+                GameModule.UI.CloseUI<WordSearchUI>();
+                return;
+            }
+
+            LoadAndInitAsync().Forget();
         }
 
-        private async UniTaskVoid LoadAndInit()
+        private async UniTaskVoid LoadAndInitAsync()
         {
             Log.Info($"[WordSearchUI] LoadAndInit start: {_packId}_{_levelId}");
 
-            // 加载关卡数据
             var levelData = await LevelManager.Instance.LoadLevelDataAsync(_packId, _levelId);
             if (levelData == null)
             {
-                Log.Error($"[WordSearchUI] Failed to load level JSON: {_packId}_{_levelId}");
+                Log.Error($"[WordSearchUI] Failed to load level: {_packId}_{_levelId}");
                 return;
             }
-            Log.Info($"[WordSearchUI] Level loaded: {levelData.rows}x{levelData.cols}, {levelData.words.Count} words");
 
             _runtimeData = new LevelRuntimeData(levelData);
 
-            // 初始化子组件
             if (_cellContainer == null)
             {
                 Log.Error("[WordSearchUI] cellContainer is null, cannot init GridView");
                 return;
             }
+
+            // GridView
             _gridView = CreateWidget<GridView>(_cellContainer.parent.gameObject);
             await _gridView.InitAsync(_cellContainer, levelData);
-            Log.Info($"[WordSearchUI] GridView initialized, cellSize={_gridView.CellSize}");
 
+            // WordListView
             _wordListView = CreateWidget<WordListView>(_wordListRoot.gameObject);
             _wordListView.Init(levelData.words, _runtimeData.ActivityMarks, levelData.rows, levelData.cols);
-            Log.Info($"[WordSearchUI] WordListView initialized, {levelData.words.Count} words");
 
+            // HighlightBarView
             _highlightBarView = CreateWidget<HighlightBarView>(_highlightRoot.gameObject);
             await _highlightBarView.InitAsync(levelData.rows, _gridView.CellSize);
 
-            // 初始化拖拽控制器，挂 GridInputHandler 到 cell_container
+            // 道具栏
+            if (_itemBarRoot != null)
+            {
+                _itemBar = CreateWidget<ItemBarWidget>(_itemBarRoot.gameObject);
+                _itemBar.Init(this);
+            }
+
+            // 学习卡片（学习模式下才显示）
+            if (_learningCardRoot != null)
+                _learningCard = CreateWidget<LearningCardWidget>(_learningCardRoot.gameObject);
+
+            // 拖拽输入
             _dragController = new DragController(this);
             var inputHandler = _cellContainer.gameObject.AddComponent(typeof(GridInputHandler)) as GridInputHandler;
             inputHandler.Setup(_dragController);
-            // 确保 cell_container 有 Image 组件（透明）让 UGUI 射线能命中
-            var hitArea = _cellContainer.gameObject.GetComponent<UnityEngine.UI.Image>();
+
+            var hitArea = _cellContainer.gameObject.GetComponent<Image>();
             if (hitArea == null)
             {
-                hitArea = _cellContainer.gameObject.AddComponent<UnityEngine.UI.Image>();
-                hitArea.color = new UnityEngine.Color(0, 0, 0, 0);
+                hitArea = _cellContainer.gameObject.AddComponent<Image>();
+                hitArea.color = new Color(0, 0, 0, 0);
                 hitArea.raycastTarget = true;
             }
 
-            // 初始化游戏控制器
+            // 游戏控制器
             _gameController = new WordSearchGameController(this);
-
-            // 直接以 normal 难度开始游戏
             _gameController.StartGame("normal");
-            Log.Info("[WordSearchUI] Game started directly with normal difficulty");
+            Log.Info("[WordSearchUI] Game started");
         }
 
         protected override void OnUpdate()
@@ -167,23 +190,28 @@ namespace GameLogic
             _gameController?.Update();
         }
 
-        // ── 回调 ──────────────────────────────────────────────
+        // ── 事件回调 ──────────────────────────────────────────
 
         private void OnWordFound(string word, List<CellPosition> cellPositions, bool isReverse)
         {
-            Log.Info($"[WordSearchUI] Word found: {word}, reverse={isReverse}");
             _gameController?.HandleWordFound(word, cellPositions, isReverse);
+
+            // 学习模式：显示学习卡片
+            if (LearningManager.Instance.IsLearningMode && _learningCard != null)
+            {
+                var detail = _runtimeData?.LevelData?.GetWordDetail(word);
+                if (detail != null)
+                    _learningCard.ShowWord(detail);
+            }
         }
 
         private void OnWordWrong()
         {
-            Log.Debug("[WordSearchUI] Word wrong");
             _gameController?.HandleWordWrong();
         }
 
         private void OnAllWordsFound()
         {
-            Log.Info("[WordSearchUI] All words found!");
             _gameController?.HandleAllWordsFound();
         }
 
@@ -191,17 +219,35 @@ namespace GameLogic
         {
             Log.Info($"[WordSearchUI] Bonus word found: {word}");
             BonusWordManager.Instance.AddBonusMeterProgress();
+            _itemBar?.RefreshBonusMeter();
         }
 
         private void OnHiddenWordFound(string word, int rewardCoins)
         {
             Log.Info($"[WordSearchUI] Hidden word found: {word}, reward={rewardCoins}");
             EconomyManager.Instance.AddCoins(rewardCoins);
+
+            // 学习模式：隐藏词也显示学习卡片
+            if (LearningManager.Instance.IsLearningMode && _learningCard != null)
+            {
+                var hw = _runtimeData?.LevelData?.hiddenWords?.Find(h => h.word == word);
+                if (hw != null)
+                {
+                    var detail = new WordDetail
+                    {
+                        word        = hw.word,
+                        translation = hw.translation,
+                        phonetic    = hw.phonetic,
+                        example     = hw.example,
+                        audio       = hw.audio,
+                    };
+                    _learningCard.ShowWord(detail);
+                }
+            }
         }
 
         private void OnTimerExpired()
         {
-            Log.Info("[WordSearchUI] Timer expired");
             _gameController?.HandleTimerExpired();
         }
 
@@ -234,33 +280,79 @@ namespace GameLogic
         public void UseRotate()
         {
             if (!ItemManager.Instance.UseItem("rotate")) return;
-            if (_cellContainer != null)
-            {
-                var euler = _cellContainer.localEulerAngles;
-                euler.z += 180f;
-                _cellContainer.localEulerAngles = euler;
-            }
+            if (_cellContainer == null) return;
+
+            // 旋转网格容器和高亮层保持同步
+            var euler = _cellContainer.localEulerAngles;
+            euler.z += 180f;
+            _cellContainer.localEulerAngles = euler;
+
+            if (_highlightRoot != null)
+                _highlightRoot.localEulerAngles = euler;
         }
 
-        public void ShowEndPanel(int starCount, int foundCount, int totalWords, float timeSeconds)
+        /// <summary>
+        /// Wind Hint：移除网格中所有非目标词字母（只留目标词字母）。
+        /// </summary>
+        public void UseWindHint()
+        {
+            if (_gridView == null || _runtimeData == null) return;
+
+            var levelData = _runtimeData.LevelData;
+            var targetCells = new HashSet<string>();
+
+            // 收集所有目标词占用的 cell 坐标
+            if (levelData.wordPositions != null)
+            {
+                foreach (var wp in levelData.wordPositions)
+                    foreach (var cp in wp.cellPositions)
+                        targetCells.Add($"{cp.x},{cp.y}");
+            }
+
+            // 隐藏非目标词 cell
+            for (int y = 0; y < _gridView.Rows; y++)
+            {
+                for (int x = 0; x < _gridView.Cols; x++)
+                {
+                    if (!targetCells.Contains($"{x},{y}"))
+                    {
+                        var cell = _gridView.GetCellView(x, y);
+                        cell?.SetAlpha(0f);
+                    }
+                }
+            }
+
+            Log.Info("[WordSearchUI] WindHint applied");
+        }
+
+        // ── 结算 ──────────────────────────────────────────────
+
+        public void ShowEndPanel(int starCount, int foundCount, int totalWords, float timeSeconds,
+            List<string> foundWordList = null, bool isPackComplete = false)
         {
             if (_endPanel != null) return;
-            CreateEndPanelAsync(starCount, foundCount, totalWords, timeSeconds).Forget();
+            CreateEndPanelAsync(starCount, foundCount, totalWords, timeSeconds, foundWordList, isPackComplete).Forget();
         }
 
-        private async UniTaskVoid CreateEndPanelAsync(int starCount, int foundCount, int totalWords, float timeSeconds)
+        private async UniTaskVoid CreateEndPanelAsync(int starCount, int foundCount, int totalWords,
+            float timeSeconds, List<string> foundWordList, bool isPackComplete)
         {
             if (_viewRoot == null) return;
             _endPanel = await CreateWidgetByPathAsync<EndPanelWidget>(_viewRoot, "ui_end_panel");
-            _endPanel.ShowResult(starCount, foundCount, totalWords, timeSeconds);
+            _endPanel.ShowResult(starCount, foundCount, totalWords, timeSeconds, foundWordList, isPackComplete);
 
-            // 通关奖励
-            Log.Info($"[WordSearchUI] Settlement: {starCount} stars, {foundCount}/{totalWords}, time={timeSeconds:F1}s");
+            var levelData = _runtimeData?.LevelData;
+            int coinMultiplier = levelData?.bonus_coin_multiplier > 0 ? levelData.bonus_coin_multiplier : 1;
+
+            Log.Info($"[WordSearchUI] Settlement: {starCount}★ {foundCount}/{totalWords} time={timeSeconds:F1}s multiplier={coinMultiplier}");
+
             EconomyManager.Instance.ApplyCoinRule("level_complete");
+            if (coinMultiplier > 1)
+                EconomyManager.Instance.AddCoins(10 * (coinMultiplier - 1)); // 额外倍率补差
+
             EconomyManager.Instance.AddLearningScore(foundCount);
             LevelManager.Instance.AdvanceLevel();
 
-            // 延迟后返回主界面
             await UniTask.Delay(3000);
             GameModule.Audio.Stop(TEngine.AudioType.Music, fadeout: true);
             GameModule.UI.CloseUI<WordSearchUI>();
@@ -273,6 +365,9 @@ namespace GameLogic
             _btnResume?.onClick.RemoveAllListeners();
             _gameController?.Dispose();
             _dragController = null;
+
+            // 防沉迷：结束游戏会话
+            AntiAddictionManager.Instance.StopSession();
         }
     }
 }

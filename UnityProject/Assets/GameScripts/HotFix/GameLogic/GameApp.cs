@@ -37,6 +37,8 @@ public partial class GameApp
     {
         // 初始化配表系统
         ConfigSystem.Instance.Load();
+        // 初始化防沉迷
+        AntiAddictionManager.Instance.ToString(); // 触发 OnInit
         // 启动登录界面
         GameModule.UI.ShowUIAsync<LoginUI>();
     }

@@ -19,8 +19,8 @@ namespace GameLogic
         public string theme;
         public string theme_en;
         public int difficulty;
-        public string type;
-        public int bonus_coin_multiplier;
+        public string type;           // normal / review / reward
+        public int bonus_coin_multiplier; // 奖励关=2
 
         public string createTime;
         public string generateTime;
@@ -42,7 +42,10 @@ namespace GameLogic
         // ── 答案信息 ──────────────────────────────────────────
         public List<WordPosition> wordPositions;
         public List<WordPosition> bonusWords;
-        public List<WordPosition> hiddenWords;
+        public List<HiddenWordPosition> hiddenWords;
+
+        // ── 学习数据 ──────────────────────────────────────────
+        public List<WordDetail> wordDetails;
 
         // ── 展示文本 ──────────────────────────────────────────
         public string puzzleText;
@@ -50,6 +53,7 @@ namespace GameLogic
 
         // ── 运行时缓存（不序列化）─────────────────────────────
         [NonSerialized] private string[] _gridLines;
+        [NonSerialized] private Dictionary<string, WordDetail> _wordDetailMap;
 
         private string[] GridLines => _gridLines ??= gridString.Split('|');
 
@@ -60,6 +64,7 @@ namespace GameLogic
         {
             if (rows == 0) rows = dimension;
             if (cols == 0) cols = dimension;
+            if (bonus_coin_multiplier == 0) bonus_coin_multiplier = 1;
         }
 
         /// <summary>
@@ -87,6 +92,26 @@ namespace GameLogic
             }
             return grid;
         }
+
+        /// <summary>
+        /// 按单词查找学习详情，O(1)。
+        /// </summary>
+        public WordDetail GetWordDetail(string word)
+        {
+            if (wordDetails == null) return null;
+            if (_wordDetailMap == null)
+            {
+                _wordDetailMap = new Dictionary<string, WordDetail>(StringComparer.OrdinalIgnoreCase);
+                foreach (var d in wordDetails)
+                    if (d != null && !string.IsNullOrEmpty(d.word))
+                        _wordDetailMap[d.word] = d;
+            }
+            _wordDetailMap.TryGetValue(word, out var detail);
+            return detail;
+        }
+
+        /// <summary>是否为奖励关（双倍金币）</summary>
+        public bool IsRewardLevel => type == "reward";
     }
 
     [Serializable]
@@ -99,6 +124,42 @@ namespace GameLogic
         public int directionY;
         public List<CellPosition> cellPositions;
         public WordColor wordColor;
+    }
+
+    /// <summary>
+    /// 隐藏词位置数据（含奖励金币和学习信息）。
+    /// </summary>
+    [Serializable]
+    public class HiddenWordPosition
+    {
+        public string word;
+        public string translation;
+        public string phonetic;
+        public string example;
+        public string audio;
+        public int startX;
+        public int startY;
+        public int directionX;
+        public int directionY;
+        public List<CellPosition> cellPositions;
+        public int reward_coins;
+    }
+
+    /// <summary>
+    /// 单词学习详情（释义、音标、例句、音频、记忆曲线标记）。
+    /// </summary>
+    [Serializable]
+    public class WordDetail
+    {
+        public string word;
+        public string translation;
+        public string phonetic;
+        public string example;
+        public string audio;
+        public bool is_new;
+        public int first_appear_level;
+        public int repeat_count;
+        public int gap_since_last;
     }
 
     [Serializable]

@@ -25,6 +25,10 @@ namespace GameLogic
         private readonly List<string> _foundWords = new();
         private float _startTime;
         private float _elapsedTime;
+        private int   _hesitationCount;
+        private int   _bonusWordsFound;
+        private int   _hiddenWordsFound;
+        private readonly Dictionary<string, float> _wordStartTimes = new();
 
         public GameState State => _state;
         public string Difficulty => _difficulty;
@@ -56,6 +60,10 @@ namespace GameLogic
             WordMatchSystem.Reset();
             _foundWords.Clear();
             _isEnding = false;
+            _hesitationCount = 0;
+            _bonusWordsFound = 0;
+            _hiddenWordsFound = 0;
+            _wordStartTimes.Clear();
 
             // 布局适配
             ApplyLayout();
@@ -83,6 +91,14 @@ namespace GameLogic
             // 音效
             GameModule.Audio.Play(TEngine.AudioType.Music, "play_wordsearch_bgm", bLoop: true);
             GameModule.Audio.Play(TEngine.AudioType.Sound, "play_wordsearch_game_start");
+
+            // 埋点
+            var progress = LevelManager.Instance.Progress;
+            AnalyticsManager.Instance.TrackLevelStart(
+                progress?.CurrentPackId ?? "",
+                progress?.CurrentLevelInPack ?? 0,
+                difficulty
+            );
 
             GameEvent.Get<IWordSearchEvent>().OnGameStateChanged((int)_state);
         }
@@ -148,7 +164,13 @@ namespace GameLogic
         {
             WordMatchSystem.MarkFound(word);
             _foundWords.Add(word);
-            Log.Info($"[GameController] WordFound: {word} ({_foundWords.Count}/{_ui.RuntimeData.LevelData.words.Count})");
+
+            // 埋点：单词找到耗时
+            float findTime = _wordStartTimes.TryGetValue(word, out float st)
+                ? Time.time - st
+                : _elapsedTime;
+            AnalyticsManager.Instance.TrackWordFound(word, findTime, _foundWords.Count);
+            _wordStartTimes.Remove(word);
 
             // 标记单词列表
             _ui.WordListView?.MarkWordFound(word);
@@ -176,6 +198,12 @@ namespace GameLogic
 
         public void HandleWordWrong()
         {
+            _hesitationCount++;
+            var progress = LevelManager.Instance.Progress;
+            AnalyticsManager.Instance.TrackHesitation(
+                progress?.CurrentPackId ?? "",
+                progress?.CurrentLevelInPack ?? 0
+            );
             GameModule.Audio.Play(TEngine.AudioType.Sound, "play_wordsearch_wrong");
         }
 
@@ -267,11 +295,28 @@ namespace GameLogic
             _state = GameState.Settlement;
             GameEvent.Get<IWordSearchEvent>().OnGameStateChanged((int)_state);
 
+            // 埋点：关卡完成
+            var progress = LevelManager.Instance.Progress;
+            AnalyticsManager.Instance.TrackLevelComplete(
+                progress?.CurrentPackId ?? "",
+                progress?.CurrentLevelInPack ?? 0,
+                _elapsedTime,
+                _foundWords.Count,
+                levelData.words.Count,
+                _bonusWordsFound,
+                _hiddenWordsFound
+            );
+
             // 显示结算面板
             int totalWords = levelData.words.Count;
             int foundCount = _foundWords.Count;
             int starCount = foundCount >= totalWords ? 3 : foundCount >= totalWords - 1 ? 2 : 1;
-            _ui.ShowEndPanel(starCount, foundCount, totalWords, _elapsedTime);
+
+            // 检查当前关是否是 Pack 最后一关（通关后 AdvanceLevel 会推进，这里提前判断）
+            var pack = progress != null ? StageConfigMgr.Instance.GetPackConfig(progress.CurrentPackId) : null;
+            bool isPackComplete = pack != null && progress.CurrentLevelInPack >= pack.TotalLevels;
+
+            _ui.ShowEndPanel(starCount, foundCount, totalWords, _elapsedTime, new System.Collections.Generic.List<string>(_foundWords), isPackComplete);
         }
 
         private async UniTaskVoid AnimateScale(RectTransform rt, float peak, float halfDur)
