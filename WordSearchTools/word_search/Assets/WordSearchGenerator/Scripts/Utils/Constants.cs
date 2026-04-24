@@ -83,8 +83,25 @@ namespace WordSearchGenerator
         /// Step 3：自动尺寸的乘性膨胀系数。
         /// 紧凑尺寸 baseDim × scale + padding：scale=1.15 可以给布局算法留出骨架空间，
         /// 避免小网格下所有词被挤在一起形成不了 X / 竖直栈。
+        /// 矩形模式下只影响 rows。
         /// </summary>
         public const float AUTO_DIMENSION_SCALE = 1.15f;
+
+        // ========== Step 5：自动矩形网格 ==========
+        //
+        // 参考图都是竖屏矩形（6×8 / 7×10 等），宽 ≈ maxLen、高 ≈ maxLen × 1.3~1.5。
+        // 自动模式现在严格按 cols = maxLen 生成长条形网格：
+        //
+        //   cols = maxLen                                 （硬约束：长词贴边正好占满一行）
+        //   rows = max(cols + 2, ceil(maxLen × ASPECT)) × dimensionScale + padding
+        //
+        // 放不下时优先 rows++ 保持骨架形态；直到 rows/cols ≥ MAX_ASPECT 才加宽。
+
+        /// <summary>自动矩形的目标纵横比 rows / cols。</summary>
+        public const float AUTO_RECT_ASPECT = 1.0f;
+
+        /// <summary>扩容时允许的最大 rows/cols 比例；超过才往宽度里加列。</summary>
+        public const float AUTO_RECT_MAX_ASPECT = 1.6f;
 
         // ========== 交叉偏好 ==========
 

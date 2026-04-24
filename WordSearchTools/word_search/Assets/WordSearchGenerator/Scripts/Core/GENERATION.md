@@ -127,10 +127,16 @@ generator.GenerateWordSearch(words, profile, directions, intersectBias,
 ### 3.2 输入预处理
 
 1. `words` 去重保序
-2. 自动尺寸模式：`dim = ceil(baseDim × dimensionScale) + AUTO_DIMENSION_PADDING`
-   - `baseDim = max(√(ΣwordLen × sizeFactor), maxWordLen)`
-   - `dimensionScale` 来自 profile 或 `Constants.AUTO_DIMENSION_SCALE = 1.15`
-3. 固定尺寸模式：直接用 `fixedRows / fixedCols`
+2. 自动尺寸模式（Step 5：**严格矩形**）：
+   ```
+   cols = maxLen                                                     # 硬约束：长词贴边正好占满
+   rows = ceil( max(maxLen+2, ceil(maxLen × AUTO_RECT_ASPECT)) × dimensionScale )
+        + AUTO_DIMENSION_PADDING
+   ```
+   - `AUTO_RECT_ASPECT = 1.2`（目标纵横比）
+   - `dimensionScale` 来自 profile，只作用于 rows
+   - 放不下时：`rows++` 优先；只有 `rows/cols > AUTO_RECT_MAX_ASPECT (1.8)` 才 `cols++`
+3. 固定尺寸模式：直接用 `fixedRows / fixedCols`，放不下直接抛异常（不自动扩容）
 4. 生成 N 个种子，依次跑 `GenerateSingleAttempt(seed)`
 
 ### 3.3 `GenerateSingleAttempt` 主循环
@@ -437,8 +443,10 @@ Generator 的 profile 重载：`effDirs = directions ?? profile.GetDirections()`
 |---|---|---|
 | `INTERSECT_BIAS_DEFAULT` | -1 (AVOID) | 无显式指定时的 bias |
 | `SIZE_FACTOR_DEFAULT` | 4 | √(ΣwordLen × factor) 中的 factor |
-| `AUTO_DIMENSION_PADDING` | 1 | 自动尺寸额外留白 |
-| `AUTO_DIMENSION_SCALE` | 1.15 | 自动尺寸乘性系数 |
+| `AUTO_DIMENSION_PADDING` | 1 | 自动尺寸额外留白（只加到 rows） |
+| `AUTO_DIMENSION_SCALE` | 1.15 | 自动尺寸乘性系数（只作用于 rows） |
+| `AUTO_RECT_ASPECT` | 1.2 | 自动矩形目标纵横比 rows/cols（Step 5） |
+| `AUTO_RECT_MAX_ASPECT` | 1.8 | 扩容时允许的最大 rows/cols（超过才加 cols） |
 | `DEFAULT_TOP_K` | 3 | Top-K 采样的 K |
 | `DEFAULT_SOFTMAX_TEMPERATURE` | 0.5 | Softmax 温度 |
 | `BEST_OF_N_DEFAULT` | 5 | 单次生成尝试次数（无 profile 时） |
@@ -586,6 +594,7 @@ Generator 的 profile 重载：`effDirs = directions ?? profile.GetDirections()`
 | **Step 2** | `LayoutContext` 全局缓存 + Top-K softmax 采样 + X 十字奖励 + 配额饱和机制 |
 | **Step 3** | `frameCoverage` / `xCrossCount` / `centroidBias` / `pairwiseDistVar` 四项指标；自动尺寸 `×1.15` 膨胀；批量 UI 显示新指标 |
 | **Step 4** | `LevelProfile` ScriptableObject + 6 档内置；UI 档位下拉 + D5 UI 覆盖规则；Generator / Helper / Context 全链路 profile 重载 |
+| **Step 5** | 自动模式改为严格矩形 `cols = maxLen`，`rows ≈ maxLen × 1.2 × dimensionScale`；扩容优先 rows++ 保持骨架形态 |
 
 ---
 

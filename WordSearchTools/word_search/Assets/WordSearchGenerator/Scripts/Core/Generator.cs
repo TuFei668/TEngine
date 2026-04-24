@@ -323,13 +323,24 @@ namespace WordSearchGenerator
             else
             {
                 if (sizeFactor.HasValue) this.sizeFactor = sizeFactor.Value;
-                // P0-5 / Step 3 / Step 4：紧凑尺寸 × 档位膨胀系数 + padding。
-                // scale 由 activeProfile 决定（无 profile 时回退到 Constants.AUTO_DIMENSION_SCALE=1.15）。
-                int baseDim = GetPuzzleDimension(this.words, this.sizeFactor);
-                this.dim  = Mathf.CeilToInt(baseDim * activeDimensionScale)
+
+                // Step 5：自动矩形网格（严格 cols = maxLen，rows 按 ASPECT 推算）。
+                // 参考图都是 6×8 / 7×10 / 8×10 这种竖屏矩形，cols 严格等于最长词长度
+                // 让贴边长词正好占满一整行/列（视觉上最贴合参考关卡）。
+                //
+                // scale 只乘到 rows，保持 cols 为长词的硬贴合尺寸；
+                // 放不下时由 GenerateSingleAttempt 走 rows++ 优先扩容。
+                int maxLen = 0;
+                foreach (var w in this.words)
+                    if (w != null && w.Length > maxLen) maxLen = w.Length;
+                if (maxLen < 2) maxLen = 2;
+
+                this.cols = maxLen;
+                int baseRows = Mathf.Max(Mathf.CeilToInt(maxLen * 0.8f),
+                                         Mathf.CeilToInt(maxLen * Constants.AUTO_RECT_ASPECT));
+                this.rows = Mathf.CeilToInt(baseRows * activeDimensionScale)
                           + Constants.AUTO_DIMENSION_PADDING;
-                this.rows = this.dim;
-                this.cols = this.dim;
+                this.dim  = Mathf.Max(this.rows, this.cols);
             }
 
             // P1-1：确定 seed
@@ -430,10 +441,17 @@ namespace WordSearchGenerator
                             throw new InvalidOperationException(
                                 $"网格尺寸不足（{cols}×{rows}），无法放置所有单词，请选择更大的网格或减少单词数量");
                         }
-                        // Auto：扩大正方形
-                        dim++;
-                        rows = dim;
-                        cols = dim;
+                        // Step 5：矩形模式优先加行，保持 cols = maxLen 的贴边优势。
+                        // 只有 rows/cols 超过 MAX_ASPECT 时才加宽，避免网格变得过于瘦长。
+                        if ((rows + 1) <= Mathf.CeilToInt(cols * Constants.AUTO_RECT_MAX_ASPECT))
+                        {
+                            rows++;
+                        }
+                        else
+                        {
+                            cols++;
+                        }
+                        dim = Mathf.Max(rows, cols);
                         ResetGenerationData();
                     }
                     else
