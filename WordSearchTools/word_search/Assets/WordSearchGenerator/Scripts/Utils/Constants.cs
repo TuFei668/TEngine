@@ -77,7 +77,7 @@ namespace WordSearchGenerator
         /// 自动模式下额外 padding（行/列）。
         /// P0-5：在紧凑尺寸之外额外留白，避免生成结果贴满整张网格。
         /// </summary>
-        public const int AUTO_DIMENSION_PADDING = 1;
+        public const int AUTO_DIMENSION_PADDING = 0;
 
         /// <summary>
         /// Step 3：自动尺寸的乘性膨胀系数。
