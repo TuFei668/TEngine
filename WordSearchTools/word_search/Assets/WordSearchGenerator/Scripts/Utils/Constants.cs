@@ -79,6 +79,13 @@ namespace WordSearchGenerator
         /// </summary>
         public const int AUTO_DIMENSION_PADDING = 1;
 
+        /// <summary>
+        /// Step 3：自动尺寸的乘性膨胀系数。
+        /// 紧凑尺寸 baseDim × scale + padding：scale=1.15 可以给布局算法留出骨架空间，
+        /// 避免小网格下所有词被挤在一起形成不了 X / 竖直栈。
+        /// </summary>
+        public const float AUTO_DIMENSION_SCALE = 1.15f;
+
         // ========== 交叉偏好 ==========
 
         public const int INTERSECT_BIAS_AVOID  = -1;
@@ -182,6 +189,21 @@ namespace WordSearchGenerator
         public const float W_DIFF_REVERSE   = 20f;
         public const float W_DIFF_DIAGONAL  = 20f;
         public const float W_DIFF_DENSITY   = 15f;
+
+        // ========== Step 3：整体布局指标（进 layoutScore，用于 Best-of-N 择优） ==========
+        //
+        // 新指标：
+        //   frameCoverage   ：四条边覆盖率 [0..1]，越高越有"骨架感"
+        //   xCrossCount     ：对角两两在中心带相交的次数（与上下文一致）
+        //   centroidBias    ：字母重心到网格几何中心的归一化距离（偏一侧则值大）
+        //   pairwiseDistVar ：被占格子两两曼哈顿距离的方差（归一化），越小越均匀
+        //
+        // 权重在 EvaluateLayout 内累加；正向指标加、负向指标减。
+
+        public const float W_M_FRAME    = 1.5f;
+        public const float W_M_XCROSS   = 2.0f;
+        public const float W_M_CENTROID = 1.5f;
+        public const float W_M_VAR      = 0.5f;
 
         // ========== 辅助方法 ==========
 

@@ -1457,7 +1457,10 @@ namespace WordSearchGenerator.UI
                         $"{batchIndex + 1}/{batchResults.Count}  " +
                         $"Score={d.layoutScore:F2}  " +
                         $"Diff={d.difficultyAuto:F1}  " +
-                        $"adj={d.adjacentPairs}";
+                        $"adj={d.adjacentPairs}  " +
+                        $"X={d.xCrossCount}  " +
+                        $"Frame={d.frameCoverage:F2}  " +
+                        $"Bias={d.centroidBias:F2}";
                 }
             }
         }

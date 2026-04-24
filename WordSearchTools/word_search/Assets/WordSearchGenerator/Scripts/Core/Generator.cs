@@ -206,8 +206,11 @@ namespace WordSearchGenerator
             else
             {
                 if (sizeFactor.HasValue) this.sizeFactor = sizeFactor.Value;
-                // P0-5：紧凑尺寸 + padding，视觉上立刻更松散
-                this.dim  = GetPuzzleDimension(this.words, this.sizeFactor)
+                // P0-5 / Step 3：紧凑尺寸 × 膨胀系数 + padding。
+                // 单纯 +1 对小网格留白不够；×1.15 后再 +1 能给骨架算法充足的空间
+                // 用于形成 X / 贴边 / 竖直栈，不至于被挤成一团。
+                int baseDim = GetPuzzleDimension(this.words, this.sizeFactor);
+                this.dim  = Mathf.CeilToInt(baseDim * Constants.AUTO_DIMENSION_SCALE)
                           + Constants.AUTO_DIMENSION_PADDING;
                 this.rows = this.dim;
                 this.cols = this.dim;

@@ -208,6 +208,26 @@ namespace WordSearchGenerator
         /// 越少代表布局越"松散"，视觉越清爽
         /// </summary>
         public int adjacentPairs;
+
+        // ========== Step 3：结构完整性 / 均匀度指标 ==========
+
+        /// <summary>四边覆盖率 ∈ [0,1]：多少条边被贴边长词占用（越高越有骨架感）</summary>
+        public float frameCoverage;
+
+        /// <summary>X 十字对数：对角方向单词两两在中心带相交的次数（参考图 X 骨架）</summary>
+        public int xCrossCount;
+
+        /// <summary>
+        /// 重心偏移 ∈ 约 [0,1]：字母重心到网格几何中心的归一化曼哈顿距离。
+        /// 0 = 完全居中；越大表示布局越偏一侧，通常是"全挤在顶边"这种失衡状态的信号。
+        /// </summary>
+        public float centroidBias;
+
+        /// <summary>
+        /// 被占格子两两曼哈顿距离的归一化方差。
+        /// 小 = 分布均匀；大 = 字母集中在某区域，留下大片空白。
+        /// </summary>
+        public float pairwiseDistVar;
         
         /// <summary>
         /// 回溯成功后的单词放置顺序（P1-4 回放用）。

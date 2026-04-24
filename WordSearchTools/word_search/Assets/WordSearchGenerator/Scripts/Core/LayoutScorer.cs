@@ -26,6 +26,12 @@ namespace WordSearchGenerator
         public int   wordCells;           // 被单词占用的格子总数（交叉格只算一次）
         public int   totalCells;          // 网格总格子数
         public float layoutScore;         // 综合布局分（越大越松散美观）
+
+        // Step 3：结构完整性 / 均匀度
+        public float frameCoverage;       // 四边覆盖率 ∈ [0,1]
+        public int   xCrossCount;         // 对角两两在中心带的相交次数
+        public float centroidBias;        // 字母重心到几何中心的归一化距离
+        public float pairwiseDistVar;     // 被占格子两两距离的归一化方差
     }
 
     /// <summary>
@@ -405,6 +411,9 @@ namespace WordSearchGenerator
             int[,] usage = new int[cols, rows];
             var usedDirections = new HashSet<Vector2Int>();
 
+            // Step 3：复用 LayoutContext 计算 frameCoverage / xCrossCount（避免重复实现）
+            var ctx = new LayoutContext(rows, cols);
+
             foreach (var word in words)
             {
                 if (!placed.TryGetValue(word, out var pos)) continue;
@@ -424,51 +433,130 @@ namespace WordSearchGenerator
                 }
 
                 if (borderHit) m.borderCount++;
+
+                ctx.Apply(word, pos);
             }
 
-            // 统计交叉数 & 实际占格数
+            // 统计交叉数 & 实际占格数 + 收集"被占格子"坐标用于均匀度指标
+            var occupied = new List<(int x, int y)>(m.totalCells);
             for (int x = 0; x < cols; x++)
             {
                 for (int y = 0; y < rows; y++)
                 {
-                    if (usage[x, y] > 0) m.wordCells++;
+                    if (usage[x, y] > 0)
+                    {
+                        m.wordCells++;
+                        occupied.Add((x, y));
+                    }
                     if (usage[x, y] > 1) m.intersectionCount += (usage[x, y] - 1);
                 }
             }
 
             m.distinctDirections = usedDirections.Count;
+            m.adjacentPairs      = CountAdjacentPairs(table, rows, cols);
 
-            // 统计紧邻对：不同单词的字母相邻但不同格
-            m.adjacentPairs = CountAdjacentPairs(table, rows, cols);
+            // Step 3：结构完整性
+            m.frameCoverage = ctx.borderUsed / 4f;
+            m.xCrossCount   = ctx.xCrossCount;
+
+            // Step 3：均匀度 —— 重心偏移 + 距离方差
+            m.centroidBias    = ComputeCentroidBias(occupied, rows, cols);
+            m.pairwiseDistVar = ComputePairwiseDistVar(occupied, rows, cols);
 
             // --- 综合布局分（Best-of-N 择优用） ---
             //
-            // 思路：
-            //   + 分散（邻接对少）
-            //   + 方向多样
-            //   + 贴边 / 对角比例适中
-            //   - 字母密度过高（过度拥挤）
-            //
-            // 不包含"交叉"：交叉由 intersectBias 在候选打分阶段控制
-            //
-            // 各分量归一到 0~1 左右再加权
+            // 旧公式（仍保留）：
+            //   + 分散 + 方向多样 + 贴边率 + 对角率 − 密度惩罚
+            // Step 3 新增：
+            //   + frameCoverage     （四边骨架覆盖）
+            //   + xCrossCount ≥ 1   （X 十字确认）
+            //   − centroidBias      （布局偏一侧扣分）
+            //   − pairwiseDistVar   （分布不均扣分）
 
-            float spreadScore      = 1f - Mathf.Clamp01(m.adjacentPairs / (float)(words.Count * 2 + 1));
-            float diversityScore   = allowedDirectionCount > 0
-                                     ? m.distinctDirections / (float)allowedDirectionCount
-                                     : 0f;
-            float borderScore      = words.Count > 0 ? m.borderCount   / (float)words.Count : 0f;
-            float diagonalScore    = words.Count > 0 ? m.diagonalCount / (float)words.Count : 0f;
-            float densityPenalty   = m.totalCells > 0 ? m.wordCells    / (float)m.totalCells : 0f;
+            float spreadScore    = 1f - Mathf.Clamp01(m.adjacentPairs / (float)(words.Count * 2 + 1));
+            float diversityScore = allowedDirectionCount > 0
+                                   ? m.distinctDirections / (float)allowedDirectionCount
+                                   : 0f;
+            float borderScore    = words.Count > 0 ? m.borderCount   / (float)words.Count : 0f;
+            float diagonalScore  = words.Count > 0 ? m.diagonalCount / (float)words.Count : 0f;
+            float densityPenalty = m.totalCells > 0 ? m.wordCells    / (float)m.totalCells : 0f;
+
+            float xCrossScore    = m.xCrossCount >= 1 ? 1f : 0f;
 
             m.layoutScore =
                   3.0f * spreadScore
                 + 1.5f * diversityScore
                 + 1.2f * borderScore
                 + 1.0f * diagonalScore
-                - 1.0f * densityPenalty;
+                - 1.0f * densityPenalty
+                + Constants.W_M_FRAME    * m.frameCoverage
+                + Constants.W_M_XCROSS   * xCrossScore
+                - Constants.W_M_CENTROID * m.centroidBias
+                - Constants.W_M_VAR      * m.pairwiseDistVar;
 
             return m;
+        }
+
+        // ========== Step 3：均匀度指标 ==========
+
+        /// <summary>
+        /// 字母重心到网格几何中心的归一化曼哈顿距离。
+        /// 归一化因子用 (rows+cols)/4 —— 这是随机均匀分布下重心偏移的量级参考；
+        /// 结果≈落在 [0, 1]，偏一侧会 >0.3，全贴上边缘会接近 0.5 以上。
+        /// </summary>
+        private static float ComputeCentroidBias(List<(int x, int y)> cells, int rows, int cols)
+        {
+            if (cells == null || cells.Count == 0) return 0f;
+
+            float sx = 0f, sy = 0f;
+            foreach (var (x, y) in cells) { sx += x; sy += y; }
+            float cxMean = sx / cells.Count;
+            float cyMean = sy / cells.Count;
+
+            float dx = Mathf.Abs(cxMean - (cols - 1) * 0.5f);
+            float dy = Mathf.Abs(cyMean - (rows - 1) * 0.5f);
+
+            float denom = Mathf.Max(1f, (rows + cols) * 0.25f);
+            return Mathf.Clamp01((dx + dy) / denom);
+        }
+
+        /// <summary>
+        /// 被占格子两两曼哈顿距离的方差，按 (rows+cols)² 归一化到近似 [0, 1]。
+        /// 用 O(N²) 计算；对 N ≤ 100 的布局可忽略。
+        /// 方差越大说明字母忽聚忽散（有大片空白+小团块），越小说明分布均匀。
+        /// </summary>
+        private static float ComputePairwiseDistVar(List<(int x, int y)> cells, int rows, int cols)
+        {
+            int n = cells?.Count ?? 0;
+            if (n < 2) return 0f;
+
+            long pairs = 0;
+            double sum = 0.0;
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = i + 1; j < n; j++)
+                {
+                    int d = Mathf.Abs(cells[i].x - cells[j].x) + Mathf.Abs(cells[i].y - cells[j].y);
+                    sum += d;
+                    pairs++;
+                }
+            }
+            double mean = sum / pairs;
+
+            double var = 0.0;
+            for (int i = 0; i < n; i++)
+            {
+                for (int j = i + 1; j < n; j++)
+                {
+                    int d = Mathf.Abs(cells[i].x - cells[j].x) + Mathf.Abs(cells[i].y - cells[j].y);
+                    double diff = d - mean;
+                    var += diff * diff;
+                }
+            }
+            var /= pairs;
+
+            float denom = Mathf.Max(1f, (rows + cols) * (rows + cols));
+            return Mathf.Clamp01((float)(var / denom));
         }
 
         // ========== P1-3：将分项指标写回 WordSearchData ==========
@@ -486,6 +574,12 @@ namespace WordSearchGenerator
             data.wordDensity        = m.totalCells > 0 ? m.wordCells / (float)m.totalCells : 0f;
             data.adjacentPairs      = m.adjacentPairs;
             data.layoutScore        = m.layoutScore;
+
+            // Step 3：结构完整性 / 均匀度
+            data.frameCoverage      = m.frameCoverage;
+            data.xCrossCount        = m.xCrossCount;
+            data.centroidBias       = m.centroidBias;
+            data.pairwiseDistVar    = m.pairwiseDistVar;
 
             // 综合难度分（越高越难）
             //   - 交叉多 → 难
