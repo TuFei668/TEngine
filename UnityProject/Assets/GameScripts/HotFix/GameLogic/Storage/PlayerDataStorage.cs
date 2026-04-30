@@ -21,6 +21,16 @@ namespace GameLogic
         public const string KEY_IS_MINOR           = "player_is_minor";
         public const string KEY_BADGE_LEVEL        = "player_badge_level";
 
+        // ── 活动系统 Keys ─────────────────────────────────────
+        public const string KEY_ACTIVITY_PREFIX    = "activity_";
+        public const string KEY_DAILY_DASH_CURRENT = "activity_daily_dash_current";
+        public const string KEY_DAILY_DASH_CLAIMED = "activity_daily_dash_claimed";
+        public const string KEY_DAILY_REWARD_STREAK = "activity_daily_reward_streak";
+        public const string KEY_DAILY_REWARD_LAST  = "activity_daily_reward_last_claim";
+
+        // ── 收藏系统 Keys ─────────────────────────────────────
+        public const string KEY_COLLECTION_PREFIX  = "collection_";
+
         // ── 基础读写 ──────────────────────────────────────────
 
         public static string GetString(string key, string defaultValue = "")

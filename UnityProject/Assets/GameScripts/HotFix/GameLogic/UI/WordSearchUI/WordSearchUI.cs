@@ -226,6 +226,7 @@ namespace GameLogic
         {
             Log.Info($"[WordSearchUI] Hidden word found: {word}, reward={rewardCoins}");
             EconomyManager.Instance.AddCoins(rewardCoins);
+            _gameController?.HandleHiddenWordFound(word, rewardCoins);
 
             // 学习模式：隐藏词也显示学习卡片
             if (LearningManager.Instance.IsLearningMode && _learningCard != null)
@@ -351,6 +352,11 @@ namespace GameLogic
                 EconomyManager.Instance.AddCoins(10 * (coinMultiplier - 1)); // 额外倍率补差
 
             EconomyManager.Instance.AddLearningScore(foundCount);
+
+            // 活动系统结算（在 AdvanceLevel 之前，因为需要当前关卡数据）
+            if (_runtimeData != null)
+                ActivityManager.Instance.OnLevelComplete(_runtimeData);
+
             LevelManager.Instance.AdvanceLevel();
 
             await UniTask.Delay(3000);

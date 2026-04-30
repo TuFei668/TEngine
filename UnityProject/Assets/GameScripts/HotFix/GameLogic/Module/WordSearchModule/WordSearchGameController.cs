@@ -207,6 +207,20 @@ namespace GameLogic
             GameModule.Audio.Play(TEngine.AudioType.Sound, "play_wordsearch_wrong");
         }
 
+        public void HandleHiddenWordFound(string word, int rewardCoins)
+        {
+            WordMatchSystem.MarkFound(word);
+            _hiddenWordsFound++;
+
+            // 埋点
+            AnalyticsManager.Instance.TrackWordFound(word, _elapsedTime, _foundWords.Count);
+
+            // 音效（隐藏词用特殊音效）
+            GameModule.Audio.Play(TEngine.AudioType.Sound, "play_wordsearch_hidden_word");
+
+            Log.Info($"[GameController] Hidden word: {word}, +{rewardCoins} coins, total hidden={_hiddenWordsFound}");
+        }
+
         public void HandleAllWordsFound()
         {
             EndGame("all_found");

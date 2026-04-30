@@ -89,6 +89,22 @@ namespace GameLogic
                 }
 
                 _wordItems[word] = data;
+
+                // 活动标记图标（星标/指南针）
+                if (markMap.TryGetValue(word, out var mark))
+                {
+                    var markGO = new GameObject($"mark_{mark.MarkIcon}");
+                    markGO.transform.SetParent(itemGO.transform, false);
+                    var markRt = markGO.AddComponent<RectTransform>();
+                    markRt.sizeDelta = new Vector2(itemHeight * 0.6f, itemHeight * 0.6f);
+                    markRt.anchoredPosition = new Vector2(word.Length * fontSize * 0.5f + 20f, 0);
+
+                    var markText = markGO.AddComponent<Text>();
+                    markText.text = mark.MarkIcon == "star" ? "⭐" : "🧭";
+                    markText.fontSize = Mathf.RoundToInt(fontSize * 0.7f);
+                    markText.alignment = TextAnchor.MiddleCenter;
+                    markText.font = Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+                }
             }
         }
 

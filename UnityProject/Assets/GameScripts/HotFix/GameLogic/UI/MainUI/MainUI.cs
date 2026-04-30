@@ -27,6 +27,16 @@ namespace GameLogic
 
         // Tab 栏
         private Button _btnTabCollection;
+        private Button _btnTabActivity;
+        private Button _btnTabDailyChallenge;
+
+        // 活动入口（左侧）
+        private Button _btnDailyDash;
+        private Text   _txtDailyDashProgress;
+        private Button _btnDailyReward;
+
+        // 省份
+        private Text _txtProvince;
 
         // 广告位
         private GameObject _goAdBanner;
@@ -47,6 +57,14 @@ namespace GameLogic
             _txtPlayLevel       = FindChildComponent<Text>("m_text_PlayLevel");
 
             _btnTabCollection   = FindChildComponent<Button>("m_btn_TabCollection");
+            _btnTabActivity     = FindChildComponent<Button>("m_btn_TabActivity");
+            _btnTabDailyChallenge = FindChildComponent<Button>("m_btn_TabDailyChallenge");
+
+            _btnDailyDash       = FindChildComponent<Button>("m_btn_DailyDash");
+            _txtDailyDashProgress = FindChildComponent<Text>("m_text_DailyDashProgress");
+            _btnDailyReward     = FindChildComponent<Button>("m_btn_DailyReward");
+
+            _txtProvince        = FindChildComponent<Text>("m_text_Province");
 
             _goAdBanner         = FindChild("m_go_AdBanner")?.gameObject;
         }
@@ -56,15 +74,31 @@ namespace GameLogic
             _btnSettings?.onClick.AddListener(OnSettingsClick);
             _btnPlay?.onClick.AddListener(OnPlayClick);
             _btnTabCollection?.onClick.AddListener(OnCollectionClick);
+            _btnTabActivity?.onClick.AddListener(OnActivityClick);
+            _btnTabDailyChallenge?.onClick.AddListener(OnDailyChallengeClick);
+            _btnDailyDash?.onClick.AddListener(OnDailyDashClick);
+            _btnDailyReward?.onClick.AddListener(OnDailyRewardClick);
 
             AddUIEvent<int>(IOnCoinChanged_Event.OnCoinChanged, OnCoinChanged);
             AddUIEvent<int, string>(IOnBadgeUpgraded_Event.OnBadgeUpgraded, OnBadgeUpgraded);
             AddUIEvent(IOnLevelAdvanced_Event.OnLevelAdvanced, OnLevelAdvanced);
+            AddUIEvent<string, int, int>(
+                IActivityProgressChanged_Event.OnActivityProgressChanged,
+                OnActivityProgressChanged);
         }
 
         protected override void OnCreate()
         {
             RefreshBackground();
+
+            // 请求省份信息
+            ProvinceManager.Instance.RequestProvince();
+
+            // 刷新活动系统
+            ActivityManager.Instance.RefreshActiveEvents();
+
+            // 检查每日登录奖励
+            CheckDailyReward();
         }
 
         protected override void OnRefresh()
@@ -73,6 +107,8 @@ namespace GameLogic
             RefreshUserCard();
             RefreshPlayButton();
             RefreshBackground();
+            RefreshProvince();
+            RefreshActivityEntries();
         }
 
         private void RefreshCoins()
@@ -132,6 +168,40 @@ namespace GameLogic
             _imgBackground.SetSprite(packCfg.BackgroundAsset);
         }
 
+        // ── 省份 ──────────────────────────────────────────────
+
+        private void RefreshProvince()
+        {
+            if (_txtProvince != null)
+                _txtProvince.text = ProvinceManager.Instance.GetContributionText();
+        }
+
+        // ── 活动入口 ──────────────────────────────────────────
+
+        private void RefreshActivityEntries()
+        {
+            // Daily Dash 进度
+            var dashEvt = ActivityManager.Instance.GetActiveEvent("daily_dash");
+            if (_txtDailyDashProgress != null)
+            {
+                if (dashEvt != null)
+                    _txtDailyDashProgress.text = $"{dashEvt.Progress.CurrentValue}/5";
+                else
+                    _txtDailyDashProgress.text = "";
+            }
+        }
+
+        private void CheckDailyReward()
+        {
+            var handler = new DailyRewardHandler();
+            var evt = ActivityManager.Instance.GetActiveEvent("daily_reward");
+            if (evt != null && handler.CanClaimReward(evt))
+            {
+                // 自动弹出每日登录奖励
+                GameModule.UI.ShowUIAsync<DailyRewardUI>();
+            }
+        }
+
         // ── 事件回调 ──────────────────────────────────────────
 
         private void OnCoinChanged(int newAmount)
@@ -156,6 +226,19 @@ namespace GameLogic
 
         private void OnCollectionClick() => GameModule.UI.ShowUIAsync<CollectionUI>();
 
+        private void OnActivityClick() => GameModule.UI.ShowUIAsync<ActivityCenterUI>();
+
+        private void OnDailyChallengeClick() => GameModule.UI.ShowUIAsync<DailyChallengeUI>();
+
+        private void OnDailyDashClick() => GameModule.UI.ShowUIAsync<DailyDashUI>();
+
+        private void OnDailyRewardClick() => GameModule.UI.ShowUIAsync<DailyRewardUI>();
+
+        private void OnActivityProgressChanged(string eventType, int current, int target)
+        {
+            RefreshActivityEntries();
+        }
+
         private void OnBadgeUpgraded(int newLevel, string title)
         {
             // 刷新主界面（称号可能显示在用户卡片上）
@@ -176,6 +259,10 @@ namespace GameLogic
             _btnSettings?.onClick.RemoveAllListeners();
             _btnPlay?.onClick.RemoveAllListeners();
             _btnTabCollection?.onClick.RemoveAllListeners();
+            _btnTabActivity?.onClick.RemoveAllListeners();
+            _btnTabDailyChallenge?.onClick.RemoveAllListeners();
+            _btnDailyDash?.onClick.RemoveAllListeners();
+            _btnDailyReward?.onClick.RemoveAllListeners();
         }
     }
 }

@@ -27,6 +27,9 @@ namespace GameLogic
         private Transform _tfWordReview;  // 容器节点（可选）
         private GameObject _goWordReviewItem; // 模板（可选）
 
+        // 分享按钮
+        private Button _btnShare;
+
         private static readonly Color StarOn  = new Color(1f, 0.851f, 0f);
         private static readonly Color StarOff = new Color(0.4f, 0.4f, 0.4f);
 
@@ -42,9 +45,17 @@ namespace GameLogic
             _txtPackBonus     = FindChildComponent<Text>("m_text_PackBonus");
             _tfWordReview     = FindChild("m_tf_WordReview");
             _goWordReviewItem = FindChild("m_tf_WordReview/m_go_WordItem")?.gameObject;
+            _btnShare         = FindChildComponent<Button>("m_btn_Share");
 
             if (_goWordReviewItem != null)
                 _goWordReviewItem.SetActive(false);
+        }
+
+        protected override void RegisterEvent() { }
+
+        protected override void OnCreate()
+        {
+            _btnShare?.onClick.AddListener(OnShareClick);
         }
 
         // ── 公开接口 ──────────────────────────────────────────
@@ -112,6 +123,20 @@ namespace GameLogic
                         ? $"{word}  {detail.Translation}"
                         : word;
             }
+        }
+
+        private void OnShareClick()
+        {
+            int displayLevel = LevelManager.Instance.CalcDisplayLevel();
+            ShareManager.Instance.ShareLevelComplete(displayLevel, () =>
+            {
+                Log.Info("[EndPanel] Share success");
+            });
+        }
+
+        protected override void OnDestroy()
+        {
+            _btnShare?.onClick.RemoveAllListeners();
         }
     }
 }

@@ -116,6 +116,9 @@ namespace GameLogic
             // 检查称号升级
             BadgeManager.Instance.CheckBadgeUpgrade();
 
+            // 通知活动系统（活动系统内部会通知收藏系统）
+            // ActivityManager 监听 IOnLevelAdvanced 事件自动处理
+
             GameEvent.Get<IOnLevelAdvanced>().OnLevelAdvanced();
         }
 

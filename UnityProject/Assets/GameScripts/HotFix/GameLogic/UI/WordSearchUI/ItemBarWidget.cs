@@ -106,16 +106,30 @@ namespace GameLogic
 
         private void OnFreeHintClick()
         {
-            // MVP阶段：直接给一次提示（不接真实广告）
-            Log.Info("[ItemBar] FreeHint clicked (ad placeholder)");
-            _gameUI?.UseNormalHint();
+            AdManager.Instance.ShowFreeHintAd(
+                onSuccess: () =>
+                {
+                    Log.Info("[ItemBar] FreeHint ad success");
+                    _gameUI?.UseNormalHint();
+                },
+                onFail: () =>
+                {
+                    Log.Info("[ItemBar] FreeHint ad failed/cancelled");
+                });
         }
 
         private void OnGetCoinsClick()
         {
-            // MVP阶段：直接给金币（不接真实广告）
-            Log.Info("[ItemBar] GetCoins clicked (ad placeholder)");
-            EconomyManager.Instance.AddCoins(10);
+            AdManager.Instance.ShowGetCoinsAd(
+                onSuccess: () =>
+                {
+                    Log.Info("[ItemBar] GetCoins ad success");
+                    // 奖励由 AdManager 自动发放
+                },
+                onFail: () =>
+                {
+                    Log.Info("[ItemBar] GetCoins ad failed/cancelled");
+                });
         }
 
         private void OnWindHintClick()
