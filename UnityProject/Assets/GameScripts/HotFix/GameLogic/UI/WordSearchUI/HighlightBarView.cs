@@ -37,11 +37,11 @@ namespace GameLogic
             }
             else
             {
-                // 动态加载 word_line_segment prefab 作为模板
-                _barPrefab = await GameModule.Resource.LoadAssetAsync<GameObject>("word_line_segment");
+                // 动态加载 WordLineSegment prefab 作为模板
+                _barPrefab = await GameModule.Resource.LoadAssetAsync<GameObject>("WordLineSegment");
                 if (_barPrefab == null)
                 {
-                    Log.Error("[HighlightBarView] Failed to load word_line_segment prefab");
+                    Log.Error("[HighlightBarView] Failed to load WordLineSegment prefab");
                     return;
                 }
             }

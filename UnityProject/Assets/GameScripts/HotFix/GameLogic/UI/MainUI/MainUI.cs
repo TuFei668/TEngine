@@ -1,4 +1,3 @@
-using Cysharp.Threading.Tasks;
 using TEngine;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,10 +10,12 @@ namespace GameLogic
         // 顶部
         private Text   _txtCoins;
         private Button _btnSettings;
+        private Button _btnSubscription;   // 1.3 订阅入口
 
         // 用户卡片
         private Text   _txtGreeting;
         private Text   _txtStageName;
+        private Text   _txtBadgeTitle;     // 称号显示
         private Slider _sliderPackProgress;
         private Text   _txtPackProgress;
 
@@ -34,9 +35,16 @@ namespace GameLogic
         private Button _btnDailyDash;
         private Text   _txtDailyDashProgress;
         private Button _btnDailyReward;
+        private Button _btnWordMaster;     // 1.2 单词大师入口
+        private Button _btnTournament;     // 1.3 学习赛入口
 
-        // 省份
-        private Text _txtProvince;
+        // 省份 / 排行
+        private Text   _txtProvince;
+        private Button _btnProvinceRank;   // 1.2 省份排行入口
+        private Button _btnFriendRank;     // 1.3 好友排行入口
+
+        // Streak 打卡
+        private Text   _txtStreak;         // 1.2 连续打卡天数
 
         // 广告位
         private GameObject _goAdBanner;
@@ -45,9 +53,11 @@ namespace GameLogic
         {
             _txtCoins           = FindChildComponent<Text>("m_text_Coins");
             _btnSettings        = FindChildComponent<Button>("m_btn_Settings");
+            _btnSubscription    = FindChildComponent<Button>("m_btn_Subscription");
 
             _txtGreeting        = FindChildComponent<Text>("m_text_Greeting");
             _txtStageName       = FindChildComponent<Text>("m_text_StageName");
+            _txtBadgeTitle      = FindChildComponent<Text>("m_text_BadgeTitle");
             _sliderPackProgress = FindChildComponent<Slider>("m_slider_PackProgress");
             _txtPackProgress    = FindChildComponent<Text>("m_text_PackProgress");
 
@@ -63,8 +73,14 @@ namespace GameLogic
             _btnDailyDash       = FindChildComponent<Button>("m_btn_DailyDash");
             _txtDailyDashProgress = FindChildComponent<Text>("m_text_DailyDashProgress");
             _btnDailyReward     = FindChildComponent<Button>("m_btn_DailyReward");
+            _btnWordMaster      = FindChildComponent<Button>("m_btn_WordMaster");
+            _btnTournament      = FindChildComponent<Button>("m_btn_Tournament");
 
             _txtProvince        = FindChildComponent<Text>("m_text_Province");
+            _btnProvinceRank    = FindChildComponent<Button>("m_btn_ProvinceRank");
+            _btnFriendRank      = FindChildComponent<Button>("m_btn_FriendRank");
+
+            _txtStreak          = FindChildComponent<Text>("m_text_Streak");
 
             _goAdBanner         = FindChild("m_go_AdBanner")?.gameObject;
         }
@@ -72,12 +88,17 @@ namespace GameLogic
         protected override void RegisterEvent()
         {
             _btnSettings?.onClick.AddListener(OnSettingsClick);
+            _btnSubscription?.onClick.AddListener(OnSubscriptionClick);
             _btnPlay?.onClick.AddListener(OnPlayClick);
             _btnTabCollection?.onClick.AddListener(OnCollectionClick);
             _btnTabActivity?.onClick.AddListener(OnActivityClick);
             _btnTabDailyChallenge?.onClick.AddListener(OnDailyChallengeClick);
             _btnDailyDash?.onClick.AddListener(OnDailyDashClick);
             _btnDailyReward?.onClick.AddListener(OnDailyRewardClick);
+            _btnWordMaster?.onClick.AddListener(OnWordMasterClick);
+            _btnTournament?.onClick.AddListener(OnTournamentClick);
+            _btnProvinceRank?.onClick.AddListener(OnProvinceRankClick);
+            _btnFriendRank?.onClick.AddListener(OnFriendRankClick);
 
             AddUIEvent<int>(IOnCoinChanged_Event.OnCoinChanged, OnCoinChanged);
             AddUIEvent<int, string>(IOnBadgeUpgraded_Event.OnBadgeUpgraded, OnBadgeUpgraded);
@@ -85,6 +106,8 @@ namespace GameLogic
             AddUIEvent<string, int, int>(
                 IActivityProgressChanged_Event.OnActivityProgressChanged,
                 OnActivityProgressChanged);
+            AddUIEvent<int>(IOnStreakUpdated_Event.OnStreakUpdated, OnStreakUpdated);
+            AddUIEvent<int, int>(IOnStreakMilestone_Event.OnStreakMilestone, OnStreakMilestone);
         }
 
         protected override void OnCreate()
@@ -99,6 +122,10 @@ namespace GameLogic
 
             // 检查每日登录奖励
             CheckDailyReward();
+
+            // 广告 Banner（订阅用户不显示）
+            if (_goAdBanner != null)
+                _goAdBanner.SetActive(!SubscriptionManager.Instance.AdsRemoved);
         }
 
         protected override void OnRefresh()
@@ -109,6 +136,7 @@ namespace GameLogic
             RefreshBackground();
             RefreshProvince();
             RefreshActivityEntries();
+            RefreshStreak();
         }
 
         private void RefreshCoins()
@@ -133,6 +161,14 @@ namespace GameLogic
             var stageCfg = StageConfigMgr.Instance.GetStageConfig(progress.Stage);
             if (_txtStageName != null && stageCfg != null)
                 _txtStageName.text = stageCfg.StageName;
+
+            // 称号显示
+            if (_txtBadgeTitle != null)
+            {
+                string title = BadgeManager.Instance.GetCurrentTitle();
+                _txtBadgeTitle.text = string.IsNullOrEmpty(title) ? "" : $"[{title}]";
+                _txtBadgeTitle.gameObject.SetActive(!string.IsNullOrEmpty(title));
+            }
 
             var packCfg = StageConfigMgr.Instance.GetPackConfig(progress.CurrentPackId);
             if (packCfg != null)
@@ -176,6 +212,23 @@ namespace GameLogic
                 _txtProvince.text = ProvinceManager.Instance.GetContributionText();
         }
 
+        // ── Streak 打卡 ───────────────────────────────────────
+
+        private void RefreshStreak()
+        {
+            if (_txtStreak == null) return;
+            int streak = StreakManager.Instance.CurrentStreak;
+            if (streak > 0)
+            {
+                _txtStreak.text = $"🔥 连续 {streak} 天";
+                _txtStreak.gameObject.SetActive(true);
+            }
+            else
+            {
+                _txtStreak.gameObject.SetActive(false);
+            }
+        }
+
         // ── 活动入口 ──────────────────────────────────────────
 
         private void RefreshActivityEntries()
@@ -189,6 +242,20 @@ namespace GameLogic
                 else
                     _txtDailyDashProgress.text = "";
             }
+
+            // Word Master 入口（有活动时显示）
+            if (_btnWordMaster != null)
+            {
+                var wmEvt = ActivityManager.Instance.GetActiveEvent("word_master");
+                _btnWordMaster.gameObject.SetActive(wmEvt != null);
+            }
+
+            // 学习赛入口（工作日/周末显示）
+            if (_btnTournament != null)
+            {
+                var tEvt = ActivityManager.Instance.GetActiveEvent("tournament");
+                _btnTournament.gameObject.SetActive(tEvt != null);
+            }
         }
 
         private void CheckDailyReward()
@@ -197,7 +264,6 @@ namespace GameLogic
             var evt = ActivityManager.Instance.GetActiveEvent("daily_reward");
             if (evt != null && handler.CanClaimReward(evt))
             {
-                // 自动弹出每日登录奖励
                 GameModule.UI.ShowUIAsync<DailyRewardUI>();
             }
         }
@@ -210,6 +276,8 @@ namespace GameLogic
         }
 
         private void OnSettingsClick() => GameModule.UI.ShowUIAsync<SettingsUI>();
+
+        private void OnSubscriptionClick() => GameModule.UI.ShowUIAsync<SubscriptionUI>();
 
         private void OnPlayClick()
         {
@@ -234,6 +302,14 @@ namespace GameLogic
 
         private void OnDailyRewardClick() => GameModule.UI.ShowUIAsync<DailyRewardUI>();
 
+        private void OnWordMasterClick() => GameModule.UI.ShowUIAsync<WordMasterUI>();
+
+        private void OnTournamentClick() => GameModule.UI.ShowUIAsync<TournamentUI>();
+
+        private void OnProvinceRankClick() => GameModule.UI.ShowUIAsync<ProvinceRankUI>();
+
+        private void OnFriendRankClick() => GameModule.UI.ShowUIAsync<FriendRankUI>();
+
         private void OnActivityProgressChanged(string eventType, int current, int target)
         {
             RefreshActivityEntries();
@@ -241,28 +317,40 @@ namespace GameLogic
 
         private void OnBadgeUpgraded(int newLevel, string title)
         {
-            // 刷新主界面（称号可能显示在用户卡片上）
             RefreshUserCard();
-            // 弹出升级庆祝弹窗
             GameModule.UI.ShowUIAsync<BadgeUpgradeUI>(newLevel, title);
         }
 
         private void OnLevelAdvanced()
         {
-            // 关卡推进后刷新主界面数据
             RefreshUserCard();
             RefreshPlayButton();
+        }
+
+        private void OnStreakUpdated(int streakDays)
+        {
+            RefreshStreak();
+        }
+
+        private void OnStreakMilestone(int milestoneDays, int coinsEarned)
+        {
+            GameModule.UI.ShowUIAsync<StreakMilestoneUI>(milestoneDays, coinsEarned);
         }
 
         protected override void OnDestroy()
         {
             _btnSettings?.onClick.RemoveAllListeners();
+            _btnSubscription?.onClick.RemoveAllListeners();
             _btnPlay?.onClick.RemoveAllListeners();
             _btnTabCollection?.onClick.RemoveAllListeners();
             _btnTabActivity?.onClick.RemoveAllListeners();
             _btnTabDailyChallenge?.onClick.RemoveAllListeners();
             _btnDailyDash?.onClick.RemoveAllListeners();
             _btnDailyReward?.onClick.RemoveAllListeners();
+            _btnWordMaster?.onClick.RemoveAllListeners();
+            _btnTournament?.onClick.RemoveAllListeners();
+            _btnProvinceRank?.onClick.RemoveAllListeners();
+            _btnFriendRank?.onClick.RemoveAllListeners();
         }
     }
 }

@@ -102,7 +102,7 @@ namespace GameLogic
             }
         }
 
-        private void RefreshNodes(List<WordMasterNodeConfig> nodes, int currentWords)
+        private void RefreshNodes(List<WordMasterNodeData> nodes, int currentWords)
         {
             if (_tfNodeList == null || _goNodeItemPrefab == null) return;
 

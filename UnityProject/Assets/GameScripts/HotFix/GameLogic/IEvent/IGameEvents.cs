@@ -36,4 +36,25 @@ namespace GameLogic
     {
         void OnPackCompleted(string packId);
     }
+
+    /// <summary>打卡 Streak 天数更新</summary>
+    [EventInterface(EEventGroup.GroupLogic)]
+    public interface IOnStreakUpdated
+    {
+        void OnStreakUpdated(int streakDays);
+    }
+
+    /// <summary>打卡 Streak 里程碑达成（3/7/30天）</summary>
+    [EventInterface(EEventGroup.GroupLogic)]
+    public interface IOnStreakMilestone
+    {
+        void OnStreakMilestone(int milestoneDays, int coinsEarned);
+    }
+
+    /// <summary>订阅状态变化</summary>
+    [EventInterface(EEventGroup.GroupLogic)]
+    public interface IOnSubscriptionChanged
+    {
+        void OnSubscriptionChanged(bool isActive);
+    }
 }

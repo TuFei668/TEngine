@@ -57,11 +57,11 @@ namespace GameLogic
             }
             else
             {
-                // 动态加载 grid_cell prefab 作为模板
-                _cellPrefab = await GameModule.Resource.LoadAssetAsync<GameObject>("grid_cell");
+                // 动态加载 GridCell prefab 作为模板
+                _cellPrefab = await GameModule.Resource.LoadAssetAsync<GameObject>("GridCell");
                 if (_cellPrefab == null)
                 {
-                    Log.Error("[GridView] Failed to load grid_cell prefab");
+                    Log.Error("[GridView] Failed to load GridCell prefab");
                     return;
                 }
             }

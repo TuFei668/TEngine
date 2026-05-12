@@ -160,24 +160,4 @@ namespace GameLogic
                 DateTime.UtcNow.ToString("yyyy-MM-dd"));
         }
     }
-
-    /// <summary>
-    /// 活动配表数据（从 ActivityConfigMgr 获取，对应 event_config 表一行）。
-    /// </summary>
-    public class ActivityEventConfig
-    {
-        public string EventId;
-        public string EventType;
-        public string EventName;
-        public string Recurrence;
-        public int DurationHours;
-        public bool NeedWordMark;
-        public string MarkIcon;
-        public float MarkRatio;
-        public int MarkMin;
-        public int MarkMax;
-        public string RewardCurrency;
-        public int RewardPerMark;
-        public string Version;
-    }
 }

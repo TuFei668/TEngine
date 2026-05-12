@@ -27,6 +27,9 @@ namespace GameLogic
         // Normal Hint 数量角标
         private Text _txtNormalHintCount;
 
+        // Bonus Meter 领取弹窗
+        private BonusMeterClaimWidget _bonusMeterClaim;
+
         private WordSearchUI _gameUI;
 
         // 道具金币定价
@@ -49,9 +52,7 @@ namespace GameLogic
             _btnNormalHint      = FindChildComponent<Button>("m_btn_NormalHint");
             _btnRotate          = FindChildComponent<Button>("m_btn_Rotate");
             _txtNormalHintCount = FindChildComponent<Text>("m_btn_NormalHint/m_text_Count");
-        }
-
-        protected override void RegisterEvent()
+        }        protected override void RegisterEvent()
         {
             _btnFreeHint?.onClick.AddListener(OnFreeHintClick);
             _btnGetCoins?.onClick.AddListener(OnGetCoinsClick);
@@ -67,6 +68,9 @@ namespace GameLogic
         {
             RefreshBonusMeter();
             RefreshButtons();
+
+            // Bonus Meter 满时自动弹出领取提示
+            BonusWordManager.Instance.OnBonusMeterFull += OnBonusMeterFull;
         }
 
         // ── 刷新 ──────────────────────────────────────────────
@@ -149,8 +153,50 @@ namespace GameLogic
             _gameUI?.UseRotate();
         }
 
+        // ── Bonus Meter 满时弹窗 ──────────────────────────────
+
+        private void OnBonusMeterFull()
+        {
+            // 懒加载 BonusMeterClaimWidget
+            if (_bonusMeterClaim == null && gameObject != null)
+            {
+                _bonusMeterClaim = CreateWidget<BonusMeterClaimWidget>(gameObject);
+            }
+            else if (_bonusMeterClaim != null)
+            {
+                _bonusMeterClaim.gameObject.SetActive(true);
+            }
+            RefreshBonusMeter();
+        }
+
+        private async Cysharp.Threading.Tasks.UniTaskVoid ShowBonusMeterClaimAsync()
+        {
+            // 简化实现：直接弹出选择弹窗
+            // 实际项目中应该用专门的 BonusMeterClaimWidget
+            // 这里通过 AdManager 判断是否有广告可用
+            bool adAvailable = AdManager.Instance.IsAdAvailable("double_coins");
+
+            if (adAvailable)
+            {
+                // 有广告：提示玩家可以双倍
+                Log.Info("[ItemBar] BonusMeter full, ad available for double coins");
+                // TODO: 弹出 BonusMeterClaimWidget 让玩家选择
+                // 临时：直接领取
+                BonusWordManager.Instance.ClaimBonusMeter();
+                RefreshBonusMeter();
+            }
+            else
+            {
+                // 无广告：直接领取
+                BonusWordManager.Instance.ClaimBonusMeter();
+                RefreshBonusMeter();
+            }
+
+            await Cysharp.Threading.Tasks.UniTask.CompletedTask;
+        }
         protected override void OnDestroy()
         {
+            BonusWordManager.Instance.OnBonusMeterFull -= OnBonusMeterFull;
             _btnFreeHint?.onClick.RemoveAllListeners();
             _btnGetCoins?.onClick.RemoveAllListeners();
             _btnWindHint?.onClick.RemoveAllListeners();

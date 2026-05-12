@@ -28,13 +28,10 @@ namespace GameLogic
 
             var items = GetItems();
             int unlocked = 0;
-            int nextUnlockLevel = int.MaxValue;
 
             foreach (var item in items)
             {
                 if (item.IsUnlocked) unlocked++;
-                // 找最近的未解锁卡片需要的关卡数
-                // （这里简化处理，详细逻辑在 GetItems 中）
             }
 
             string hint = unlocked == items.Count

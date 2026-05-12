@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 namespace GameLogic
 {
-    [Window(UILayer.UI, fullScreen: true, location: "word_search_main_view")]
+    [Window(UILayer.UI, fullScreen: true, location: "WordSearchMainView")]
     public class WordSearchUI : UIWindow
     {
         // ── 节点引用 ──────────────────────────────────────────
@@ -135,6 +135,9 @@ namespace GameLogic
             }
 
             _runtimeData = new LevelRuntimeData(levelData);
+
+            // 合成活动标记（必须在 WordListView.Init 之前）
+            ActivityManager.Instance.SynthesizeMarks(_runtimeData);
 
             if (_cellContainer == null)
             {
@@ -339,7 +342,7 @@ namespace GameLogic
             float timeSeconds, List<string> foundWordList, bool isPackComplete)
         {
             if (_viewRoot == null) return;
-            _endPanel = await CreateWidgetByPathAsync<EndPanelWidget>(_viewRoot, "ui_end_panel");
+            _endPanel = await CreateWidgetByPathAsync<EndPanelWidget>(_viewRoot, "EndPanel");
             _endPanel.ShowResult(starCount, foundCount, totalWords, timeSeconds, foundWordList, isPackComplete);
 
             var levelData = _runtimeData?.LevelData;

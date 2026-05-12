@@ -24,8 +24,7 @@ namespace GameLogic
 
         private async UniTaskVoid StartLoadFlow()
         {
-            // 加载配表
-            ConfigSystem.Instance.Load();
+            // 配表已在 GameApp.StartGameLogic() 中加载，此处无需重复加载
 
             // 加载 Bonus Word 词典
             await BonusWordManager.Instance.LoadDictionaryAsync();

@@ -95,6 +95,25 @@ namespace GameLogic
             });
         }
 
+        /// <summary>记录分享行为</summary>
+        public void TrackShare(string scene)
+        {
+            Track("share", new Dictionary<string, object>
+            {
+                { "share_scene", scene },
+            });
+        }
+
+        /// <summary>记录广告观看</summary>
+        public void TrackAdWatched(string adSlotId, string adType)
+        {
+            Track("ad_watched", new Dictionary<string, object>
+            {
+                { "ad_slot_id", adSlotId },
+                { "ad_type",    adType   },
+            });
+        }
+
         // ── 内部 ──────────────────────────────────────────────
 
         private void Track(string eventName, Dictionary<string, object> props)

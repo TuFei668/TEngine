@@ -116,6 +116,9 @@ namespace GameLogic
             // 检查称号升级
             BadgeManager.Instance.CheckBadgeUpgrade();
 
+            // 打卡 Streak（每日通关记录）
+            StreakManager.Instance.RecordPlay();
+
             // 通知活动系统（活动系统内部会通知收藏系统）
             // ActivityManager 监听 IOnLevelAdvanced 事件自动处理
 
