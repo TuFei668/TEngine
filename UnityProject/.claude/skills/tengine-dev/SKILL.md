@@ -19,6 +19,7 @@ TEngine 基于 HybridCLR + YooAsset + UniTask + Luban 构建。
 | 热更包下载 / Manifest 更新 / 缓存清理 | [hotpatch-management.md](references/hotpatch-management.md) |
 | 热更代码 / HybridCLR / GameApp 入口 | [hotfix-development.md](references/hotfix-development.md) |
 | Luban 配置表生成与访问 | [luban-config.md](references/luban-config.md) |
+| 网络请求（HTTP/WebSocket/拦截器/环境切换）| [network-module.md](references/network-module.md) |
 | 代码规范 / 命名约定 / 设计模式 | [conventions.md](references/conventions.md) |
 | 常见问题 / 错误排查 | [troubleshooting.md](references/troubleshooting.md) |
 | **unity-mcp 全工具索引 / batch_execute / 目标定位** | [unity-mcp-guide.md](references/unity-mcp-guide.md) |

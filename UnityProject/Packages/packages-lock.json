@@ -24,7 +24,7 @@
         "com.unity.nuget.newtonsoft-json": "3.0.2",
         "com.unity.test-framework": "1.1.31"
       },
-      "hash": "e64a71770adc78d7cdc97fc95e8188726f81a138"
+      "hash": "a2a5edf8d8e3f715881c0db4589c18feff7c379f"
     },
     "com.cysharp.unitask": {
       "version": "file:UniTask",
@@ -38,6 +38,24 @@
       "source": "git",
       "dependencies": {},
       "hash": "9de9b8d7730f65a617d9992f07c3ecfae8b9858a"
+    },
+    "com.tivadar.best.http": {
+      "version": "file:com.tivadar.best.http",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.8.23",
+        "com.unity.profiling.core": "1.0.0"
+      }
+    },
+    "com.tivadar.best.websockets": {
+      "version": "file:com.tivadar.best.websockets",
+      "depth": 0,
+      "source": "embedded",
+      "dependencies": {
+        "com.unity.burst": "1.8.10",
+        "com.tivadar.best.http": "3.0.10"
+      }
     },
     "com.tuyoogame.yooasset": {
       "version": "file:YooAsset",
@@ -60,7 +78,7 @@
       "url": "https://packages.unity.com"
     },
     "com.unity.burst": {
-      "version": "1.8.21",
+      "version": "1.8.23",
       "depth": 1,
       "source": "registry",
       "dependencies": {
@@ -102,6 +120,13 @@
     "com.unity.nuget.newtonsoft-json": {
       "version": "3.2.2",
       "depth": 0,
+      "source": "registry",
+      "dependencies": {},
+      "url": "https://packages.unity.com"
+    },
+    "com.unity.profiling.core": {
+      "version": "1.0.2",
+      "depth": 1,
       "source": "registry",
       "dependencies": {},
       "url": "https://packages.unity.com"
